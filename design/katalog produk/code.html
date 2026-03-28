@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Urban Retail POS - Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#6b3b00",
+              "primary-fixed-dim": "#87d0f2",
+              "on-primary-fixed": "#001f2a",
+              "surface-tint": "#016684",
+              "secondary-fixed": "#a3f69c",
+              "surface-container": "#ebeef4",
+              "surface-container-highest": "#dfe3e8",
+              "on-secondary-fixed": "#002204",
+              "primary-container": "#006684",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "tertiary": "#6b3a00",
+              "on-surface": "#181c20",
+              "secondary": "#1b6d24",
+              "surface-dim": "#d7dae0",
+              "background": "#f7f9ff",
+              "primary-fixed": "#bee9ff",
+              "on-secondary-container": "#217128",
+              "surface-bright": "#f7f9ff",
+              "on-tertiary-fixed": "#2d1600",
+              "primary": "#004d64",
+              "tertiary-fixed": "#ffdcc0",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed-dim": "#88d982",
+              "inverse-on-surface": "#eef1f7",
+              "secondary-container": "#a0f399",
+              "outline-variant": "#bfc8cd",
+              "on-primary-container": "#a2e1ff",
+              "on-tertiary-container": "#ffcfa6",
+              "tertiary-container": "#885116",
+              "on-background": "#181c20",
+              "on-secondary-fixed-variant": "#005312",
+              "on-error-container": "#93000a",
+              "inverse-surface": "#2d3135",
+              "on-surface-variant": "#3f484d",
+              "tertiary-fixed-dim": "#ffb876",
+              "surface-variant": "#dfe3e8",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#87d0f2",
+              "surface": "#f7f9ff",
+              "surface-container-high": "#e5e8ee",
+              "error": "#ba1a1a",
+              "surface-container-low": "#f1f4fa",
+              "outline": "#70787e",
+              "on-tertiary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#004d64"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm shadow-teal-900/5 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-teal-900 dark:text-teal-100" data-icon="storefront">storefront</span>
+<h1 class="font-manrope font-extrabold text-teal-900 dark:text-teal-50 text-lg tracking-tight">Urban Retail POS</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="transition-all duration-200 active:scale-95 hover:bg-teal-50 dark:hover:bg-teal-900/30 p-2 rounded-full">
+<span class="material-symbols-outlined text-teal-900 dark:text-teal-50" data-icon="search">search</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-40 px-6 max-w-screen-xl mx-auto">
+<!-- Search & Filter Bar (The Precision Architect Style) -->
+<div class="mb-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-12 pr-4 text-on-surface focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:text-outline/60" placeholder="Search by product name or SKU..." type="text"/>
+</div>
+<!-- Category Scroller -->
+<div class="flex gap-3 mt-6 overflow-x-auto hide-scrollbar pb-2">
+<button class="whitespace-nowrap bg-primary-container text-white px-6 py-2 rounded-full font-semibold text-sm transition-all active:scale-95">All Items</button>
+<button class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-semibold text-sm transition-all hover:bg-surface-container-high active:scale-95">Coffee &amp; Tea</button>
+<button class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-semibold text-sm transition-all hover:bg-surface-container-high active:scale-95">Bakery</button>
+<button class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-semibold text-sm transition-all hover:bg-surface-container-high active:scale-95">Lifestyle</button>
+<button class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-semibold text-sm transition-all hover:bg-surface-container-high active:scale-95">Accessories</button>
+</div>
+</div>
+<!-- Product Grid (Asymmetric Bento-ish Layout) -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern minimalist matte black ceramic coffee dripper on a white surface with soft morning light and shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjTX7zZXF4ps-r1vP_xUr1HU4GLmv1-wiFRhYtd--vL3vuNS52w-tNOTT5yAWQTE4cGOAdH4ke13_xFjWrKNsE-gtFxqd7DOzBoVk44UUhhO-HIYWHosxeokFXhXntHFEWnViSS3x7Z9phMgRI4V6IHzbYNyZcc68s-K-I3ABXkbqMx1fPTnoY58pn2bx6crQ9gM3zOLdPpuNYNhh2mlBVZ-Y_2TJ3HwMxLVcZSIAmaap2O9WgEGErhvmWEBAIQ1n_mTq5lEJCgNg"/>
+<div class="absolute top-3 left-3 bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        In Stock
+                    </div>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Brewing</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Ceramic V60 Dripper</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-outline mb-0.5">24 units left</p>
+<p class="font-headline text-lg font-extrabold text-primary">$34.00</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Two bags of premium roasted coffee beans with elegant typography labels in a bright professional studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLASaBEh5AClue95wtyLyin9TSkWw3hr1_znBOECLxpigEKJmlgzabx3fVWO_R4o2VIi5-sF63ZlcFFrEdXIkgetae0mFnNp2_ZG9hvo-IbsMwQXzVqOQkbDQtGQGYDXunoohSTgNwdynXER5WdY58EerQwY6131ccYTATRVQthr7-d9T7jhekeBFCuShE7gRQf3MjRB2H3Lxp2i7zsrwMuLGFTVjcAyvT_XCDYz6hZX6_lP9FdY5W-n5mDUlsrqPw-nFJQKe6Wmg"/>
+<div class="absolute top-3 left-3 bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        Low Stock
+                    </div>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Beans</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Ethiopian Yirgacheffe</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-error mb-0.5">5 units left</p>
+<p class="font-headline text-lg font-extrabold text-primary">$18.50</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Close up of a stainless steel milk frothing pitcher with perfect latte art being poured into a white ceramic cup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuF3efKSRfFJUCDA54h7OmhmoQOuuV-FQLqMrc_HLKTt7vHIyMOewnDR0Zle0sbl4ICpnyCVwoJiLywKepm1MP3hG8xztMSX-mdGIOPbA7quqa-UyTi7TNDrAd0cFSHaQBgMRXgKgU7KK9l9Ec0zENQmwDm8HipR7l7DgiBSUkkY_eSiB_J4ztGdrXuti1qaAyXiVyb5fHtub7FlBAXQ8Dx5_DjIYVna1-UoqncvVNYd12r5zIAscRBeh39hGOke-_iPB-uR-ykAA"/>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Barista Tools</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Precision Milk Pitcher</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-outline mb-0.5">12 units left</p>
+<p class="font-headline text-lg font-extrabold text-primary">$42.00</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Assortment of fresh golden croissants and pastries displayed on a marble counter in an artisan bakery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIJhFEXd4yFyDaUfreXaVXARwZ2mJBjeoy0_7-d1cm5zedBlyDoy8P01xuxMssfh2yOc4lVw-xmC1K4X95x7qfg7v1lEwjCEizcLVwnh0n9vJdP-7L-7a0JQFW5nF8kWkRwROv3iOe9ioJ4rRTMnaMBJ8yhsCaBGIsbbxjG9HyQoIWMGBTXKaJNGzrHpV-8399hodl-hoS6FXyRG2de9MfBahSrPEQZRs_VHNFvhdJxrYybReTrWSgw_vHUip0pHRRW_E-wBk1zmA"/>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Pastry</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Butter Croissant</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-outline mb-0.5">Freshly baked</p>
+<p class="font-headline text-lg font-extrabold text-primary">$4.50</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Handheld electric coffee grinder with sleek metallic finish being used to grind fresh coffee beans" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATvK7tj-arPdaQu1kYayVX04Y5ZUUNAkblYRNRcQSuwcdukKytKuR1FcTbZ8_r7LCDlilzCw9jcbR8x6G_6Yyq-GrPMaRF1_GbUJsyBnZsBwMwE83L3b9zxWgU9mVHIwNtwEGDvOKerkgTO-PC_6TsRir1XQna_BI2XVSpMuXpFiRkjctHckCOp31m4fp7u_9nhnXNWas3xH18mEMEnyQJxh8ZjMRtErGdF2tI7CpLRcnUEM3cVSXmXevJy8HMdBDYK6OWIYr3eqE"/>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Equipment</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Electric Hand Grinder</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-outline mb-0.5">8 units left</p>
+<p class="font-headline text-lg font-extrabold text-primary">$129.00</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm group transition-all duration-300 hover:shadow-md">
+<div class="relative aspect-square overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Sleek glass carafe filled with pour-over coffee on a wooden coaster with natural sunlight filtering through" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4u8zplpn0kvcj4xkZdYW7sM2ZqP--xcGSaAwaThcijTLztotal-mqHZihgjzUkKnOKgF7UFDHuH_KRhAaETVxanLUboBdMGXv90CfWanzCSQjHdpj-G9M7Vh4hbCW8KUTTMrRv234A_nr35DiITuuySsIu5edLQ7kiIYoxwz4ijX_Lc0Y71zY6OnpP70rU4hvXjsScTDFOK9yJkoBxA0aiKR8ksOyRdBZLNG5Gn9AQSitMuRcZ_LToJz7NdKK16kdgtcSO_Ohio8"/>
+</div>
+<div class="p-4">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest mb-1">Glassware</p>
+<h3 class="font-headline font-bold text-on-surface leading-tight mb-2">Glass Server 600ml</h3>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] text-outline mb-0.5">15 units left</p>
+<p class="font-headline text-lg font-extrabold text-primary">$26.00</p>
+</div>
+<button class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Cart Summary Bar (Premium Glassmorphism) -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-40">
+<div class="bg-primary/90 backdrop-blur-xl rounded-2xl p-4 flex items-center justify-between shadow-2xl shadow-primary/30 border border-white/10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center relative">
+<span class="material-symbols-outlined text-white" data-icon="shopping_basket">shopping_basket</span>
+<span class="absolute -top-1 -right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-primary">3</span>
+</div>
+<div>
+<p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Total Items</p>
+<p class="text-white font-headline font-extrabold text-xl leading-none">$57.00</p>
+</div>
+</div>
+<button class="bg-white text-primary px-6 py-3 rounded-xl font-bold tracking-tight shadow-sm transition-all active:scale-95 hover:bg-white/90">
+                Checkout
+            </button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(24,28,32,0.06)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1 transition-transform duration-150 active:scale-90 hover:text-teal-700" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home_precision_ui">home</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-teal-100/50 dark:bg-teal-900/40 text-teal-900 dark:text-teal-100 rounded-xl px-4 py-1 transition-transform duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-wider">Catalog</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1 transition-transform duration-150 active:scale-90 hover:text-teal-700" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-wider">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1 transition-transform duration-150 active:scale-90 hover:text-teal-700" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="inventory_2">inventory_2</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-wider">Stock</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1 transition-transform duration-150 active:scale-90 hover:text-teal-700" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="menu">menu</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-wider">More</span>
+</a>
+</nav>
+</body></html>

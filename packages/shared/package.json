@@ -1,0 +1,12 @@
+{
+  "name": "@pos-saas/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "echo shared: no build step",
+    "lint": "echo shared: no lint step",
+    "typecheck": "echo shared: no typecheck step"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "pos-saas",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:pos": "npm run dev -w @pos-saas/pos",
+    "dev:web": "npm run dev -w @pos-saas/web",
+    "dev": "npm run dev:pos",
+    "build": "npm run build -ws --if-present",
+    "lint": "npm run lint -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "check": "npm run typecheck && npm run lint"
+  },
+  "devDependencies": {
+    "isexe": "^4.0.0",
+    "node-exports-info": "^1.6.0"
+  }
+}

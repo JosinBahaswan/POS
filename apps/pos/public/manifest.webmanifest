@@ -1,0 +1,16 @@
+{
+  "name": "POS Terminal",
+  "short_name": "POS",
+  "description": "Offline-first POS terminal",
+  "theme_color": "#0b1f3a",
+  "background_color": "#f7f8fc",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
