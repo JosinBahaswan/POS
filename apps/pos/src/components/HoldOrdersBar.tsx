@@ -17,7 +17,7 @@ type HoldOrdersBarProps = {
 
 export function HoldOrdersBar({ orders, onResume }: HoldOrdersBarProps) {
   return (
-    <section className="rounded-3xl bg-surface-container-low px-4 py-3 sm:px-5 sm:py-4 enter-fade-up">
+    <section className="rounded-3xl bg-surface-container-low px-4 py-3 sm:px-5 sm:py-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-on-surface-variant sm:text-base">Order Tertahan</h2>
         <span className="rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-semibold text-on-surface-variant">

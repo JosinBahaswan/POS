@@ -63,8 +63,8 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
   };
 
   return (
-    <section className="grid gap-4 enter-fade-up">
-      <article className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary-container px-5 py-6 text-on-primary editorial-shadow lift-hover">
+    <section className="grid gap-4">
+      <article className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary-container px-5 py-6 text-on-primary editorial-shadow">
         <div className="absolute -right-6 -top-6 opacity-10">
           <span className="material-symbols-outlined text-[120px]">payments</span>
         </div>

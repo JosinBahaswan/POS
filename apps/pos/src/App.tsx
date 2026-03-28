@@ -32,7 +32,7 @@ const allowedSectionsByRole: Record<UserRole, ActiveSection[]> = {
 
 const defaultSectionByRole: Record<UserRole, ActiveSection> = {
   cashier: "cashier",
-  manager: "products",
+  manager: "reports",
   owner: "reports"
 };
 
@@ -61,6 +61,18 @@ function App() {
   const hasProductAccess = role === "manager";
   const hasReportsAccess = role === "owner" || role === "manager";
   const hasOwnerAccess = role === "owner";
+  const mobileRoleNavItems: Array<{ section: ActiveSection; label: string; icon: string }> =
+    role === "manager"
+      ? [
+          { section: "reports", label: "Home", icon: "home" },
+          { section: "products", label: "Stok", icon: "inventory_2" }
+        ]
+      : role === "owner"
+        ? [
+            { section: "reports", label: "Home", icon: "home" },
+            { section: "users", label: "Pengguna", icon: "groups" }
+          ]
+        : [];
 
   useEffect(() => {
     let cancelled = false;
@@ -432,76 +444,129 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
-      <div className="mx-auto w-full max-w-7xl">
-        <TopHeader
-          isOnline={isOnline}
-          pendingSales={pendingSales}
-          isSyncing={isSyncing}
-          cartItemCount={cartItemCount}
-          total={total}
-          todayRevenue={todayRevenue}
-          lowStockCount={lowStockCount}
-          outOfStockCount={outOfStockCount}
-          checkoutError={checkoutError}
-          role={role}
-          section={activeSection}
-          userName={authUser.fullName}
-          tenantName={authUser.tenantName}
-          tenantCode={authUser.tenantCode}
-          joinCode={hasOwnerAccess ? authUser.joinCode : undefined}
-          onLogout={handleLogout}
-          onSectionChange={handleSectionChange}
-        />
+    <main className="min-h-screen bg-background px-0 py-0 sm:px-4 sm:py-4 lg:px-6">
+      <TopHeader
+        isOnline={isOnline}
+        pendingSales={pendingSales}
+        isSyncing={isSyncing}
+        cartItemCount={cartItemCount}
+        total={total}
+        todayRevenue={todayRevenue}
+        lowStockCount={lowStockCount}
+        outOfStockCount={outOfStockCount}
+        checkoutError={checkoutError}
+        role={role}
+        section={activeSection}
+        userName={authUser.fullName}
+        tenantName={authUser.tenantName}
+        tenantCode={authUser.tenantCode}
+        joinCode={hasOwnerAccess ? authUser.joinCode : undefined}
+        onLogout={handleLogout}
+        onSectionChange={handleSectionChange}
+      />
 
-        {activeSection === "cashier" && (
-          <CashierPage
-            products={productCatalog}
-            heldOrders={heldOrders}
-            sales={recentSales}
-            cart={cart}
-            subtotal={subtotal}
-            discountPercent={discountPercent}
-            discountAmount={discountAmount}
-            total={total}
-            paymentMethod={paymentMethod}
-            cashReceived={cashReceived}
-            changeAmount={changeAmount}
-            isSyncing={isSyncing}
-            onAddItem={addItem}
-            onDiscountChange={setDiscountPercent}
-            onPaymentMethodChange={setPaymentMethod}
-            onCashReceivedChange={setCashReceived}
-            onIncreaseQty={increaseQty}
-            onDecreaseQty={decreaseQty}
-            onRemoveItem={removeItem}
-            onHoldOrder={holdOrder}
-            onResumeOrder={resumeOrder}
-            onClear={clearCart}
-            onCheckout={requestCheckout}
-            onPrintReceipt={printReceipt}
-          />
+      <div className="mx-auto w-full max-w-7xl px-3 pb-3 pt-20 sm:px-0 sm:pb-0 sm:pt-20">
+
+        {role !== "cashier" && mobileRoleNavItems.length > 0 && (
+          <nav className="mb-3 hidden lg:block">
+            <div className="inline-flex rounded-2xl border border-outline-variant/40 bg-white/90 p-1 backdrop-blur">
+              {mobileRoleNavItems.map((item) => (
+                <button
+                  key={item.section}
+                  type="button"
+                  onClick={() => handleSectionChange(item.section)}
+                  className={
+                    activeSection === item.section
+                      ? "inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold uppercase tracking-[0.14em] text-on-primary"
+                      : "inline-flex h-11 items-center gap-2 rounded-xl px-4 text-xs font-semibold uppercase tracking-[0.14em] text-on-surface-variant"
+                  }
+                >
+                  <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </nav>
         )}
 
-        {hasProductAccess && activeSection === "products" && (
-          <ProductsPage products={productCatalog} onUpsert={upsertProduct} onDelete={deleteProduct} />
-        )}
+        <div className={role === "cashier" ? "" : "pb-24 lg:pb-0"}>
+          {activeSection === "cashier" && (
+            <CashierPage
+              products={productCatalog}
+              heldOrders={heldOrders}
+              sales={recentSales}
+              cart={cart}
+              subtotal={subtotal}
+              discountPercent={discountPercent}
+              discountAmount={discountAmount}
+              total={total}
+              paymentMethod={paymentMethod}
+              cashReceived={cashReceived}
+              changeAmount={changeAmount}
+              isSyncing={isSyncing}
+              onAddItem={addItem}
+              onDiscountChange={setDiscountPercent}
+              onPaymentMethodChange={setPaymentMethod}
+              onCashReceivedChange={setCashReceived}
+              onIncreaseQty={increaseQty}
+              onDecreaseQty={decreaseQty}
+              onRemoveItem={removeItem}
+              onHoldOrder={holdOrder}
+              onResumeOrder={resumeOrder}
+              onClear={clearCart}
+              onCheckout={requestCheckout}
+              onPrintReceipt={printReceipt}
+            />
+          )}
 
-        {hasReportsAccess && activeSection === "reports" && <ReportsPage sales={readLocalSales(storageScope)} />}
+          {hasProductAccess && activeSection === "products" && (
+            <ProductsPage products={productCatalog} onUpsert={upsertProduct} onDelete={deleteProduct} />
+          )}
 
-        {hasOwnerAccess && activeSection === "users" && (
-          <UsersPage
-            users={managedUsers}
-            loading={usersLoading}
-            error={usersError}
-            onRefresh={() => {
-              void refreshManagedUsers();
-            }}
-            onCreateUser={handleCreateManagedUser}
-            onUpdateUser={handleUpdateManagedUser}
-          />
-        )}
+          {hasReportsAccess && activeSection === "reports" && <ReportsPage sales={readLocalSales(storageScope)} />}
+
+          {hasOwnerAccess && activeSection === "users" && (
+            <UsersPage
+              users={managedUsers}
+              loading={usersLoading}
+              error={usersError}
+              onRefresh={() => {
+                void refreshManagedUsers();
+              }}
+              onCreateUser={handleCreateManagedUser}
+              onUpdateUser={handleUpdateManagedUser}
+            />
+          )}
+        </div>
       </div>
+
+      {role !== "cashier" && mobileRoleNavItems.length > 0 && (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-6 pt-2 backdrop-blur-2xl lg:hidden">
+          <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
+            {mobileRoleNavItems.map((item) => (
+              <button
+                key={item.section}
+                type="button"
+                onClick={() => handleSectionChange(item.section)}
+                className={
+                  activeSection === item.section
+                    ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary"
+                    : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"
+                }
+              >
+                <span
+                  className="material-symbols-outlined text-[18px]"
+                  style={activeSection === item.section ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {item.icon}
+                </span>
+                <span className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.12em]">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
+
       <CheckoutConfirmModal
         open={showCheckoutConfirm}
         itemCount={cart.reduce((acc, item) => acc + item.qty, 0)}

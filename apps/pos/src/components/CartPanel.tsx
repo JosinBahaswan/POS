@@ -42,7 +42,7 @@ export function CartPanel({
   disableCheckout = false
 }: CartPanelProps) {
   return (
-    <aside className="max-w-full space-y-4 rounded-3xl bg-surface px-2 py-2 sm:px-3 sm:py-3 enter-fade-up">
+    <aside className="max-w-full space-y-4 rounded-3xl bg-surface px-2 py-2 sm:px-3 sm:py-3">
       <div className="rounded-2xl bg-surface-container-low px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">

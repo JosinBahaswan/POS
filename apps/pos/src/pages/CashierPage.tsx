@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ProductGrid } from "../components/ProductGrid";
 import { CartPanel } from "../components/CartPanel";
 import { SalesHistory } from "../components/SalesHistory";
+import { ReportsPanel } from "../components/ReportsPanel";
 import { HoldOrdersBar, type HeldOrder } from "../components/HoldOrdersBar";
 import type { CartItem, PaymentMethod } from "../types";
 import type { ProductItem } from "../localData";
@@ -60,12 +61,12 @@ export function CashierPage({
   onCheckout,
   onPrintReceipt
 }: CashierPageProps) {
-  const [mobileTab, setMobileTab] = useState<"products" | "cart" | "history">("products");
+  const [mobileTab, setMobileTab] = useState<"home" | "products" | "cart" | "history">("home");
   const itemCount = useMemo(() => cart.reduce((acc, item) => acc + item.qty, 0), [cart]);
 
   return (
     <section className="mt-3 grid gap-3 pb-36 sm:mt-4 sm:gap-4 sm:pb-32 lg:pb-0">
-      <HoldOrdersBar orders={heldOrders} onResume={onResumeOrder} />
+      {heldOrders.length > 0 && <HoldOrdersBar orders={heldOrders} onResume={onResumeOrder} />}
 
       <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ProductGrid products={products} onAdd={onAddItem} />
@@ -95,7 +96,12 @@ export function CashierPage({
       </div>
 
       <div className="lg:hidden">
-        {mobileTab === "products" && <ProductGrid products={products} onAdd={onAddItem} />}
+        {mobileTab === "home" && <ReportsPanel sales={sales} />}
+        {mobileTab === "products" && (
+          <div className={itemCount > 0 ? "pb-36" : "pb-24"}>
+            <ProductGrid products={products} onAdd={onAddItem} />
+          </div>
+        )}
         {mobileTab === "cart" && (
           <CartPanel
             cart={cart}
@@ -122,31 +128,41 @@ export function CashierPage({
       </div>
 
       {mobileTab === "products" && itemCount > 0 && (
-        <div className="fixed bottom-24 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileTab("cart")}
-            className="flex w-full items-center justify-between rounded-2xl bg-primary/95 px-4 py-3 text-on-primary editorial-shadow tap-bounce enter-fade-up"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative grid h-11 w-11 place-items-center rounded-xl bg-white/20">
-                <span className="material-symbols-outlined text-white">shopping_basket</span>
-                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-secondary-container text-[10px] font-bold text-on-secondary-container">
-                  {itemCount}
-                </span>
+        <div className="fixed inset-x-0 bottom-24 z-40 px-6 lg:hidden">
+          <div className="mx-auto w-full max-w-md">
+            <button
+              type="button"
+              onClick={() => setMobileTab("cart")}
+              className="flex w-full items-center justify-between rounded-2xl bg-primary/95 px-4 py-3 text-on-primary editorial-shadow tap-bounce"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative grid h-11 w-11 place-items-center rounded-xl bg-white/20">
+                  <span className="material-symbols-outlined text-white">shopping_basket</span>
+                  <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-secondary-container text-[10px] font-bold text-on-secondary-container">
+                    {itemCount}
+                  </span>
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/70">Total Items</p>
+                  <p className="font-headline text-xl font-extrabold leading-none text-white sm:text-2xl">Rp {total.toLocaleString("id-ID")}</p>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Total Item</p>
-                <p className="font-headline text-xl font-extrabold leading-none text-white sm:text-2xl">Rp {total.toLocaleString("id-ID")}</p>
-              </div>
-            </div>
-            <span className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-primary">Keranjang</span>
-          </button>
+              <span className="rounded-xl bg-white px-6 py-3 text-sm font-bold tracking-tight text-primary">Checkout</span>
+            </button>
+          </div>
         </div>
       )}
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-6 pt-2 backdrop-blur-2xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-2">
+          <button
+            type="button"
+            onClick={() => setMobileTab("home")}
+            className={mobileTab === "home" ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary" : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"}
+          >
+            <span className="material-symbols-outlined text-[18px]" style={mobileTab === "home" ? { fontVariationSettings: "'FILL' 1" } : undefined}>home</span>
+            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">Home</span>
+          </button>
           <button
             type="button"
             onClick={() => setMobileTab("products")}
