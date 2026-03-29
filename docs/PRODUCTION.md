@@ -35,3 +35,7 @@
 - Aktifkan backup harian database
 - Simpan audit log transaksi minimal 90 hari
 - Uji restore backup minimal 1x per bulan
+
+## 6) Progress Implementasi
+
+- Progress fitur per role ada di docs/IMPLEMENTATION_PROGRESS.md

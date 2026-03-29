@@ -1,4 +1,4 @@
-import type { CartItem, PaymentMethod } from "../types";
+import type { CartItem, PaymentBreakdown, PaymentMethod } from "../types";
 
 type CartPanelProps = {
   cart: CartItem[];
@@ -7,10 +7,14 @@ type CartPanelProps = {
   discountAmount: number;
   total: number;
   paymentMethod: PaymentMethod;
+  isSplitPayment: boolean;
+  splitPayment: PaymentBreakdown;
   cashReceived: number;
   changeAmount: number;
   onDiscountChange: (value: number) => void;
   onPaymentMethodChange: (value: PaymentMethod) => void;
+  onSplitPaymentToggle: (enabled: boolean) => void;
+  onSplitPaymentAmountChange: (method: PaymentMethod, value: number) => void;
   onCashReceivedChange: (value: number) => void;
   onIncreaseQty: (id: string) => void;
   onDecreaseQty: (id: string) => void;
@@ -28,10 +32,14 @@ export function CartPanel({
   discountAmount,
   total,
   paymentMethod,
+  isSplitPayment,
+  splitPayment,
   cashReceived,
   changeAmount,
   onDiscountChange,
   onPaymentMethodChange,
+  onSplitPaymentToggle,
+  onSplitPaymentAmountChange,
   onCashReceivedChange,
   onIncreaseQty,
   onDecreaseQty,
@@ -41,6 +49,12 @@ export function CartPanel({
   onCheckout,
   disableCheckout = false
 }: CartPanelProps) {
+  const splitTotal = splitPayment.cash + splitPayment.card + splitPayment.qris;
+  const splitDifference = total - splitTotal;
+  const splitValid = Math.abs(splitDifference) < 1;
+  const requiresCashInput = isSplitPayment ? splitPayment.cash > 0 : paymentMethod === "cash";
+  const cashTarget = isSplitPayment ? splitPayment.cash : total;
+
   return (
     <aside className="max-w-full space-y-4 rounded-3xl bg-surface px-2 py-2 sm:px-3 sm:py-3">
       <div className="rounded-2xl bg-surface-container-low px-4 py-4">
@@ -117,36 +131,95 @@ export function CartPanel({
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Metode Bayar</p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 flex items-center justify-between rounded-xl bg-surface-container-lowest px-3 py-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Split Payment</span>
             <button
               type="button"
-              onClick={() => onPaymentMethodChange("cash")}
-              className={paymentMethod === "cash" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
+              onClick={() => onSplitPaymentToggle(!isSplitPayment)}
+              className={
+                isSplitPayment
+                  ? "h-8 rounded-lg bg-primary px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-on-primary"
+                  : "h-8 rounded-lg bg-surface-container-high px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant"
+              }
             >
-              <span className="material-symbols-outlined text-[22px]">payments</span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Tunai</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onPaymentMethodChange("qris")}
-              className={paymentMethod === "qris" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
-            >
-              <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em]">QRIS</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onPaymentMethodChange("card")}
-              className={paymentMethod === "card" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
-            >
-              <span className="material-symbols-outlined text-[22px]">credit_card</span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Kartu</span>
+              {isSplitPayment ? "Aktif" : "Nonaktif"}
             </button>
           </div>
+
+          {!isSplitPayment && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => onPaymentMethodChange("cash")}
+                className={paymentMethod === "cash" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
+              >
+                <span className="material-symbols-outlined text-[22px]">payments</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Tunai</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onPaymentMethodChange("qris")}
+                className={paymentMethod === "qris" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
+              >
+                <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em]">QRIS</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onPaymentMethodChange("card")}
+                className={paymentMethod === "card" ? "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-primary text-on-primary tap-bounce" : "flex h-16 flex-col items-center justify-center gap-1 rounded-xl bg-surface-container-lowest text-on-surface-variant tap-bounce"}
+              >
+                <span className="material-symbols-outlined text-[22px]">credit_card</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Kartu</span>
+              </button>
+            </div>
+          )}
+
+          {isSplitPayment && (
+            <div className="mt-2 grid gap-2">
+              <div className="grid grid-cols-3 gap-2">
+                <label className="rounded-xl bg-surface-container-lowest px-2 py-2 text-xs text-on-surface-variant">
+                  Tunai
+                  <input
+                    type="number"
+                    min={0}
+                    value={splitPayment.cash}
+                    onChange={(event) => onSplitPaymentAmountChange("cash", Number(event.target.value || 0))}
+                    className="mt-1 h-9 w-full rounded-lg border-none bg-surface-container-low px-2 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  />
+                </label>
+                <label className="rounded-xl bg-surface-container-lowest px-2 py-2 text-xs text-on-surface-variant">
+                  Kartu
+                  <input
+                    type="number"
+                    min={0}
+                    value={splitPayment.card}
+                    onChange={(event) => onSplitPaymentAmountChange("card", Number(event.target.value || 0))}
+                    className="mt-1 h-9 w-full rounded-lg border-none bg-surface-container-low px-2 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  />
+                </label>
+                <label className="rounded-xl bg-surface-container-lowest px-2 py-2 text-xs text-on-surface-variant">
+                  QRIS
+                  <input
+                    type="number"
+                    min={0}
+                    value={splitPayment.qris}
+                    onChange={(event) => onSplitPaymentAmountChange("qris", Number(event.target.value || 0))}
+                    className="mt-1 h-9 w-full rounded-lg border-none bg-surface-container-low px-2 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  />
+                </label>
+              </div>
+
+              <p className={splitValid ? "text-xs text-on-surface-variant" : "text-xs font-semibold text-error"}>
+                Split: Rp {splitTotal.toLocaleString("id-ID")} / Total: Rp {total.toLocaleString("id-ID")}
+                {!splitValid && ` (selisih Rp ${Math.abs(splitDifference).toLocaleString("id-ID")})`}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {paymentMethod === "cash" && (
+      {requiresCashInput && (
         <div className="grid gap-1.5 rounded-2xl bg-surface-container-low p-4">
           <label htmlFor="cash-received" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Uang Diterima</label>
           <input
@@ -157,6 +230,9 @@ export function CartPanel({
             className="h-12 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
             onChange={(event) => onCashReceivedChange(Number(event.target.value || 0))}
           />
+          <p className="text-sm text-on-surface-variant">
+            {isSplitPayment ? "Target Tunai" : "Tagihan Tunai"}: <span className="font-semibold text-on-surface">Rp {cashTarget.toLocaleString("id-ID")}</span>
+          </p>
           <p className="text-sm text-on-surface-variant">
             Kembalian: <span className="font-headline text-xl font-bold text-on-surface">Rp {changeAmount.toLocaleString("id-ID")}</span>
           </p>
@@ -176,6 +252,11 @@ export function CartPanel({
           <strong className="font-headline text-xl sm:text-2xl">Total Akhir</strong>
           <strong className="font-headline text-2xl text-primary sm:text-3xl">Rp {total.toLocaleString("id-ID")}</strong>
         </div>
+        {isSplitPayment && (
+          <p className={splitValid ? "text-xs text-on-surface-variant" : "text-xs font-semibold text-error"}>
+            Validasi split: {splitValid ? "sesuai" : "belum sesuai total transaksi"}
+          </p>
+        )}
       </div>
 
       <div className="sticky bottom-2 grid gap-2 rounded-2xl bg-surface-container-low px-3 py-3 backdrop-blur sm:static sm:bg-transparent sm:px-0 sm:py-0">
@@ -195,7 +276,7 @@ export function CartPanel({
         <button
           className="h-14 w-full rounded-2xl bg-gradient-to-br from-primary to-primary-container text-base font-bold text-on-primary transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           onClick={onCheckout}
-          disabled={cart.length === 0 || disableCheckout}
+          disabled={cart.length === 0 || disableCheckout || (isSplitPayment && !splitValid)}
         >
           Konfirmasi Bayar
         </button>

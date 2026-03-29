@@ -1,4 +1,4 @@
-import type { CartItem, PaymentMethod } from "../types";
+import type { CartItem, PaymentBreakdown, PaymentMethod } from "../types";
 
 export type HeldOrder = {
   id: string;
@@ -7,6 +7,8 @@ export type HeldOrder = {
   subtotal: number;
   discountPercent: number;
   paymentMethod: PaymentMethod;
+  isSplitPayment?: boolean;
+  paymentBreakdown?: PaymentBreakdown;
   items: CartItem[];
 };
 

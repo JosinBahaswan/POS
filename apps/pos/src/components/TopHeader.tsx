@@ -40,13 +40,6 @@ export function TopHeader({
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="grid h-9 w-9 place-items-center rounded-full text-primary transition hover:bg-surface-container-low tap-bounce"
-            aria-label="Cari"
-          >
-            <span className="material-symbols-outlined text-[20px]">search</span>
-          </button>
-          <button
-            type="button"
             onClick={onLogout}
             className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-outline-variant/30 bg-surface-container-highest text-xs font-bold text-primary transition hover:brightness-95 tap-bounce"
             aria-label="Keluar"

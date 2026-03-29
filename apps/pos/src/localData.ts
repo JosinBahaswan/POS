@@ -1,10 +1,12 @@
-export type ProductCategory = "drink" | "food";
+export type ProductCategory = string;
 
 export type ProductItem = {
   id: string;
   barcode: string;
   name: string;
   price: number;
+  costPrice: number;
+  promoPercent: number;
   stock: number;
   category: ProductCategory;
   favorite: boolean;
@@ -17,6 +19,8 @@ export const products: ProductItem[] = [
     barcode: "899700100001",
     name: "Americano",
     price: 18000,
+    costPrice: 7600,
+    promoPercent: 0,
     stock: 30,
     category: "drink",
     favorite: true,
@@ -27,6 +31,8 @@ export const products: ProductItem[] = [
     barcode: "899700100002",
     name: "Cappuccino",
     price: 22000,
+    costPrice: 9400,
+    promoPercent: 10,
     stock: 24,
     category: "drink",
     favorite: true,
@@ -37,6 +43,8 @@ export const products: ProductItem[] = [
     barcode: "899700100003",
     name: "Croissant",
     price: 15000,
+    costPrice: 6100,
+    promoPercent: 0,
     stock: 12,
     category: "food",
     favorite: false,
@@ -47,6 +55,8 @@ export const products: ProductItem[] = [
     barcode: "899700100004",
     name: "Mineral Water",
     price: 7000,
+    costPrice: 2600,
+    promoPercent: 0,
     stock: 42,
     category: "drink",
     favorite: false,

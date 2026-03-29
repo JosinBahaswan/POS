@@ -2,11 +2,14 @@ import { useMemo, useState } from "react";
 import { ProductGrid } from "../components/ProductGrid";
 import { CartPanel } from "../components/CartPanel";
 import { SalesHistory } from "../components/SalesHistory";
+import { CashierHomePanel } from "../components/CashierHomePanel";
+import { CashierShiftPanel } from "../components/CashierShiftPanel";
 import { ReportsPanel } from "../components/ReportsPanel";
 import { HoldOrdersBar, type HeldOrder } from "../components/HoldOrdersBar";
-import type { CartItem, PaymentMethod } from "../types";
+import type { CartItem, PaymentBreakdown, PaymentMethod } from "../types";
 import type { ProductItem } from "../localData";
 import type { LocalSale } from "../database";
+import type { CashMovementType, ShiftSession } from "../shift";
 
 type CashierPageProps = {
   products: ProductItem[];
@@ -18,13 +21,22 @@ type CashierPageProps = {
   discountAmount: number;
   total: number;
   paymentMethod: PaymentMethod;
+  isSplitPayment: boolean;
+  splitPayment: PaymentBreakdown;
   cashReceived: number;
   changeAmount: number;
+  activeShift: ShiftSession | null;
+  recentShiftHistory: ShiftSession[];
   isSyncing: boolean;
   onAddItem: (id: string, name: string, price: number) => void;
   onDiscountChange: (value: number) => void;
   onPaymentMethodChange: (value: PaymentMethod) => void;
+  onSplitPaymentToggle: (enabled: boolean) => void;
+  onSplitPaymentAmountChange: (method: PaymentMethod, value: number) => void;
   onCashReceivedChange: (value: number) => void;
+  onOpenShift: (openingCash: number) => void;
+  onCloseShift: (closingCash: number, note: string) => void;
+  onAddCashMovement: (type: CashMovementType, amount: number, note: string) => void;
   onIncreaseQty: (id: string) => void;
   onDecreaseQty: (id: string) => void;
   onRemoveItem: (id: string) => void;
@@ -33,6 +45,8 @@ type CashierPageProps = {
   onClear: () => void;
   onCheckout: () => void;
   onPrintReceipt: (saleId: string) => void;
+  onRequestRefund: (saleId: string, reason: string) => void;
+  onRequestVoid: (saleId: string, reason: string) => void;
 };
 
 export function CashierPage({
@@ -45,13 +59,22 @@ export function CashierPage({
   discountAmount,
   total,
   paymentMethod,
+  isSplitPayment,
+  splitPayment,
   cashReceived,
   changeAmount,
+  activeShift,
+  recentShiftHistory,
   isSyncing,
   onAddItem,
   onDiscountChange,
   onPaymentMethodChange,
+  onSplitPaymentToggle,
+  onSplitPaymentAmountChange,
   onCashReceivedChange,
+  onOpenShift,
+  onCloseShift,
+  onAddCashMovement,
   onIncreaseQty,
   onDecreaseQty,
   onRemoveItem,
@@ -59,10 +82,26 @@ export function CashierPage({
   onResumeOrder,
   onClear,
   onCheckout,
-  onPrintReceipt
+  onPrintReceipt,
+  onRequestRefund,
+  onRequestVoid
 }: CashierPageProps) {
   const [mobileTab, setMobileTab] = useState<"home" | "products" | "cart" | "history">("home");
   const itemCount = useMemo(() => cart.reduce((acc, item) => acc + item.qty, 0), [cart]);
+  const todaySalesCount = useMemo(() => {
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    return sales.filter(
+      (sale) => sale.status === "completed" && new Date(sale.createdAt).getTime() >= startToday
+    ).length;
+  }, [sales]);
+  const todayRevenue = useMemo(() => {
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    return sales
+      .filter((sale) => sale.status === "completed" && new Date(sale.createdAt).getTime() >= startToday)
+      .reduce((acc, sale) => acc + sale.total, 0);
+  }, [sales]);
 
   return (
     <section className="mt-3 grid gap-3 pb-36 sm:mt-4 sm:gap-4 sm:pb-32 lg:pb-0">
@@ -78,10 +117,14 @@ export function CashierPage({
             discountAmount={discountAmount}
             total={total}
             paymentMethod={paymentMethod}
+            isSplitPayment={isSplitPayment}
+            splitPayment={splitPayment}
             cashReceived={cashReceived}
             changeAmount={changeAmount}
             onDiscountChange={onDiscountChange}
             onPaymentMethodChange={onPaymentMethodChange}
+            onSplitPaymentToggle={onSplitPaymentToggle}
+            onSplitPaymentAmountChange={onSplitPaymentAmountChange}
             onCashReceivedChange={onCashReceivedChange}
             onIncreaseQty={onIncreaseQty}
             onDecreaseQty={onDecreaseQty}
@@ -91,12 +134,34 @@ export function CashierPage({
             onCheckout={onCheckout}
             disableCheckout={isSyncing}
           />
-          <SalesHistory sales={sales} onPrint={onPrintReceipt} />
+          <SalesHistory
+            sales={sales}
+            onPrint={onPrintReceipt}
+            onRequestRefund={onRequestRefund}
+            onRequestVoid={onRequestVoid}
+          />
         </div>
       </div>
 
       <div className="lg:hidden">
-        {mobileTab === "home" && <ReportsPanel sales={sales} />}
+        {mobileTab === "home" && (
+          <div className="grid gap-3">
+            <CashierHomePanel
+              cartItemCount={itemCount}
+              heldOrderCount={heldOrders.length}
+              todaySalesCount={todaySalesCount}
+              todayRevenue={todayRevenue}
+            />
+            <CashierShiftPanel
+              activeShift={activeShift}
+              recentShifts={recentShiftHistory}
+              onOpenShift={onOpenShift}
+              onCloseShift={onCloseShift}
+              onAddCashMovement={onAddCashMovement}
+            />
+            <ReportsPanel sales={sales} />
+          </div>
+        )}
         {mobileTab === "products" && (
           <div className={itemCount > 0 ? "pb-36" : "pb-24"}>
             <ProductGrid products={products} onAdd={onAddItem} />
@@ -110,10 +175,14 @@ export function CashierPage({
             discountAmount={discountAmount}
             total={total}
             paymentMethod={paymentMethod}
+            isSplitPayment={isSplitPayment}
+            splitPayment={splitPayment}
             cashReceived={cashReceived}
             changeAmount={changeAmount}
             onDiscountChange={onDiscountChange}
             onPaymentMethodChange={onPaymentMethodChange}
+            onSplitPaymentToggle={onSplitPaymentToggle}
+            onSplitPaymentAmountChange={onSplitPaymentAmountChange}
             onCashReceivedChange={onCashReceivedChange}
             onIncreaseQty={onIncreaseQty}
             onDecreaseQty={onDecreaseQty}
@@ -124,7 +193,14 @@ export function CashierPage({
             disableCheckout={isSyncing}
           />
         )}
-        {mobileTab === "history" && <SalesHistory sales={sales} onPrint={onPrintReceipt} />}
+        {mobileTab === "history" && (
+          <SalesHistory
+            sales={sales}
+            onPrint={onPrintReceipt}
+            onRequestRefund={onRequestRefund}
+            onRequestVoid={onRequestVoid}
+          />
+        )}
       </div>
 
       {mobileTab === "products" && itemCount > 0 && (

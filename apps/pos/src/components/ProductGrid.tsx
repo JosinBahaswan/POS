@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BarcodeScannerButton } from "./BarcodeScannerButton";
 import type { ProductItem } from "../localData";
 
 const FALLBACK_PRODUCT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e5e8ee'/%3E%3Cstop offset='1' stop-color='%23dfe3e8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ccircle cx='200' cy='160' r='54' fill='%23bfc8cd'/%3E%3Crect x='110' y='238' width='180' height='26' rx='13' fill='%23bfc8cd'/%3E%3C/svg%3E";
@@ -10,7 +11,27 @@ type ProductGridProps = {
 
 export function ProductGrid({ products, onAdd }: ProductGridProps) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "drink" | "food">("all");
+  const [filter, setFilter] = useState("all");
+
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const product of products) {
+      const category = product.category.trim();
+      if (category) set.add(category);
+    }
+
+    return ["all", ...Array.from(set)];
+  }, [products]);
+
+  const normalizeCategoryLabel = (value: string) => {
+    if (value === "all") return "Semua Item";
+
+    return value
+      .split(/[-_\s]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
+  };
 
   const filteredProducts = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -20,9 +41,7 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
         product.id.toLowerCase().includes(keyword) ||
         product.barcode.toLowerCase().includes(keyword);
 
-      const matchFilter =
-        filter === "all" ||
-        product.category === filter;
+      const matchFilter = filter === "all" || product.category === filter;
 
       return matchText && matchFilter;
     });
@@ -31,36 +50,42 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
   return (
     <section className="space-y-6">
       <div className="space-y-4">
-        <div className="relative group">
-          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-outline">
-            search
-          </span>
-          <input
-            className="h-12 w-full rounded-xl border-none bg-surface-container-low py-4 pl-12 pr-4 text-sm font-medium text-on-surface outline-none transition placeholder:text-outline/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-            type="text"
-            placeholder="Cari nama produk atau SKU..."
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="relative group">
+            <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              search
+            </span>
+            <input
+              className="h-12 w-full rounded-xl border-none bg-surface-container-low py-4 pl-12 pr-4 text-sm font-medium text-on-surface outline-none transition placeholder:text-outline/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+              type="text"
+              placeholder="Cari nama produk atau SKU..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
+
+          <BarcodeScannerButton
+            label="Scan"
+            onDetected={(barcode) => {
+              setQuery(barcode);
+            }}
+            className="inline-flex h-12 items-center justify-center gap-1 rounded-xl bg-surface-container-high px-3 text-xs font-semibold text-on-surface"
           />
         </div>
 
         <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
-          {[
-            { key: "all", label: "Semua Item" },
-            { key: "drink", label: "Minuman" },
-            { key: "food", label: "Makanan" }
-          ].map((item) => (
+          {categoryOptions.map((item) => (
             <button
-              key={item.key}
+              key={item}
               type="button"
-              onClick={() => setFilter(item.key as "all" | "drink" | "food")}
+              onClick={() => setFilter(item)}
               className={
-                filter === item.key
+                filter === item
                   ? "whitespace-nowrap rounded-full bg-primary-container px-6 py-2 text-sm font-semibold text-white"
                   : "whitespace-nowrap rounded-full bg-surface-container-highest px-6 py-2 text-sm font-semibold text-on-surface-variant"
               }
             >
-              {item.label}
+              {normalizeCategoryLabel(item)}
             </button>
           ))}
         </div>
@@ -68,6 +93,8 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 xl:grid-cols-4">
         {filteredProducts.map((product) => {
+          const promoPercent = Math.max(0, Math.min(100, Number(product.promoPercent || 0)));
+          const effectivePrice = Math.round(product.price * (1 - promoPercent / 100));
           const stockState =
             product.stock <= 0
               ? {
@@ -87,7 +114,7 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
                     helperClass: "text-on-surface-variant"
                   };
 
-          const categoryLabel = product.category === "drink" ? "Minuman" : "Makanan";
+          const categoryLabel = normalizeCategoryLabel(product.category);
 
           return (
             <article
@@ -121,11 +148,17 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
                     <p className={`mb-0.5 text-[10px] font-medium ${stockState.helperClass}`}>
                       {product.stock > 0 ? `${product.stock} tersisa` : "Tidak tersedia"}
                     </p>
-                    <p className="font-headline text-lg font-extrabold text-primary">Rp {product.price.toLocaleString("id-ID")}</p>
+                    <p className="font-headline text-lg font-extrabold text-primary">Rp {effectivePrice.toLocaleString("id-ID")}</p>
+                    {promoPercent > 0 && (
+                      <p className="text-[10px] font-semibold text-on-surface-variant">
+                        <span className="line-through">Rp {product.price.toLocaleString("id-ID")}</span>
+                        {` • Promo ${promoPercent}%`}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => onAdd(product.id, product.name, product.price)}
+                    onClick={() => onAdd(product.id, product.name, effectivePrice)}
                     disabled={product.stock <= 0}
                     className={
                       product.stock <= 0

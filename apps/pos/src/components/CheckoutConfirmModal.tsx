@@ -1,10 +1,12 @@
-import type { PaymentMethod } from "../types";
+import type { PaymentBreakdown, PaymentMethod } from "../types";
 
 type CheckoutConfirmModalProps = {
   open: boolean;
   itemCount: number;
   total: number;
   paymentMethod: PaymentMethod;
+  isSplitPayment?: boolean;
+  paymentBreakdown?: PaymentBreakdown;
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
@@ -15,6 +17,8 @@ export function CheckoutConfirmModal({
   itemCount,
   total,
   paymentMethod,
+  isSplitPayment = false,
+  paymentBreakdown,
   onClose,
   onConfirm,
   loading = false
@@ -32,8 +36,19 @@ export function CheckoutConfirmModal({
           </div>
           <div className="flex items-center justify-between text-on-surface-variant">
             <span>Metode</span>
-            <span className="font-headline text-lg font-bold uppercase text-on-surface">{paymentMethod}</span>
+            <span className="font-headline text-lg font-bold uppercase text-on-surface">
+              {isSplitPayment ? "SPLIT" : paymentMethod}
+            </span>
           </div>
+
+          {isSplitPayment && paymentBreakdown && (
+            <div className="rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+              <p>Tunai: Rp {paymentBreakdown.cash.toLocaleString("id-ID")}</p>
+              <p>Kartu: Rp {paymentBreakdown.card.toLocaleString("id-ID")}</p>
+              <p>QRIS: Rp {paymentBreakdown.qris.toLocaleString("id-ID")}</p>
+            </div>
+          )}
+
           <div className="flex items-center justify-between border-t border-outline-variant/30 pt-3 text-on-surface">
             <strong className="font-headline text-xl">Total</strong>
             <strong className="font-headline text-2xl text-primary">Rp {total.toLocaleString("id-ID")}</strong>

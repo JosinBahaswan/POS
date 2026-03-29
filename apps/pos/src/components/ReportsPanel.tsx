@@ -16,11 +16,16 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
     const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const startYesterday = startToday - 24 * 60 * 60 * 1000;
 
-    const todaySales = sales.filter((sale) => new Date(sale.createdAt).getTime() >= startToday);
-    const yesterdaySales = sales.filter((sale) => {
+    const todaySalesAll = sales.filter((sale) => new Date(sale.createdAt).getTime() >= startToday);
+    const yesterdaySalesAll = sales.filter((sale) => {
       const createdAt = new Date(sale.createdAt).getTime();
       return createdAt >= startYesterday && createdAt < startToday;
     });
+
+    const todaySales = todaySalesAll.filter((sale) => sale.status === "completed");
+    const yesterdaySales = yesterdaySalesAll.filter((sale) => sale.status === "completed");
+    const refundedCount = todaySalesAll.filter((sale) => sale.status === "refunded").length;
+    const voidedCount = todaySalesAll.filter((sale) => sale.status === "voided").length;
 
     const omzet = todaySales.reduce((acc, sale) => acc + sale.total, 0);
     const yesterdayOmzet = yesterdaySales.reduce((acc, sale) => acc + sale.total, 0);
@@ -44,7 +49,7 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
         ? null
         : ((omzet - yesterdayOmzet) / yesterdayOmzet) * 100;
 
-    return { omzet, trx, topProducts, topSeller, growth, todaySales };
+    return { omzet, trx, topProducts, topSeller, growth, todaySales, refundedCount, voidedCount };
   }, [sales]);
 
   const exportCsv = () => {
@@ -86,6 +91,7 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
           </div>
           <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-on-surface-variant">Transaksi</p>
           <p className="font-headline text-2xl font-bold text-on-surface sm:text-3xl">{report.trx}</p>
+          <p className="mt-1 text-xs text-on-surface-variant">Refund/Void: {report.refundedCount + report.voidedCount}</p>
         </article>
         <article className="rounded-2xl bg-surface-container-lowest p-4 editorial-shadow">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-tertiary-fixed/40 text-on-tertiary-fixed-variant">
@@ -98,7 +104,7 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
 
       <article className="rounded-2xl bg-surface-container-low p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface-variant">Aksi Cepat</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface-variant">Ekspor Laporan</h2>
           <button
             type="button"
             onClick={exportCsv}
@@ -107,23 +113,9 @@ export function ReportsPanel({ sales }: ReportsPanelProps) {
             Export CSV
           </button>
         </div>
-
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container-lowest px-3 py-5 text-primary"
-          >
-            <span className="material-symbols-outlined rounded-full bg-primary p-2 text-white">add_shopping_cart</span>
-            <span className="font-headline text-lg font-bold">Transaksi Baru</span>
-          </button>
-          <button
-            type="button"
-            className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container-lowest px-3 py-5 text-on-tertiary-fixed-variant"
-          >
-            <span className="material-symbols-outlined rounded-full bg-tertiary-fixed p-2">inventory_2</span>
-            <span className="font-headline text-lg font-bold">Stok</span>
-          </button>
-        </div>
+        <p className="mt-3 rounded-xl bg-surface-container-lowest p-3 text-sm text-on-surface-variant">
+          Gunakan tombol ekspor untuk mengunduh transaksi hari ini dalam format CSV.
+        </p>
       </article>
 
       <article className="rounded-2xl bg-surface-container-low p-4">

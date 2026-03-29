@@ -19,12 +19,14 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   const [ownerName, setOwnerName] = useState("");
   const [ownerCompanyName, setOwnerCompanyName] = useState("");
   const [ownerCompanyCode, setOwnerCompanyCode] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPassword, setOwnerPassword] = useState("");
+  const [showOwnerPassword, setShowOwnerPassword] = useState(false);
 
   const runWithGuard = async (action: () => Promise<AuthenticatedUser>) => {
     setLoading(true);
@@ -142,14 +144,26 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                   onChange={(event) => setLoginEmail(event.target.value)}
                   required
                 />
-                <input
-                  className="h-11 rounded-xl border border-slate-300 px-3 text-sm"
-                  type="password"
-                  placeholder="Password"
-                  value={loginPassword}
-                  onChange={(event) => setLoginPassword(event.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    className="h-11 w-full rounded-xl border border-slate-300 px-3 pr-11 text-sm"
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={loginPassword}
+                    onChange={(event) => setLoginPassword(event.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword((state) => !state)}
+                    className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    aria-label={showLoginPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {showLoginPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
                 <button
                   type="submit"
                   disabled={loading}
@@ -194,14 +208,26 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                   onChange={(event) => setOwnerEmail(event.target.value)}
                   required
                 />
-                <input
-                  className="h-11 rounded-xl border border-slate-300 px-3 text-sm"
-                  type="password"
-                  placeholder="Password"
-                  value={ownerPassword}
-                  onChange={(event) => setOwnerPassword(event.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    className="h-11 w-full rounded-xl border border-slate-300 px-3 pr-11 text-sm"
+                    type={showOwnerPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={ownerPassword}
+                    onChange={(event) => setOwnerPassword(event.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOwnerPassword((state) => !state)}
+                    className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    aria-label={showOwnerPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {showOwnerPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
                 <button
                   type="submit"
                   disabled={loading}
