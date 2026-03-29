@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ProductGrid } from "../components/ProductGrid";
 import { CartPanel } from "../components/CartPanel";
 import { SalesHistory } from "../components/SalesHistory";
@@ -86,7 +86,29 @@ export function CashierPage({
   onRequestRefund,
   onRequestVoid
 }: CashierPageProps) {
-  const [mobileTab, setMobileTab] = useState<"home" | "products" | "cart" | "history">("home");
+  const [mobileTab, setMobileTabState] = useState<"home" | "products" | "cart" | "history">("home");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (["home", "products", "cart", "history"].includes(hash)) {
+        setMobileTabState(hash as "home" | "products" | "cart" | "history");
+      } else {
+        setMobileTabState("home");
+      }
+    };
+    
+    // Set initial tab from hash if available
+    handleHashChange();
+    
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const setMobileTab = (tab: "home" | "products" | "cart" | "history") => {
+    window.location.hash = tab;
+  };
+
   const itemCount = useMemo(() => cart.reduce((acc, item) => acc + item.qty, 0), [cart]);
   const todaySalesCount = useMemo(() => {
     const now = new Date();
@@ -143,9 +165,9 @@ export function CashierPage({
         </div>
       </div>
 
-      <div className="lg:hidden">
+      <div className="lg:hidden relative overflow-hidden">
         {mobileTab === "home" && (
-          <div className="grid gap-3">
+          <div className="grid gap-3 animate-slide-up">
             <CashierHomePanel
               cartItemCount={itemCount}
               heldOrderCount={heldOrders.length}
@@ -163,48 +185,55 @@ export function CashierPage({
           </div>
         )}
         {mobileTab === "products" && (
-          <div className={itemCount > 0 ? "pb-36" : "pb-24"}>
+          <div className={`animate-slide-in-right ${itemCount > 0 ? "pb-36" : "pb-24"}`}>
             <ProductGrid products={products} onAdd={onAddItem} />
           </div>
         )}
         {mobileTab === "cart" && (
-          <CartPanel
-            cart={cart}
-            subtotal={subtotal}
-            discountPercent={discountPercent}
-            discountAmount={discountAmount}
-            total={total}
-            paymentMethod={paymentMethod}
-            isSplitPayment={isSplitPayment}
-            splitPayment={splitPayment}
-            cashReceived={cashReceived}
-            changeAmount={changeAmount}
-            onDiscountChange={onDiscountChange}
-            onPaymentMethodChange={onPaymentMethodChange}
-            onSplitPaymentToggle={onSplitPaymentToggle}
-            onSplitPaymentAmountChange={onSplitPaymentAmountChange}
-            onCashReceivedChange={onCashReceivedChange}
-            onIncreaseQty={onIncreaseQty}
-            onDecreaseQty={onDecreaseQty}
-            onRemoveItem={onRemoveItem}
-            onHoldOrder={onHoldOrder}
-            onClear={onClear}
-            onCheckout={onCheckout}
-            disableCheckout={isSyncing}
-          />
+          <div className="animate-slide-in-right">
+            <CartPanel
+              cart={cart}
+              subtotal={subtotal}
+              discountPercent={discountPercent}
+              discountAmount={discountAmount}
+              total={total}
+              paymentMethod={paymentMethod}
+              isSplitPayment={isSplitPayment}
+              splitPayment={splitPayment}
+              cashReceived={cashReceived}
+              changeAmount={changeAmount}
+              onDiscountChange={onDiscountChange}
+              onPaymentMethodChange={onPaymentMethodChange}
+              onSplitPaymentToggle={onSplitPaymentToggle}
+              onSplitPaymentAmountChange={onSplitPaymentAmountChange}
+              onCashReceivedChange={onCashReceivedChange}
+              onIncreaseQty={onIncreaseQty}
+              onDecreaseQty={onDecreaseQty}
+              onRemoveItem={onRemoveItem}
+              onHoldOrder={onHoldOrder}
+              onClear={onClear}
+              onCheckout={onCheckout}
+              disableCheckout={isSyncing}
+            />
+          </div>
         )}
         {mobileTab === "history" && (
-          <SalesHistory
-            sales={sales}
-            onPrint={onPrintReceipt}
-            onRequestRefund={onRequestRefund}
-            onRequestVoid={onRequestVoid}
-          />
+          <div className="animate-slide-in-right">
+            <SalesHistory
+              sales={sales}
+              onPrint={onPrintReceipt}
+              onRequestRefund={onRequestRefund}
+              onRequestVoid={onRequestVoid}
+            />
+          </div>
         )}
       </div>
 
       {mobileTab === "products" && itemCount > 0 && (
-        <div className="fixed inset-x-0 bottom-24 z-40 px-6 lg:hidden">
+        <div 
+          className="fixed inset-x-0 z-40 px-6 lg:hidden animate-slide-up"
+          style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        >
           <div className="mx-auto w-full max-w-md">
             <button
               type="button"
@@ -219,49 +248,57 @@ export function CashierPage({
                   </span>
                 </div>
                 <div className="text-left">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/70">Total Items</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/70">Total Items</p>
                   <p className="font-headline text-xl font-extrabold leading-none text-white sm:text-2xl">Rp {total.toLocaleString("id-ID")}</p>
                 </div>
               </div>
-              <span className="rounded-xl bg-white px-6 py-3 text-sm font-bold tracking-tight text-primary">Checkout</span>
+              <span className="rounded-xl bg-white px-6 py-3 text-sm font-bold tracking-tight text-primary hover:bg-surface-container-low transition-colors">Checkout</span>
             </button>
           </div>
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-6 pt-2 backdrop-blur-2xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-[calc(24px+env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl lg:hidden transition-all duration-300">
         <div className="mx-auto grid max-w-md grid-cols-4 gap-2">
           <button
             type="button"
             onClick={() => setMobileTab("home")}
-            className={mobileTab === "home" ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary" : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"}
+            className={`flex flex-col items-center justify-center gap-1 text-xs font-semibold h-12 transition-colors duration-200 ${mobileTab === "home" ? "text-primary" : "text-on-surface-variant"}`}
           >
-            <span className="material-symbols-outlined text-[18px]" style={mobileTab === "home" ? { fontVariationSettings: "'FILL' 1" } : undefined}>home</span>
-            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">Home</span>
+            <div className={`flex w-16 h-8 items-center justify-center rounded-full transition-all duration-300 ${mobileTab === "home" ? "bg-primary/15" : "bg-transparent"}`}>
+               <span className="material-symbols-outlined text-[20px] transition-transform" style={mobileTab === "home" ? { fontVariationSettings: "'FILL' 1" } : undefined}>home</span>
+            </div>
+            <span className={`text-[10px] uppercase tracking-[0.12em] ${mobileTab === "home" ? "font-bold" : "font-medium"}`}>Home</span>
           </button>
           <button
             type="button"
             onClick={() => setMobileTab("products")}
-            className={mobileTab === "products" ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary" : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"}
+            className={`flex flex-col items-center justify-center gap-1 text-xs font-semibold h-12 transition-colors duration-200 ${mobileTab === "products" ? "text-primary" : "text-on-surface-variant"}`}
           >
-            <span className="material-symbols-outlined text-[18px]" style={mobileTab === "products" ? { fontVariationSettings: "'FILL' 1" } : undefined}>grid_view</span>
-            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">Katalog</span>
+            <div className={`flex w-16 h-8 items-center justify-center rounded-full transition-all duration-300 ${mobileTab === "products" ? "bg-primary/15" : "bg-transparent"}`}>
+               <span className="material-symbols-outlined text-[20px] transition-transform" style={mobileTab === "products" ? { fontVariationSettings: "'FILL' 1" } : undefined}>grid_view</span>
+            </div>
+            <span className={`text-[10px] uppercase tracking-[0.12em] ${mobileTab === "products" ? "font-bold" : "font-medium"}`}>Katalog</span>
           </button>
           <button
             type="button"
             onClick={() => setMobileTab("cart")}
-            className={mobileTab === "cart" ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary" : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"}
+            className={`flex flex-col items-center justify-center gap-1 text-xs font-semibold h-12 transition-colors duration-200 ${mobileTab === "cart" ? "text-primary" : "text-on-surface-variant"}`}
           >
-            <span className="material-symbols-outlined text-[18px]" style={mobileTab === "cart" ? { fontVariationSettings: "'FILL' 1" } : undefined}>shopping_cart</span>
-            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">Keranjang</span>
+            <div className={`flex w-16 h-8 items-center justify-center rounded-full transition-all duration-300 ${mobileTab === "cart" ? "bg-primary/15" : "bg-transparent"}`}>
+               <span className="material-symbols-outlined text-[20px] transition-transform" style={mobileTab === "cart" ? { fontVariationSettings: "'FILL' 1" } : undefined}>shopping_cart</span>
+            </div>
+            <span className={`text-[10px] uppercase tracking-[0.12em] ${mobileTab === "cart" ? "font-bold" : "font-medium"}`}>Keranjang</span>
           </button>
           <button
             type="button"
             onClick={() => setMobileTab("history")}
-            className={mobileTab === "history" ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary" : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"}
+            className={`flex flex-col items-center justify-center gap-1 text-xs font-semibold h-12 transition-colors duration-200 ${mobileTab === "history" ? "text-primary" : "text-on-surface-variant"}`}
           >
-            <span className="material-symbols-outlined text-[18px]" style={mobileTab === "history" ? { fontVariationSettings: "'FILL' 1" } : undefined}>receipt_long</span>
-            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">Riwayat</span>
+            <div className={`flex w-16 h-8 items-center justify-center rounded-full transition-all duration-300 ${mobileTab === "history" ? "bg-primary/15" : "bg-transparent"}`}>
+               <span className="material-symbols-outlined text-[20px] transition-transform" style={mobileTab === "history" ? { fontVariationSettings: "'FILL' 1" } : undefined}>receipt_long</span>
+            </div>
+            <span className={`text-[10px] uppercase tracking-[0.12em] ${mobileTab === "history" ? "font-bold" : "font-medium"}`}>Riwayat</span>
           </button>
         </div>
       </nav>

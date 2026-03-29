@@ -26,8 +26,8 @@ export function CheckoutConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-end bg-slate-900/40 p-3 sm:place-items-center">
-      <div className="w-full max-w-md rounded-3xl bg-surface-container-lowest p-5 editorial-shadow sm:p-6">
+    <div className="fixed inset-0 z-[60] grid place-items-end bg-slate-900/40 p-3 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:place-items-center sm:p-4 animate-fade-in">
+      <div className="w-full max-w-md rounded-3xl bg-surface-container-lowest p-5 editorial-shadow sm:p-6 animate-slide-up">
         <h3 className="font-headline text-2xl font-extrabold text-on-surface">Konfirmasi pembayaran</h3>
         <div className="mt-4 grid gap-2 rounded-2xl bg-surface-container-low p-4 text-sm">
           <div className="flex items-center justify-between text-on-surface-variant">
@@ -55,10 +55,10 @@ export function CheckoutConfirmModal({
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-4 sm:gap-3">
           <button
             type="button"
-            className="h-12 rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant"
+            className="order-2 h-12 w-full rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant sm:order-1 sm:col-span-1 hover:bg-surface-container-highest transition-colors"
             onClick={onClose}
             disabled={loading}
           >
@@ -66,11 +66,11 @@ export function CheckoutConfirmModal({
           </button>
           <button
             type="button"
-            className="h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container text-sm font-semibold text-on-primary disabled:opacity-60"
+            className="order-1 h-12 w-full rounded-xl bg-gradient-to-br from-primary to-primary-container text-base font-bold tracking-tight text-on-primary shadow-lg shadow-teal-900/10 transition-transform active:scale-[0.98] disabled:opacity-60 disabled:transform-none sm:order-2 sm:col-span-3"
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "Memproses..." : "Konfirmasi"}
+            {loading ? "Memproses..." : "Konfirmasi Pembayaran"}
           </button>
         </div>
       </div>

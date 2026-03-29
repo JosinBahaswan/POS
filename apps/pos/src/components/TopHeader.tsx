@@ -22,15 +22,18 @@ type TopHeaderProps = {
 
 export function TopHeader({
   checkoutError,
+  role,
+  section,
   userName,
   tenantName,
-  onLogout
+  onLogout,
+  onSectionChange
 }: TopHeaderProps) {
   const title = tenantName || "POS";
   const avatarLabel = (userName || "U").trim().charAt(0).toUpperCase();
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-outline-variant/30 bg-white/80 shadow-sm shadow-teal-900/5 backdrop-blur-xl">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-outline-variant/30 bg-white/80 shadow-sm shadow-teal-900/5 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
         <div className="flex min-w-0 items-center gap-3">
           <span className="material-symbols-outlined text-primary">storefront</span>
@@ -38,6 +41,16 @@ export function TopHeader({
         </div>
 
         <div className="flex items-center gap-3">
+          {role !== "cashier" && section === "cashier" && (
+            <button
+              type="button"
+              onClick={() => onSectionChange(role === "owner" ? "analytics" : "reports")}
+              className="flex h-8 items-center gap-1 rounded-xl bg-primary/10 px-3 text-xs font-bold text-primary transition tap-bounce lg:hidden"
+            >
+              <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+              Menu
+            </button>
+          )}
           <button
             type="button"
             onClick={onLogout}

@@ -11,6 +11,7 @@ import { OwnerAnalyticsPage } from "../pages/OwnerAnalyticsPage";
 import { ProductsPage } from "../pages/ProductsPage";
 import { ReportsPage } from "../pages/ReportsPage";
 import { UsersPage } from "../pages/UsersPage";
+import CustomersPage from "../pages/CustomersPage";
 import { SalesHistory } from "./SalesHistory";
 import type {
   ActiveSection,
@@ -35,6 +36,7 @@ export type AppViewProps = {
   hasReportsAccess: boolean;
   hasAnalyticsAccess: boolean;
   hasOwnerAccess: boolean;
+  hasCustomersAccess: boolean;
   mobileRoleNavItems: MobileRoleNavItem[];
   mobileRoleNavGridClass: string;
   isOnline: boolean;
@@ -122,6 +124,7 @@ export function AppView({
   hasReportsAccess,
   hasAnalyticsAccess,
   hasOwnerAccess,
+  hasCustomersAccess,
   mobileRoleNavItems,
   mobileRoleNavGridClass,
   isOnline,
@@ -208,7 +211,7 @@ export function AppView({
         onSectionChange={onSectionChange}
       />
 
-      <div className="mx-auto w-full max-w-7xl px-3 pb-3 pt-20 sm:px-0 sm:pb-0 sm:pt-20">
+      <div className="mx-auto w-full max-w-7xl px-3 pb-3 pt-[calc(5rem+env(safe-area-inset-top))] sm:px-0 sm:pb-0">
         {role !== "cashier" && mobileRoleNavItems.length > 0 && (
           <nav className="mb-3 hidden lg:block">
             <div className="inline-flex rounded-2xl border border-outline-variant/40 bg-white/90 p-1 backdrop-blur">
@@ -322,30 +325,32 @@ export function AppView({
               onUpdateUser={onUpdateManagedUser}
             />
           )}
+
+          {hasCustomersAccess && activeSection === "customers" && (
+            <CustomersPage />
+          )}
         </div>
       </div>
 
-      {role !== "cashier" && mobileRoleNavItems.length > 0 && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-6 pt-2 backdrop-blur-2xl lg:hidden">
+      {role !== "cashier" && mobileRoleNavItems.length > 0 && activeSection !== "cashier" && (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-outline-variant/40 bg-white/90 px-3 pb-[calc(24px+env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl lg:hidden">
           <div className={mobileRoleNavGridClass}>
             {mobileRoleNavItems.map((item) => (
               <button
                 key={item.section}
                 type="button"
                 onClick={() => onSectionChange(item.section)}
-                className={
-                  activeSection === item.section
-                    ? "flex h-12 flex-col items-center justify-center rounded-xl bg-teal-100/60 text-primary"
-                    : "flex h-12 flex-col items-center justify-center rounded-xl text-on-surface-variant"
-                }
+                className={`flex flex-col items-center justify-center gap-1 text-xs font-semibold h-12 transition-colors duration-200 ${activeSection === item.section ? "text-primary" : "text-on-surface-variant"}`}
               >
-                <span
-                  className="material-symbols-outlined text-[18px]"
-                  style={activeSection === item.section ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                >
-                  {item.icon}
-                </span>
-                <span className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.12em]">{item.label}</span>
+                <div className={`flex w-16 h-8 items-center justify-center rounded-full transition-all duration-300 ${activeSection === item.section ? "bg-primary/15" : "bg-transparent"}`}>
+                  <span
+                    className="material-symbols-outlined text-[20px] transition-transform"
+                    style={activeSection === item.section ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                  >
+                    {item.icon}
+                  </span>
+                </div>
+                <span className={`text-[10px] uppercase tracking-[0.12em] ${activeSection === item.section ? "font-bold" : "font-medium"}`}>{item.label}</span>
               </button>
             ))}
           </div>

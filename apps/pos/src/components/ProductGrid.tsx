@@ -118,7 +118,7 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
 
           return (
             <article
-              className="group min-w-0 overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98]"
+              className="group min-w-0 overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm transition-all duration-300 hover:shadow-md active:scale-95 border border-transparent hover:border-outline-variant/30"
               key={product.id}
             >
               <div className="relative aspect-square overflow-hidden bg-surface-container">
@@ -176,9 +176,15 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
         })}
 
         {filteredProducts.length === 0 && (
-          <p className="col-span-2 rounded-xl bg-surface-container-low px-4 py-5 text-sm text-on-surface-variant sm:col-span-3 xl:col-span-4">
-            Produk tidak ditemukan.
-          </p>
+          <div className="col-span-2 sm:col-span-3 xl:col-span-4 flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="grid h-24 w-24 place-items-center rounded-full bg-surface-container-high/50 text-outline-variant mb-4">
+               <span className="material-symbols-outlined text-[48px] opacity-50">search_off</span>
+            </div>
+            <h3 className="font-headline text-lg font-bold text-on-surface mb-1">Produk tidak ditemukan</h3>
+            <p className="text-sm text-on-surface-variant max-w-sm">
+              Coba gunakan kata kunci lain atau periksa kembali ejaan pencarian Anda.
+            </p>
+          </div>
         )}
       </div>
     </section>

@@ -93,6 +93,7 @@ export function usePosAppController(): UsePosAppControllerResult {
   const hasReportsAccess = role === "owner" || role === "manager";
   const hasAnalyticsAccess = role === "owner";
   const hasOwnerAccess = role === "owner";
+  const hasCustomersAccess = true; // All roles can access CRM view broadly, but UI might restrict actions
   const mobileRoleNavItems = mobileRoleNavByRole[role];
   const mobileRoleNavGridClass = getMobileRoleNavGridClass(mobileRoleNavItems.length);
 
@@ -792,6 +793,7 @@ export function usePosAppController(): UsePosAppControllerResult {
         hasReportsAccess,
         hasAnalyticsAccess,
         hasOwnerAccess,
+        hasCustomersAccess,
         mobileRoleNavItems,
         mobileRoleNavGridClass,
         isOnline,

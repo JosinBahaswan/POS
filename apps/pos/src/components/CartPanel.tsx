@@ -71,46 +71,52 @@ export function CartPanel({
 
       <ul className="grid gap-3">
         {cart.length === 0 && (
-          <li className="rounded-2xl bg-surface-container-low px-4 py-4 text-sm text-on-surface-variant">
-            Belum ada item di keranjang.
+          <li className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-2xl bg-surface-container-low/50">
+            <div className="grid h-20 w-20 place-items-center rounded-full bg-surface-container-high/50 text-outline-variant mb-4">
+              <span className="material-symbols-outlined text-[40px] opacity-50">shopping_basket</span>
+            </div>
+            <h3 className="font-headline text-base font-bold text-on-surface mb-1">Keranjang kosong</h3>
+            <p className="text-xs text-on-surface-variant max-w-[200px]">
+              Pilih produk dari katalog untuk mulai menambahkan ke pesanan.
+            </p>
           </li>
         )}
         {cart.map((item) => (
           <li key={item.id} className="rounded-2xl bg-surface-container-low px-4 py-3">
             <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <span className="block truncate font-headline text-lg font-bold text-on-surface">{item.name}</span>
-              <span className="mt-0.5 block text-sm text-on-surface-variant">SKU: {item.id}</span>
-                <span className="mt-1 block font-headline text-lg font-bold text-primary sm:text-xl">Rp {item.price.toLocaleString("id-ID")}</span>
+              <span className="block truncate font-headline text-base font-semibold text-on-surface">{item.name}</span>
+              <span className="mt-0.5 block text-xs text-on-surface-variant">SKU: {item.id}</span>
+              <span className="mt-1 block font-headline text-lg font-bold text-primary">Rp {item.price.toLocaleString("id-ID")}</span>
             </div>
 
               <button
                 type="button"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-surface-container-high text-on-surface-variant active:scale-95"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-container-high text-on-surface-variant active:scale-95"
                 onClick={() => onRemoveItem(item.id)}
                 aria-label={`Hapus ${item.name}`}
               >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
+                <span className="material-symbols-outlined text-[20px]">delete</span>
               </button>
             </div>
 
-            <div className="mt-2 flex items-center justify-end gap-2 rounded-xl bg-surface-container-lowest p-1">
+            <div className="mt-3 flex items-center justify-end gap-3 rounded-xl bg-surface-container-lowest p-1">
               <button
                 type="button"
                 onClick={() => onDecreaseQty(item.id)}
-                className="grid h-9 w-9 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95"
+                className="grid h-10 w-10 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95 transition-transform"
                 aria-label={`Kurangi ${item.name}`}
               >
-                <span className="material-symbols-outlined text-[18px]">remove</span>
+                <span className="material-symbols-outlined text-[20px]">remove</span>
               </button>
-              <span className="min-w-7 text-center text-base font-bold text-on-surface">{item.qty}</span>
+              <span className="min-w-6 text-center text-sm font-bold text-on-surface">{item.qty}</span>
               <button
                 type="button"
                 onClick={() => onIncreaseQty(item.id)}
-                className="grid h-9 w-9 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95"
+                className="grid h-10 w-10 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95 transition-transform"
                 aria-label={`Tambah ${item.name}`}
               >
-                <span className="material-symbols-outlined text-[18px]">add</span>
+                <span className="material-symbols-outlined text-[20px]">add</span>
               </button>
             </div>
           </li>
@@ -242,39 +248,43 @@ export function CartPanel({
       <div className="grid gap-2 rounded-3xl bg-surface-container-low p-5 text-sm">
         <div className="flex items-center justify-between text-on-surface-variant">
           <span>Subtotal</span>
-          <span className="font-headline text-lg font-bold sm:text-xl">Rp {subtotal.toLocaleString("id-ID")}</span>
+          <span className="font-headline text-base font-semibold sm:text-lg">Rp {subtotal.toLocaleString("id-ID")}</span>
         </div>
-        <div className="flex items-center justify-between text-on-surface-variant">
-          <span>Diskon</span>
-          <span className="font-headline text-lg font-bold sm:text-xl">- Rp {discountAmount.toLocaleString("id-ID")}</span>
-        </div>
+        {discountAmount > 0 && (
+          <div className="flex items-center justify-between text-on-surface-variant">
+            <span>Potongan Diskon {discountPercent > 0 ? `(${discountPercent}%)` : ""}</span>
+            <span className="font-headline text-base font-semibold text-error sm:text-lg">- Rp {discountAmount.toLocaleString("id-ID")}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between border-t border-outline-variant/30 pt-3 text-on-surface">
-          <strong className="font-headline text-xl sm:text-2xl">Total Akhir</strong>
-          <strong className="font-headline text-2xl text-primary sm:text-3xl">Rp {total.toLocaleString("id-ID")}</strong>
+          <strong className="font-headline text-lg sm:text-xl">Total Akhir</strong>
+          <strong className="font-headline text-2xl font-extrabold text-primary sm:text-3xl">Rp {total.toLocaleString("id-ID")}</strong>
         </div>
         {isSplitPayment && (
-          <p className={splitValid ? "text-xs text-on-surface-variant" : "text-xs font-semibold text-error"}>
-            Validasi split: {splitValid ? "sesuai" : "belum sesuai total transaksi"}
+          <p className={`text-xs mt-1 font-medium ${splitValid ? "text-on-surface-variant" : "text-error"}`}>
+            {splitValid 
+              ? "✓ Pembayaran split sudah sesuai tagihan" 
+              : `⚠ Total pembayaran selisih Rp ${Math.abs(splitDifference).toLocaleString("id-ID")}`}
           </p>
         )}
       </div>
 
       <div className="sticky bottom-2 grid gap-2 rounded-2xl bg-surface-container-low px-3 py-3 backdrop-blur sm:static sm:bg-transparent sm:px-0 sm:py-0">
         <button
-          className="h-11 w-full rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant transition hover:brightness-95 disabled:opacity-60"
+          className="h-11 w-full rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant transition hover:brightness-95 active:scale-[0.98] disabled:opacity-60"
           onClick={onHoldOrder}
           disabled={cart.length === 0}
         >
           Tahan Order
         </button>
         <button
-          className="h-11 w-full rounded-xl bg-error-container text-sm font-semibold text-on-error-container transition hover:brightness-95 active:scale-[0.99]"
+          className="h-11 w-full rounded-xl bg-error-container text-sm font-semibold text-on-error-container transition hover:brightness-95 active:scale-[0.98]"
           onClick={onClear}
         >
           Reset
         </button>
         <button
-          className="h-14 w-full rounded-2xl bg-gradient-to-br from-primary to-primary-container text-base font-bold text-on-primary transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-14 w-full rounded-2xl bg-gradient-to-br from-primary to-primary-container text-base font-bold text-on-primary shadow-lg shadow-teal-900/10 transition hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           onClick={onCheckout}
           disabled={cart.length === 0 || disableCheckout || (isSplitPayment && !splitValid)}
         >
