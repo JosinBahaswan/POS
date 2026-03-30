@@ -1,5 +1,6 @@
-import type { CartItem, PaymentBreakdown, PaymentMethod, TransactionStatus } from "./types";
+import type { CartItem, PaymentBreakdown, PaymentMethod, TransactionStatus, Customer } from "./types";
 import type { ProductItem } from "./localData";
+import { parseProductHppProfile, resolveEffectiveCostPrice } from "./hpp";
 
 export type LocalSale = {
   id: string;
@@ -11,6 +12,8 @@ export type LocalSale = {
   paymentBreakdown?: PaymentBreakdown;
   shiftId?: string;
   outletId?: string;
+  customerId?: string;
+  earnedPoints?: number;
   status: TransactionStatus;
   approvalRequestId?: string;
   approvedBy?: string;
@@ -21,6 +24,7 @@ export type LocalSale = {
 
 const STORAGE_KEY = "pos_local_sales";
 const PRODUCTS_KEY = "pos_products";
+const CUSTOMERS_KEY = "pos_customers";
 
 function scopedKey(baseKey: string, scopeKey: string) {
   return `${baseKey}:${scopeKey}`;
@@ -120,14 +124,26 @@ export function readProducts(defaultProducts: ProductItem[], scopeKey = "default
     if (!Array.isArray(parsed) || parsed.length === 0) {
       return defaultProducts;
     }
-    return parsed.map((item) => ({
-      ...item,
-      costPrice: Math.max(0, Number(item.costPrice || 0)),
-      promoPercent: Math.max(0, Math.min(100, Number(item.promoPercent || 0))),
-      imageUrl:
-        item.imageUrl ||
-        "https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=400&q=80"
-    }));
+    return parsed.map((item) => {
+      const baseCost = Math.max(0, Number(item.costPrice || 0));
+      const hppProfile = parseProductHppProfile(item.hppProfile, baseCost);
+      const effectiveCostPrice = resolveEffectiveCostPrice({
+        costPrice: baseCost,
+        hppProfile
+      });
+
+      return {
+        ...item,
+        barcode: item.barcode || item.id,
+        stock: Math.max(0, Math.round(Number(item.stock || 0))),
+        costPrice: effectiveCostPrice,
+        hppProfile,
+        promoPercent: Math.max(0, Math.min(100, Number(item.promoPercent || 0))),
+        imageUrl:
+          item.imageUrl ||
+          "https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=400&q=80"
+      };
+    });
   } catch {
     return defaultProducts;
   }
@@ -135,6 +151,22 @@ export function readProducts(defaultProducts: ProductItem[], scopeKey = "default
 
 export function saveProducts(products: ProductItem[], scopeKey = "default") {
   localStorage.setItem(scopedKey(PRODUCTS_KEY, scopeKey), JSON.stringify(products));
+}
+
+export function readCustomers(defaultCustomers: Customer[], scopeKey = "default"): Customer[] {
+  const raw = localStorage.getItem(scopedKey(CUSTOMERS_KEY, scopeKey));
+  if (!raw) return defaultCustomers;
+  try {
+    const parsed = JSON.parse(raw) as Customer[];
+    if (!Array.isArray(parsed)) return defaultCustomers;
+    return parsed;
+  } catch {
+    return defaultCustomers;
+  }
+}
+
+export function saveCustomers(customers: Customer[], scopeKey = "default") {
+  localStorage.setItem(scopedKey(CUSTOMERS_KEY, scopeKey), JSON.stringify(customers));
 }
 
 export function applyStockDeduction(

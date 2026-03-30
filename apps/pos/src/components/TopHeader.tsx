@@ -1,4 +1,6 @@
 import type { ActiveSection, UserRole } from "../types";
+import type { ProductItem } from "../localData";
+import { LowStockNotificationWidget } from "./LowStockNotificationWidget";
 
 type TopHeaderProps = {
   isOnline: boolean;
@@ -8,6 +10,7 @@ type TopHeaderProps = {
   total: number;
   todayRevenue: number;
   lowStockCount: number;
+  lowStockItems: ProductItem[];
   outOfStockCount: number;
   checkoutError: string;
   role: UserRole;
@@ -26,6 +29,7 @@ export function TopHeader({
   section,
   userName,
   tenantName,
+  lowStockItems,
   onLogout,
   onSectionChange
 }: TopHeaderProps) {
@@ -40,8 +44,9 @@ export function TopHeader({
           <p className="truncate font-headline text-base font-extrabold tracking-tight text-primary sm:text-xl">{title}</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          {role !== "cashier" && section === "cashier" && (
+        <div className="flex items-center gap-3">            {lowStockItems && lowStockItems.length > 0 && role !== "cashier" && (
+              <LowStockNotificationWidget lowStockItems={lowStockItems} />
+            )}          {role !== "cashier" && section === "cashier" && (
             <button
               type="button"
               onClick={() => onSectionChange(role === "owner" ? "analytics" : "reports")}

@@ -1,7 +1,10 @@
-import type { CartItem, PaymentBreakdown, PaymentMethod } from "../types";
+import type { Customer, CartItem, PaymentBreakdown, PaymentMethod } from "../types";
 
 type CartPanelProps = {
   cart: CartItem[];
+  customers?: Customer[];
+  selectedCustomerId?: string;
+  onSelectCustomer?: (id: string | undefined) => void;
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
@@ -27,6 +30,9 @@ type CartPanelProps = {
 
 export function CartPanel({
   cart,
+  customers = [],
+  selectedCustomerId,
+  onSelectCustomer,
   subtotal,
   discountPercent,
   discountAmount,
@@ -124,7 +130,27 @@ export function CartPanel({
       </ul>
 
       <div className="grid gap-3 rounded-2xl bg-surface-container-low p-4">
-        <label htmlFor="discount" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Diskon (%)</label>
+        <label htmlFor="customer" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Pelanggan (Loyalty)</label>
+          <div className="relative">
+            <select
+              id="customer"
+              value={selectedCustomerId || ""}
+              onChange={(e) => onSelectCustomer?.(e.target.value || undefined)}
+              className="h-12 w-full appearance-none rounded-xl border-none bg-surface-container-lowest px-3 pr-10 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">-- Non Member --</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.loyalty_points ? `(Pts: ${c.loyalty_points})` : ""}
+                </option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]">
+              expand_more
+            </span>
+          </div>
+
+          <label htmlFor="discount" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Diskon (%)</label>
         <input
           id="discount"
           type="number"

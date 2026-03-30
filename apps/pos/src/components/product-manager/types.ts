@@ -1,4 +1,7 @@
 import type { ProductCategory } from "../../localData";
+import { createDefaultProductHppProfile, type ProductHppProfile } from "../../hpp";
+
+export type ProductHppMode = "basic" | "advanced";
 
 export type ProductManagerFormState = {
   id: string;
@@ -6,6 +9,8 @@ export type ProductManagerFormState = {
   name: string;
   price: number;
   costPrice: number;
+  hppMode: ProductHppMode;
+  hppProfile: ProductHppProfile;
   promoPercent: number;
   stock: number;
   category: ProductCategory;
@@ -18,6 +23,8 @@ export const productManagerInitialState: ProductManagerFormState = {
   name: "",
   price: 0,
   costPrice: 0,
+  hppMode: "basic",
+  hppProfile: createDefaultProductHppProfile(),
   promoPercent: 0,
   stock: 0,
   category: "drink",

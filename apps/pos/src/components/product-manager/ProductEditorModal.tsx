@@ -1,4 +1,5 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { calculateAdvancedHpp, sanitizeProductHppProfile } from "../../hpp";
 import { BarcodeScannerButton } from "../BarcodeScannerButton";
 import {
   DEFAULT_PRODUCT_IMAGE,
@@ -20,6 +21,7 @@ type ProductEditorModalProps = {
   onDeleteEditing: () => void;
   onAddNewCategory: () => void;
   onImageUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+  onApplyHppSuggestedPrice: () => void;
 };
 
 export function ProductEditorModal({
@@ -35,9 +37,21 @@ export function ProductEditorModal({
   onReset,
   onDeleteEditing,
   onAddNewCategory,
-  onImageUpload
+  onImageUpload,
+  onApplyHppSuggestedPrice
 }: ProductEditorModalProps) {
   if (!open) return null;
+
+  const normalizedHppProfile = sanitizeProductHppProfile(
+    form.hppProfile,
+    Math.max(0, form.costPrice)
+  );
+  const hppPreview = calculateAdvancedHpp(normalizedHppProfile);
+  const promoPercent = Math.max(0, Math.min(100, form.promoPercent));
+  const discountedPrice = Math.round(form.price * (1 - promoPercent / 100));
+  const effectiveCostPrice = form.hppMode === "advanced" ? hppPreview.unitHpp : Math.max(0, form.costPrice);
+  const unitMargin = discountedPrice - effectiveCostPrice;
+  const unitMarginLabel = `${unitMargin < 0 ? "-" : ""}Rp ${Math.abs(Math.round(unitMargin)).toLocaleString("id-ID")}`;
 
   return (
     <div
@@ -179,19 +193,6 @@ export function ProductEditorModal({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="grid gap-1">
               <label className="px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
-                Harga Modal / HPP (Rp)
-              </label>
-              <input
-                className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
-                type="number"
-                min={0}
-                placeholder="0"
-                value={form.costPrice}
-                onChange={(event) => setForm((state) => ({ ...state, costPrice: Number(event.target.value || 0) }))}
-              />
-            </div>
-            <div className="grid gap-1">
-              <label className="px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
                 Promo Diskon (%)
               </label>
               <input
@@ -204,10 +205,228 @@ export function ProductEditorModal({
                 onChange={(event) => setForm((state) => ({ ...state, promoPercent: Number(event.target.value || 0) }))}
               />
             </div>
+            <div className="grid gap-1">
+              <label className="px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Mode HPP</label>
+              <div className="grid h-11 grid-cols-2 gap-1 rounded-xl bg-surface-container p-1">
+                <button
+                  type="button"
+                  onClick={() => setForm((state) => ({ ...state, hppMode: "basic" }))}
+                  className={
+                    form.hppMode === "basic"
+                      ? "rounded-lg bg-primary text-xs font-semibold text-on-primary"
+                      : "rounded-lg text-xs font-semibold text-on-surface-variant"
+                  }
+                >
+                  Basic
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((state) => ({
+                      ...state,
+                      hppMode: "advanced",
+                      hppProfile: {
+                        ...state.hppProfile,
+                        materialCost:
+                          state.hppProfile.materialCost > 0
+                            ? state.hppProfile.materialCost
+                            : Math.max(0, state.costPrice)
+                      }
+                    }))
+                  }
+                  className={
+                    form.hppMode === "advanced"
+                      ? "rounded-lg bg-primary text-xs font-semibold text-on-primary"
+                      : "rounded-lg text-xs font-semibold text-on-surface-variant"
+                  }
+                >
+                  Advanced
+                </button>
+              </div>
+            </div>
           </div>
 
-          <p className="text-xs text-on-surface-variant">
-            Harga jual setelah promo: Rp {Math.round(form.price * (1 - Math.max(0, Math.min(100, form.promoPercent)) / 100)).toLocaleString("id-ID")}
+          {form.hppMode === "basic" ? (
+            <div className="grid gap-1">
+              <label className="px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                Harga Modal / HPP (Rp)
+              </label>
+              <input
+                className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                type="number"
+                min={0}
+                placeholder="0"
+                value={form.costPrice}
+                onChange={(event) => setForm((state) => ({ ...state, costPrice: Number(event.target.value || 0) }))}
+              />
+            </div>
+          ) : (
+            <div className="grid gap-2 rounded-xl bg-surface-container-lowest p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                Komponen HPP Advanced
+              </p>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Bahan baku (Rp)"
+                  value={form.hppProfile.materialCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, materialCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Tenaga kerja (Rp)"
+                  value={form.hppProfile.laborCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, laborCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Overhead (Rp)"
+                  value={form.hppProfile.overheadCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, overheadCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Kemasan (Rp)"
+                  value={form.hppProfile.packagingCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, packagingCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Logistik (Rp)"
+                  value={form.hppProfile.logisticsCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, logisticsCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  placeholder="Biaya lain (Rp)"
+                  value={form.hppProfile.otherCost}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, otherCost: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="Susut (%)"
+                  value={form.hppProfile.wastagePercent}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, wastagePercent: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="Pajak biaya (%)"
+                  value={form.hppProfile.taxPercent}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, taxPercent: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={0}
+                  max={95}
+                  placeholder="Target margin (%)"
+                  value={form.hppProfile.targetMarginPercent}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: {
+                        ...state.hppProfile,
+                        targetMarginPercent: Number(event.target.value || 0)
+                      }
+                    }))
+                  }
+                />
+                <input
+                  className="h-10 rounded-xl border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  type="number"
+                  min={1}
+                  step={50}
+                  placeholder="Pembulatan harga (Rp)"
+                  value={form.hppProfile.priceRounding}
+                  onChange={(event) =>
+                    setForm((state) => ({
+                      ...state,
+                      hppProfile: { ...state.hppProfile, priceRounding: Number(event.target.value || 0) }
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="rounded-xl bg-surface-container p-3 text-xs text-on-surface-variant">
+                <p>HPP final per unit: Rp {hppPreview.unitHpp.toLocaleString("id-ID")}</p>
+                <p>
+                  Harga jual saran (margin {normalizedHppProfile.targetMarginPercent}%): Rp {hppPreview.suggestedPrice.toLocaleString("id-ID")}
+                </p>
+                <button
+                  type="button"
+                  onClick={onApplyHppSuggestedPrice}
+                  className="mt-2 h-9 rounded-lg bg-primary px-3 text-xs font-semibold text-on-primary"
+                >
+                  Gunakan harga saran
+                </button>
+              </div>
+            </div>
+          )}
+
+          <p className={`text-xs ${unitMargin < 0 ? "text-error" : "text-on-surface-variant"}`}>
+            Harga setelah promo: Rp {discountedPrice.toLocaleString("id-ID")} • HPP: Rp {effectiveCostPrice.toLocaleString("id-ID")} • Margin/unit: {unitMarginLabel}
           </p>
 
           <div className="grid gap-1">

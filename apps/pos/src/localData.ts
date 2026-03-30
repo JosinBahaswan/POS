@@ -1,3 +1,5 @@
+import type { ProductHppProfile } from "./hpp";
+
 export type ProductCategory = string;
 
 export type ProductItem = {
@@ -6,8 +8,10 @@ export type ProductItem = {
   name: string;
   price: number;
   costPrice: number;
+  hppProfile?: ProductHppProfile;
   promoPercent: number;
   stock: number;
+  minStockLevel?: number;
   category: ProductCategory;
   favorite: boolean;
   imageUrl: string;

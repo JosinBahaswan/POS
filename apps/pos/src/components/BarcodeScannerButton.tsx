@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 
 type BarcodeScannerButtonProps = {
   onDetected: (barcode: string) => void;
@@ -6,157 +7,103 @@ type BarcodeScannerButtonProps = {
   label?: string;
 };
 
-type BarcodeDetectorResult = {
-  rawValue?: string;
-};
-
-type BarcodeDetectorLike = {
-  detect: (source: ImageBitmapSource) => Promise<BarcodeDetectorResult[]>;
-};
-
-type BarcodeDetectorConstructor = new (options?: {
-  formats?: string[];
-}) => BarcodeDetectorLike;
-
-type WindowWithBarcodeDetector = Window & {
-  BarcodeDetector?: BarcodeDetectorConstructor;
-};
-
-function stopMediaStream(stream: MediaStream | null) {
-  if (!stream) return;
-  for (const track of stream.getTracks()) {
-    track.stop();
-  }
-}
-
 export function BarcodeScannerButton({
   onDetected,
   className,
   label = "Scan"
 }: BarcodeScannerButtonProps) {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isManualInputOpen, setIsManualInputOpen] = useState(false);
+  const [manualBarcode, setManualBarcode] = useState("");
+  const [manualError, setManualError] = useState("");
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerId = "html5-qrcode-reader-element";
 
   const closeScanner = () => {
     setOpen(false);
+    setIsManualInputOpen(false);
+    setManualBarcode("");
+    setManualError("");
   };
 
   const applyDetectedBarcode = (barcode: string) => {
     const normalized = barcode.trim();
     if (!normalized) return;
-
     onDetected(normalized);
     closeScanner();
   };
 
-  const manualInput = () => {
-    const input = window.prompt("Masukkan barcode secara manual", "");
-    if (!input || input.trim().length === 0) return;
-    applyDetectedBarcode(input);
+  const openManualInput = () => {
+    setIsManualInputOpen(true);
+    setManualError("");
+  };
+
+  const submitManualInput = () => {
+    if (manualBarcode.trim().length === 0) {
+      setManualError("Barcode manual tidak boleh kosong.");
+      return;
+    }
+
+    applyDetectedBarcode(manualBarcode);
   };
 
   useEffect(() => {
     if (!open) return;
 
-    let cancelled = false;
+    let isMounted = true;
+    setIsInitializing(true);
+    setError(null);
 
-    const startScanner = async () => {
-      setError("");
-      setIsInitializing(true);
-
+    const initializeScanner = async () => {
       try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          throw new Error("Browser tidak mendukung akses kamera.");
-        }
+        const html5Qrcode = new Html5Qrcode(scannerContainerId);
+        scannerRef.current = html5Qrcode;
 
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" }
+        await html5Qrcode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
           },
-          audio: false
-        });
-
-        if (cancelled) {
-          stopMediaStream(mediaStream);
-          return;
-        }
-
-        streamRef.current = mediaStream;
-
-        if (!videoRef.current) {
-          throw new Error("Elemen video scanner belum siap.");
-        }
-
-        videoRef.current.srcObject = mediaStream;
-        await videoRef.current.play();
-
-        const BarcodeDetectorClass = (window as WindowWithBarcodeDetector).BarcodeDetector;
-
-        if (!BarcodeDetectorClass) {
-          setError("Browser ini belum mendukung deteksi barcode otomatis.");
-          return;
-        }
-
-        const detector = new BarcodeDetectorClass({
-          formats: ["ean_13", "ean_8", "code_128", "upc_a", "upc_e", "qr_code"]
-        });
-
-        const scanLoop = async () => {
-          if (cancelled || !videoRef.current) return;
-
-          try {
-            if (videoRef.current.readyState >= 2) {
-              const results = await detector.detect(videoRef.current);
-              const barcode = results.find((result) => Boolean(result.rawValue?.trim()))?.rawValue;
-
-              if (barcode) {
-                applyDetectedBarcode(barcode);
-                return;
-              }
+          (decodedText) => {
+            if (isMounted) {
+              applyDetectedBarcode(decodedText);
             }
-          } catch {
-            // Ignore per-frame detector errors and keep scanning.
+          },
+          () => {
+            // Ignore frame check errors
           }
-
-          rafRef.current = window.requestAnimationFrame(() => {
-            void scanLoop();
-          });
-        };
-
-        rafRef.current = window.requestAnimationFrame(() => {
-          void scanLoop();
-        });
-      } catch (scannerError) {
-        setError(
-          scannerError instanceof Error
-            ? scannerError.message
-            : "Gagal mengakses kamera untuk scan barcode."
         );
-      } finally {
-        setIsInitializing(false);
+
+        if (isMounted) {
+          setIsInitializing(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Gagal mengakses kamera. Browser tidak mendukung kamera atau izin ditolak.");
+          setIsInitializing(false);
+        }
       }
     };
 
-    void startScanner();
+    // Small delay to ensure the DOM element is rendered before Html5Qrcode binds to it
+    const timer = setTimeout(() => {
+      void initializeScanner();
+    }, 100);
 
     return () => {
-      cancelled = true;
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-
-      stopMediaStream(streamRef.current);
-      streamRef.current = null;
-
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.srcObject = null;
+      isMounted = false;
+      clearTimeout(timer);
+      if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop().catch(() => {});
+        }
+        scannerRef.current.clear();
+        scannerRef.current = null;
       }
     };
   }, [open]);
@@ -201,13 +148,7 @@ export function BarcodeScannerButton({
             </div>
 
             <div className="mt-3 overflow-hidden rounded-xl bg-black/80">
-              <video
-                ref={videoRef}
-                className="h-64 w-full object-cover"
-                muted
-                playsInline
-                autoPlay
-              />
+              <div id={scannerContainerId} className="w-full"></div>
             </div>
 
             {isInitializing && (
@@ -223,7 +164,7 @@ export function BarcodeScannerButton({
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={manualInput}
+                onClick={openManualInput}
                 className="h-10 rounded-xl bg-surface-container-high text-xs font-semibold text-on-surface"
               >
                 Input Manual
@@ -236,6 +177,50 @@ export function BarcodeScannerButton({
                 Tutup
               </button>
             </div>
+
+            {isManualInputOpen && (
+              <div className="mt-3 rounded-xl bg-surface-container-lowest p-3">
+                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                  Input Barcode Manual
+                </label>
+                <input
+                  className="mt-2 h-10 w-full rounded-lg border-none bg-surface-container px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                  placeholder="Masukkan barcode"
+                  value={manualBarcode}
+                  onChange={(event) => {
+                    setManualBarcode(event.target.value);
+                    if (manualError) setManualError("");
+                  }}
+                />
+
+                {manualError && (
+                  <p className="mt-2 rounded-lg bg-error-container px-2 py-1 text-xs font-semibold text-on-error-container">
+                    {manualError}
+                  </p>
+                )}
+
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManualInputOpen(false);
+                      setManualBarcode("");
+                      setManualError("");
+                    }}
+                    className="h-9 rounded-lg bg-surface-container-high text-xs font-semibold text-on-surface-variant"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={submitManualInput}
+                    className="h-9 rounded-lg bg-primary text-xs font-semibold text-on-primary"
+                  >
+                    Gunakan Barcode
+                  </button>
+                </div>
+              </div>
+            )}
           </aside>
         </div>
       )}

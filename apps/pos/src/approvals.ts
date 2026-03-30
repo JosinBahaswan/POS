@@ -174,7 +174,7 @@ export function readApprovalRequests(scopeKey = "default"): ApprovalRequest[] {
   }
 }
 
-function writeApprovalRequests(requests: ApprovalRequest[], scopeKey = "default") {
+export function writeApprovalRequests(requests: ApprovalRequest[], scopeKey = "default") {
   localStorage.setItem(scopedKey(APPROVAL_REQUESTS_KEY, scopeKey), JSON.stringify(requests));
 }
 

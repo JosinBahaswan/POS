@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Customer } from "../types";
+import { readCustomers, saveCustomers } from "../database";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -12,31 +13,32 @@ export default function CustomersPage() {
   const loadCustomers = async () => {
     try {
       setIsLoading(true);
-      setTimeout(() => {
-        setCustomers([
-          {
-            id: "1",
-            name: "Budi Santoso",
-            phone: "081234567890",
-            loyalty_points: 150,
-            member_tier: "Gold",
-            outstanding_debt: 50000
-          },
-          {
-            id: "2",
-            name: "Andi Wijaya",
-            phone: "089876543210",
-            loyalty_points: 20,
-            member_tier: "Silver",
-            outstanding_debt: 0
-          }
-        ]);
-        setIsLoading(false);
-      }, 1000);
+      // Read from local pos scope database
+      const loaded = readCustomers([]);
+      setCustomers(loaded);
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
       setIsLoading(false);
     }
+  };
+
+  const handleAddCustomer = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newCustomer: Customer = {
+      id: "CUST-" + Date.now().toString(),
+      name: formData.get("name") as string,
+      phone: formData.get("phone") as string,
+      email: formData.get("email") as string,
+      loyalty_points: 0,
+      member_tier: "Silver",
+      outstanding_debt: 0
+    };
+    const updated = [...customers, newCustomer];
+    setCustomers(updated);
+    saveCustomers(updated);
+    e.currentTarget.reset();
   };
 
   return (
@@ -47,16 +49,16 @@ export default function CustomersPage() {
           Simpan data pelanggan untuk program loyalitas dan fitur kasbon.
         </p>
 
-        <form className="mt-4 grid gap-2.5">
+        <form onSubmit={handleAddCustomer} className="mt-4 grid gap-2.5">
           <input
             className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
-            type="text"
+            name="name" type="text"
             placeholder="Nama lengkap pelanggan"
             required
           />
           <input
             className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
-            type="tel"
+            name="phone" type="tel"
             placeholder="Nomor Telepon / WhatsApp"
           />
           <select

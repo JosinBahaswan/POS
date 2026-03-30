@@ -31,7 +31,8 @@ export function OwnerAnalyticsInsightsSection({ analytics }: OwnerAnalyticsInsig
   }));
 
   // Custom Tooltip for Area and Bar chart to match the UI style
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+  const CustomTooltip = (props: any) => {
+    const { active, payload, label } = props;
     if (active && payload && payload.length) {
       return (
         <div className="rounded-xl bg-surface-container-lowest p-3 shadow-lg border border-outline-variant/30">
@@ -45,7 +46,8 @@ export function OwnerAnalyticsInsightsSection({ analytics }: OwnerAnalyticsInsig
     return null;
   };
 
-  const CustomBarTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+  const CustomBarTooltip = (props: any) => {
+    const { active, payload, label } = props;
     if (active && payload && payload.length) {
       return (
         <div className="rounded-xl bg-surface-container-lowest p-3 shadow-lg border border-outline-variant/30">

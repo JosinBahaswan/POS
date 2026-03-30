@@ -10,6 +10,12 @@ type SalesHistoryProps = {
 
 export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }: SalesHistoryProps) {
   const [activeSaleId, setActiveSaleId] = useState<string | null>(null);
+  const [activeAction, setActiveAction] = useState<{
+    saleId: string;
+    mode: "refund" | "void";
+  } | null>(null);
+  const [actionReason, setActionReason] = useState("");
+  const [actionError, setActionError] = useState("");
   const actionButtonClass = "inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-[11px] font-semibold";
 
   const activeSale = useMemo(
@@ -17,19 +23,34 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
     [sales, activeSaleId]
   );
 
-  const requestAction = (saleId: string, mode: "refund" | "void") => {
-    const reason = window.prompt(
-      mode === "refund" ? "Alasan pengajuan refund" : "Alasan pengajuan void",
-      ""
-    );
-    if (!reason || reason.trim().length === 0) return;
+  const openActionDialog = (saleId: string, mode: "refund" | "void") => {
+    setActiveAction({ saleId, mode });
+    setActionReason("");
+    setActionError("");
+  };
 
-    if (mode === "refund") {
-      onRequestRefund?.(saleId, reason.trim());
+  const closeActionDialog = () => {
+    setActiveAction(null);
+    setActionReason("");
+    setActionError("");
+  };
+
+  const submitActionRequest = () => {
+    if (!activeAction) return;
+
+    const reason = actionReason.trim();
+    if (reason.length === 0) {
+      setActionError("Alasan wajib diisi.");
       return;
     }
 
-    onRequestVoid?.(saleId, reason.trim());
+    if (activeAction.mode === "refund") {
+      onRequestRefund?.(activeAction.saleId, reason);
+    } else {
+      onRequestVoid?.(activeAction.saleId, reason);
+    }
+
+    closeActionDialog();
   };
 
   return (
@@ -124,7 +145,7 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
                     {sale.status === "completed" && onRequestRefund && (
                       <button
                         type="button"
-                        onClick={() => requestAction(sale.id, "refund")}
+                        onClick={() => openActionDialog(sale.id, "refund")}
                         className={`${actionButtonClass} bg-tertiary-fixed text-on-tertiary-fixed-variant`}
                       >
                         <span className="material-symbols-outlined text-[14px]">restart_alt</span>
@@ -135,7 +156,7 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
                     {sale.status === "completed" && onRequestVoid && (
                       <button
                         type="button"
-                        onClick={() => requestAction(sale.id, "void")}
+                        onClick={() => openActionDialog(sale.id, "void")}
                         className={`${actionButtonClass} bg-error-container text-on-error-container`}
                       >
                         <span className="material-symbols-outlined text-[14px]">block</span>
@@ -208,6 +229,78 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
               <p>Subtotal: Rp {activeSale.subtotal.toLocaleString("id-ID")}</p>
               <p>Diskon: Rp {activeSale.discountAmount.toLocaleString("id-ID")}</p>
               <p className="font-headline text-lg font-bold text-on-surface">Total: Rp {activeSale.total.toLocaleString("id-ID")}</p>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {activeAction && (
+        <div
+          className="fixed inset-0 z-[85] flex items-end justify-center bg-black/35 px-3 pb-4 pt-20 sm:items-center sm:p-6"
+          onClick={closeActionDialog}
+        >
+          <aside
+            className="w-full max-w-md rounded-2xl bg-surface-container-low p-4 editorial-shadow sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-headline text-xl font-extrabold text-on-surface">
+                  {activeAction.mode === "refund" ? "Ajukan Refund" : "Ajukan Void"}
+                </h3>
+                <p className="mt-1 text-xs text-on-surface-variant">{activeAction.saleId}</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeActionDialog}
+                className="grid h-8 w-8 place-items-center rounded-full bg-surface-container-high text-on-surface-variant"
+                aria-label="Tutup dialog"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div className="mt-3 grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                Alasan {activeAction.mode === "refund" ? "refund" : "void"}
+              </label>
+              <textarea
+                rows={3}
+                value={actionReason}
+                onChange={(event) => {
+                  setActionReason(event.target.value);
+                  if (actionError) setActionError("");
+                }}
+                className="rounded-xl border-none bg-surface-container-lowest px-3 py-2 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+                placeholder="Tuliskan alasan permintaan"
+              />
+            </div>
+
+            {actionError && (
+              <p className="mt-2 rounded-xl bg-error-container px-3 py-2 text-xs font-semibold text-on-error-container">
+                {actionError}
+              </p>
+            )}
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={closeActionDialog}
+                className="h-10 rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={submitActionRequest}
+                className={
+                  activeAction.mode === "refund"
+                    ? "h-10 rounded-xl bg-tertiary-fixed text-sm font-semibold text-on-tertiary-fixed-variant"
+                    : "h-10 rounded-xl bg-error-container text-sm font-semibold text-on-error-container"
+                }
+              >
+                Kirim Permintaan
+              </button>
             </div>
           </aside>
         </div>

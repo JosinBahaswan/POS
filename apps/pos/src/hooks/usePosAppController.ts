@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { products } from "../localData";
+import { useLowStockAlerts } from "./useLowStockAlerts";
+import { useRemoteApprovalSync } from "./useRemoteApprovalSync";
 import {
   applyStockDeduction,
   applyStockReturn,
@@ -8,7 +10,9 @@ import {
   readSaleById,
   saveLocalSale,
   saveProducts,
-  updateLocalSaleStatus
+  updateLocalSaleStatus,
+  readCustomers,
+  saveCustomers
 } from "../database";
 import { syncPendingSales } from "../sync";
 import { env } from "../config";
@@ -19,7 +23,8 @@ import type {
   CartItem,
   PaymentBreakdown,
   PaymentMethod,
-  UserRole
+  UserRole,
+  Customer
 } from "../types";
 import {
   allowedSectionsByRole,
@@ -52,6 +57,12 @@ import { appendAuditLog, readAuditLogs, type AuditLogEntry } from "../auditLog";
 import { getCurrentAuthUser, signOutUser, type AuthenticatedUser } from "../auth";
 import { useManagedUsers } from "./useManagedUsers";
 import { printSaleReceipt } from "../utils/receiptPrinter";
+import {
+  readManagerSystemSettings,
+  saveManagerSystemSettings,
+  type ManagerSystemSettings,
+  type ManagerSystemSettingsInput
+} from "../managerSettings";
 import type { AppViewProps } from "../components/AppView";
 
 type UsePosAppControllerResult = {
@@ -78,6 +89,8 @@ export function usePosAppController(): UsePosAppControllerResult {
   const [splitPayment, setSplitPayment] = useState<PaymentBreakdown>(emptyPaymentBreakdown);
   const [cashReceived, setCashReceived] = useState<number>(0);
   const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | undefined>(undefined);
   const [activeShift, setActiveShift] = useState<ShiftSession | null>(null);
   const [shiftSessions, setShiftSessions] = useState<ShiftSession[]>([]);
   const [recentShiftHistory, setRecentShiftHistory] = useState<ShiftSession[]>([]);
@@ -85,16 +98,45 @@ export function usePosAppController(): UsePosAppControllerResult {
   const [approvalRules, setApprovalRules] = useState<ApprovalRules>(() => readApprovalRules());
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [managerSettings, setManagerSettings] = useState<ManagerSystemSettings>(() => readManagerSystemSettings());
   const [discountApprovalRequestId, setDiscountApprovalRequestId] = useState("");
 
   const storageScope = authUser?.tenantId || env.VITE_TENANT_ID || "default";
+  // Initialize remote approval polling
+  useRemoteApprovalSync(storageScope);
   const role: UserRole = authUser?.role ?? "cashier";
-  const hasProductAccess = role === "manager";
-  const hasReportsAccess = role === "owner" || role === "manager";
+  const managerVisibleSections = useMemo<ActiveSection[]>(() => {
+    const sections: ActiveSection[] = [];
+
+    if (managerSettings.showReportsSection) sections.push("reports");
+    if (managerSettings.showHistorySection) sections.push("history");
+    if (managerSettings.showProductsSection) sections.push("products");
+    if (managerSettings.showCustomersSection) sections.push("customers");
+
+    return sections.length > 0 ? sections : ["reports"];
+  }, [managerSettings]);
+
+  const roleAllowedSections = useMemo<ActiveSection[]>(() => {
+    if (role === "manager") {
+      return managerVisibleSections;
+    }
+
+    return allowedSectionsByRole[role];
+  }, [role, managerVisibleSections]);
+
+  const hasProductAccess = role === "owner" || (role === "manager" && managerSettings.showProductsSection);
+  const hasReportsAccess = role === "owner" || (role === "manager" && managerSettings.showReportsSection);
   const hasAnalyticsAccess = role === "owner";
   const hasOwnerAccess = role === "owner";
-  const hasCustomersAccess = true; // All roles can access CRM view broadly, but UI might restrict actions
-  const mobileRoleNavItems = mobileRoleNavByRole[role];
+  const hasCustomersAccess = role === "manager" ? managerSettings.showCustomersSection : true;
+  const managerCanExportData = role !== "manager" || managerSettings.allowDataExport;
+  const managerCanResolveApproval = role !== "manager" || managerSettings.allowApprovalDecision;
+  const managerCanDeleteProduct = role !== "manager" || managerSettings.allowProductDelete;
+  const managerCanAdjustStock = role !== "manager" || managerSettings.allowStockAdjustment;
+  const mobileRoleNavItems =
+    role === "manager"
+      ? mobileRoleNavByRole[role].filter((item) => roleAllowedSections.includes(item.section))
+      : mobileRoleNavByRole[role];
   const mobileRoleNavGridClass = getMobileRoleNavGridClass(mobileRoleNavItems.length);
 
   useEffect(() => {
@@ -117,11 +159,13 @@ export function usePosAppController(): UsePosAppControllerResult {
     const sessions = readShiftSessions(storageScope);
 
     setProductCatalog(readProducts(products, storageScope));
+    setCustomers(readCustomers([], storageScope));
     setAllSales(scopedSales);
     setPendingSales(scopedSales.filter((sale) => !sale.synced).length);
     setApprovalRules(readApprovalRules(storageScope));
     setApprovalRequests(readApprovalRequests(storageScope));
     setAuditLogs(readAuditLogs(storageScope));
+    setManagerSettings(readManagerSystemSettings(storageScope));
     setShiftSessions(sessions);
     setActiveShift(getActiveShift(storageScope));
     setRecentShiftHistory(sessions.filter((session) => Boolean(session.closedAt)).slice(0, 5));
@@ -141,17 +185,24 @@ export function usePosAppController(): UsePosAppControllerResult {
   }, [productCatalog, storageScope]);
 
   useEffect(() => {
+    saveCustomers(customers, storageScope);
+  }, [customers, storageScope]);
+
+  useEffect(() => {
     const onOnline = () => setIsOnline(true);
     const onOffline = () => setIsOnline(false);
+    const onLocalSync = () => setApprovalRequests(readApprovalRequests(storageScope));
 
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener("local-storage-sync", onLocalSync);
 
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("local-storage-sync", onLocalSync);
     };
-  }, []);
+  }, [storageScope]);
 
   useEffect(() => {
     if (!isOnline) return;
@@ -184,11 +235,11 @@ export function usePosAppController(): UsePosAppControllerResult {
   }, [paymentMethod, isSplitPayment, splitPayment.cash]);
 
   useEffect(() => {
-    const allowedSections = allowedSectionsByRole[role];
-    if (!allowedSections.includes(activeSection)) {
-      setActiveSection(defaultSectionByRole[role]);
+    if (!roleAllowedSections.includes(activeSection)) {
+      const fallbackSection = roleAllowedSections[0] ?? defaultSectionByRole[role];
+      setActiveSection(fallbackSection);
     }
-  }, [role, activeSection]);
+  }, [role, activeSection, roleAllowedSections]);
 
   const refreshSalesState = () => {
     const sales = readLocalSales(storageScope);
@@ -362,6 +413,17 @@ export function usePosAppController(): UsePosAppControllerResult {
 
     setProductCatalog((current) => applyStockDeduction(current, cart));
 
+    const earnedPoints = Math.floor(total / 10000);
+    if (selectedCustomerId && earnedPoints > 0) {
+      setCustomers(current => 
+        current.map(c => 
+          c.id === selectedCustomerId 
+            ? { ...c, loyalty_points: c.loyalty_points + earnedPoints }
+            : c
+        )
+      );
+    }
+
     saveLocalSale(
       {
         id: `SALE-${Date.now()}`,
@@ -373,6 +435,8 @@ export function usePosAppController(): UsePosAppControllerResult {
         paymentBreakdown: checkoutPaymentBreakdown,
         shiftId: activeShift?.id,
         outletId: authUser?.tenantCode || "MAIN",
+        customerId: selectedCustomerId,
+        earnedPoints: selectedCustomerId ? earnedPoints : undefined,
         createdAt: nowIso,
         items: cart
       },
@@ -408,7 +472,23 @@ export function usePosAppController(): UsePosAppControllerResult {
   };
 
   const upsertProduct = (product: ProductItem) => {
+    if (!hasProductAccess) {
+      setCheckoutError("Akun ini tidak punya akses untuk mengubah produk.");
+      return;
+    }
+
     const currentProduct = productCatalog.find((item) => item.id === product.id);
+
+    if (role === "manager" && !managerSettings.allowStockAdjustment) {
+      const stockChanged = currentProduct
+        ? currentProduct.stock !== product.stock
+        : product.stock > 0;
+
+      if (stockChanged) {
+        setCheckoutError("Owner menonaktifkan izin penyesuaian stok untuk manager.");
+        return;
+      }
+    }
 
     setProductCatalog((current) => {
       const exists = current.some((item) => item.id === product.id);
@@ -440,6 +520,16 @@ export function usePosAppController(): UsePosAppControllerResult {
   };
 
   const deleteProduct = (id: string) => {
+    if (!hasProductAccess) {
+      setCheckoutError("Akun ini tidak punya akses untuk menghapus produk.");
+      return;
+    }
+
+    if (role === "manager" && !managerSettings.allowProductDelete) {
+      setCheckoutError("Owner menonaktifkan izin hapus produk untuk manager.");
+      return;
+    }
+
     const product = productCatalog.find((item) => item.id === id);
     setProductCatalog((current) => current.filter((item) => item.id !== id));
     writeAudit("product_deleted", "product", id, product ? `${product.name}` : undefined);
@@ -554,10 +644,8 @@ export function usePosAppController(): UsePosAppControllerResult {
     setDiscountApprovalRequestId("");
   }, [discountPercent, subtotal, cart.length]);
 
-  const lowStockCount = useMemo(
-    () => productCatalog.filter((item) => item.stock > 0 && item.stock <= 5).length,
-    [productCatalog]
-  );
+  const { lowStockItems } = useLowStockAlerts(productCatalog);
+  const lowStockCount = lowStockItems.length;
 
   const outOfStockCount = useMemo(
     () => productCatalog.filter((item) => item.stock === 0).length,
@@ -570,8 +658,7 @@ export function usePosAppController(): UsePosAppControllerResult {
   );
 
   const handleSectionChange = (section: ActiveSection) => {
-    const allowedSections = allowedSectionsByRole[role];
-    if (!allowedSections.includes(section)) return;
+    if (!roleAllowedSections.includes(section)) return;
     setActiveSection(section);
   };
 
@@ -713,6 +800,10 @@ export function usePosAppController(): UsePosAppControllerResult {
     decision: ApprovalDecision,
     note: string
   ) => {
+    if (role === "manager" && !managerSettings.allowApprovalDecision) {
+      throw new Error("Owner menonaktifkan izin approval untuk manager.");
+    }
+
     const resolved = resolveApprovalRequest(
       requestId,
       decision,
@@ -762,8 +853,25 @@ export function usePosAppController(): UsePosAppControllerResult {
     );
   };
 
+  const handleUpdateManagerSettings = (input: ManagerSystemSettingsInput) => {
+    const next = saveManagerSystemSettings(input, authUser?.fullName || role, storageScope);
+    setManagerSettings(next);
+    writeAudit(
+      "manager_settings_updated",
+      "manager-settings",
+      undefined,
+      `Menu manager: laporan ${next.showReportsSection ? "on" : "off"}, riwayat ${next.showHistorySection ? "on" : "off"}, stok ${next.showProductsSection ? "on" : "off"}, pelanggan ${next.showCustomersSection ? "on" : "off"}`
+    );
+  };
+
   const handleAuthSuccess = (user: AuthenticatedUser) => {
     setAuthUser(user);
+    if (user.role === "manager") {
+      const fallbackSection = managerVisibleSections[0] ?? "reports";
+      setActiveSection(fallbackSection);
+      return;
+    }
+
     setActiveSection(defaultSectionByRole[user.role]);
   };
 
@@ -794,6 +902,11 @@ export function usePosAppController(): UsePosAppControllerResult {
         hasAnalyticsAccess,
         hasOwnerAccess,
         hasCustomersAccess,
+        managerSettings,
+        managerCanExportData,
+        managerCanResolveApproval,
+        managerCanDeleteProduct,
+        managerCanAdjustStock,
         mobileRoleNavItems,
         mobileRoleNavGridClass,
         isOnline,
@@ -803,9 +916,13 @@ export function usePosAppController(): UsePosAppControllerResult {
         total,
         todayRevenue,
         lowStockCount,
+        lowStockItems,
         outOfStockCount,
         checkoutError,
         productCatalog,
+        customers,
+        selectedCustomerId,
+        onSelectCustomer: setSelectedCustomerId,
         heldOrders,
         allSales,
         cart,
@@ -852,6 +969,7 @@ export function usePosAppController(): UsePosAppControllerResult {
         onDeleteProduct: deleteProduct,
         onResolveApprovalRequest: handleResolveApprovalRequest,
         onUpdateApprovalRules: handleUpdateApprovalRules,
+        onUpdateManagerSettings: handleUpdateManagerSettings,
         onRefreshManagedUsers: () => {
           void refreshManagedUsers();
         },

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { LocalSale } from "../database";
 import type { ProductItem } from "../localData";
+import { resolveEffectiveCostPrice } from "../hpp";
 import type {
   OwnerAnalyticsData,
   OwnerAnalyticsPeriod,
@@ -42,7 +43,9 @@ export function useOwnerAnalyticsData(input: {
   return useMemo(() => {
     const now = new Date();
     const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const productCostMap = new Map<string, number>(products.map((product) => [product.id, product.costPrice]));
+    const productCostMap = new Map<string, number>(
+      products.map((product) => [product.id, resolveEffectiveCostPrice(product)])
+    );
     const completedSales = sales.filter((sale) => sale.status === "completed");
 
     const calcCogs = (sale: LocalSale) =>

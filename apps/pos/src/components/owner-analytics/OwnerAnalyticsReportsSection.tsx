@@ -4,6 +4,7 @@ type OwnerAnalyticsReportsSectionProps = {
   period: OwnerAnalyticsPeriod;
   onPeriodChange: (value: OwnerAnalyticsPeriod) => void;
   onExportCsv: () => void;
+  onExportJson: () => void;
   analytics: OwnerAnalyticsData;
 };
 
@@ -11,6 +12,7 @@ export function OwnerAnalyticsReportsSection({
   period,
   onPeriodChange,
   onExportCsv,
+  onExportJson,
   analytics
 }: OwnerAnalyticsReportsSectionProps) {
   return (
@@ -34,6 +36,13 @@ export function OwnerAnalyticsReportsSection({
               className="h-9 rounded-lg bg-surface-container-high px-3 text-xs font-semibold text-on-surface"
             >
               Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={onExportJson}
+              className="h-9 rounded-lg bg-primary px-3 text-xs font-semibold text-on-primary"
+            >
+              Export JSON
             </button>
           </div>
         </div>

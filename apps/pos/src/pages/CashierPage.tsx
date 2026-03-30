@@ -6,13 +6,16 @@ import { CashierHomePanel } from "../components/CashierHomePanel";
 import { CashierShiftPanel } from "../components/CashierShiftPanel";
 import { ReportsPanel } from "../components/ReportsPanel";
 import { HoldOrdersBar, type HeldOrder } from "../components/HoldOrdersBar";
-import type { CartItem, PaymentBreakdown, PaymentMethod } from "../types";
+import type { Customer, CartItem, PaymentBreakdown, PaymentMethod } from "../types";      
 import type { ProductItem } from "../localData";
 import type { LocalSale } from "../database";
 import type { CashMovementType, ShiftSession } from "../shift";
 
 type CashierPageProps = {
   products: ProductItem[];
+  customers?: Customer[];
+  selectedCustomerId?: string;
+  onSelectCustomer?: (id: string | undefined) => void;
   heldOrders: HeldOrder[];
   sales: LocalSale[];
   cart: CartItem[];
@@ -51,6 +54,9 @@ type CashierPageProps = {
 
 export function CashierPage({
   products,
+  customers = [],
+  selectedCustomerId,
+  onSelectCustomer,
   heldOrders,
   sales,
   cart,
@@ -132,7 +138,7 @@ export function CashierPage({
       <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ProductGrid products={products} onAdd={onAddItem} />
         <div className="grid gap-4">
-          <CartPanel
+          <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
             cart={cart}
             subtotal={subtotal}
             discountPercent={discountPercent}
@@ -191,7 +197,7 @@ export function CashierPage({
         )}
         {mobileTab === "cart" && (
           <div className="animate-slide-in-right">
-            <CartPanel
+            <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
               cart={cart}
               subtotal={subtotal}
               discountPercent={discountPercent}
