@@ -7,6 +7,17 @@ export type LocalSale = {
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
+  manualDiscountAmount?: number;
+  autoPromotionAmount?: number;
+  appliedPromotionNames?: string[];
+  appliedBundleNames?: string[];
+  materialUsage?: Array<{
+    materialId: string;
+    quantity: number;
+    recipeId?: string;
+    recipeName?: string;
+    productId?: string;
+  }>;
   redeemedPoints?: number;
   redeemedAmount?: number;
   total: number;
@@ -73,6 +84,48 @@ function normalizeCartItems(items: unknown): CartItem[] {
     .filter((item): item is CartItem => item !== null);
 }
 
+function normalizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const normalized = value
+    .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+    .filter((entry) => entry.length > 0);
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function normalizeMaterialUsage(value: unknown): LocalSale["materialUsage"] {
+  if (!Array.isArray(value)) return undefined;
+
+  const normalized: NonNullable<LocalSale["materialUsage"]> = [];
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object") continue;
+
+    const raw = entry as {
+      materialId?: unknown;
+      quantity?: unknown;
+      recipeId?: unknown;
+      recipeName?: unknown;
+      productId?: unknown;
+    };
+
+    if (typeof raw.materialId !== "string" || raw.materialId.trim().length === 0) continue;
+
+    const quantity = Math.max(0, Number(raw.quantity || 0));
+    if (quantity <= 0) continue;
+
+    normalized.push({
+      materialId: raw.materialId.trim(),
+      quantity,
+      recipeId: typeof raw.recipeId === "string" && raw.recipeId.trim().length > 0 ? raw.recipeId.trim() : undefined,
+      recipeName: typeof raw.recipeName === "string" && raw.recipeName.trim().length > 0 ? raw.recipeName.trim() : undefined,
+      productId: typeof raw.productId === "string" && raw.productId.trim().length > 0 ? raw.productId.trim() : undefined
+    });
+  }
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function saveLocalSale(
   sale: Omit<LocalSale, "synced" | "status"> & { status?: TransactionStatus },
   scopeKey = "default"
@@ -129,6 +182,17 @@ export function readLocalSales(scopeKey = "default"): LocalSale[] {
         sale.redeemedAmount === undefined
           ? undefined
           : Math.max(0, Number(sale.redeemedAmount || 0)),
+      manualDiscountAmount:
+        sale.manualDiscountAmount === undefined
+          ? undefined
+          : Math.max(0, Number(sale.manualDiscountAmount || 0)),
+      autoPromotionAmount:
+        sale.autoPromotionAmount === undefined
+          ? undefined
+          : Math.max(0, Number(sale.autoPromotionAmount || 0)),
+      appliedPromotionNames: normalizeStringArray(sale.appliedPromotionNames),
+      appliedBundleNames: normalizeStringArray(sale.appliedBundleNames),
+      materialUsage: normalizeMaterialUsage(sale.materialUsage),
       items: normalizeCartItems(sale.items)
     }));
   } catch {

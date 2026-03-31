@@ -8,8 +8,8 @@ export type MobileRoleNavItem = {
 
 export const allowedSectionsByRole: Record<UserRole, ActiveSection[]> = {
   cashier: ["cashier", "customers"],
-  manager: ["products", "reports", "history", "customers"],
-  owner: ["products", "reports", "history", "analytics", "users", "customers"]
+  manager: ["products", "reports", "history", "customers", "suppliers", "promotions"],
+  owner: ["products", "reports", "history", "analytics", "users", "customers", "suppliers", "promotions"]
 };
 
 export const defaultSectionByRole: Record<UserRole, ActiveSection> = {
@@ -24,7 +24,9 @@ export const mobileRoleNavByRole: Record<UserRole, MobileRoleNavItem[]> = {
     { section: "reports", label: "Home", icon: "home" },
     { section: "history", label: "Riwayat", icon: "history" },
     { section: "products", label: "Stok", icon: "inventory_2" },
-    { section: "customers", label: "Pelanggan", icon: "group" }
+    { section: "customers", label: "Pelanggan", icon: "group" },
+    { section: "suppliers", label: "Operasi", icon: "factory" },
+    { section: "promotions", label: "Promo", icon: "campaign" }
   ],
   owner: [
     { section: "analytics", label: "Home", icon: "analytics" },
@@ -32,7 +34,9 @@ export const mobileRoleNavByRole: Record<UserRole, MobileRoleNavItem[]> = {
     { section: "history", label: "Riwayat", icon: "history" },
     { section: "products", label: "Stok", icon: "inventory_2" },
     { section: "users", label: "Pengguna", icon: "groups" },
-    { section: "customers", label: "Pelanggan", icon: "group" }
+    { section: "customers", label: "Pelanggan", icon: "group" },
+    { section: "suppliers", label: "Operasi", icon: "factory" },
+    { section: "promotions", label: "Promo", icon: "campaign" }
   ]
 };
 

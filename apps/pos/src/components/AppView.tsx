@@ -118,6 +118,9 @@ export function AppView({
   cart,
   subtotal,
   discountPercent,
+  manualDiscountAmount,
+  autoPromotionDiscountAmount,
+  appliedAutoDiscountLabels,
   discountAmount,
   paymentMethod,
   isSplitPayment,
@@ -223,6 +226,8 @@ export function AppView({
     if (section === "analytics") return hasAnalyticsAccess;
     if (section === "users") return hasOwnerAccess;
     if (section === "customers") return hasCustomersAccess;
+    if (section === "suppliers") return hasProductAccess;
+    if (section === "promotions") return hasProductAccess;
     return false;
   };
 
@@ -289,6 +294,8 @@ export function AppView({
       }
       if (hasProductAccess) {
         rawItems.push({ key: "catalog", label: "Catalog", icon: "inventory_2", section: "products" });
+        rawItems.push({ key: "operations", label: "Operasional", icon: "factory", section: "suppliers" });
+        rawItems.push({ key: "promotions", label: "Promo", icon: "campaign", section: "promotions" });
       }
       if (hasOwnerAccess) {
         rawItems.push({ key: "team", label: "Team", icon: "groups", section: "users" });
@@ -306,6 +313,8 @@ export function AppView({
     }
     if (hasProductAccess) {
       rawItems.push({ key: "catalog", label: "Catalog", icon: "inventory_2", section: "products" });
+      rawItems.push({ key: "operations", label: "Operasional", icon: "factory", section: "suppliers" });
+      rawItems.push({ key: "promotions", label: "Promo", icon: "campaign", section: "promotions" });
     }
     if (hasCustomersAccess) {
       rawItems.push({ key: "customers", label: "Customers", icon: "group", section: "customers" });
@@ -335,6 +344,8 @@ export function AppView({
     if (activeSection === "analytics") return "Owner Command Center";
     if (activeSection === "users") return "Team Management";
     if (activeSection === "customers") return "Customer Workspace";
+    if (activeSection === "suppliers") return "Operational Workspace";
+    if (activeSection === "promotions") return "Promotion & Bundle Workspace";
     return "Merchant Pro";
   }, [role, activeSection, desktopCashierHash]);
 
@@ -375,11 +386,11 @@ export function AppView({
     }
 
     if (role === "owner") {
-      openFirstAvailableSection(["analytics", "reports", "history", "products", "customers", "users"]);
+      openFirstAvailableSection(["analytics", "reports", "history", "products", "suppliers", "promotions", "customers", "users"]);
       return;
     }
 
-    openFirstAvailableSection(["reports", "history", "products", "customers"]);
+    openFirstAvailableSection(["reports", "history", "products", "suppliers", "promotions", "customers"]);
   };
 
   const openHistoryWorkspace = () => {
@@ -387,7 +398,7 @@ export function AppView({
       navigateCashierHash("history");
       return;
     }
-    openFirstAvailableSection(["history", "reports", "analytics", "products", "customers"]);
+    openFirstAvailableSection(["history", "reports", "analytics", "products", "suppliers", "promotions", "customers"]);
   };
 
   const openCatalogWorkspace = () => {
@@ -395,7 +406,7 @@ export function AppView({
       navigateCashierHash("products");
       return;
     }
-    openFirstAvailableSection(["products", "reports", "history", "analytics", "customers"]);
+    openFirstAvailableSection(["products", "suppliers", "promotions", "reports", "history", "analytics", "customers"]);
   };
 
   const openCheckoutWorkspace = () => {
@@ -403,7 +414,7 @@ export function AppView({
       navigateCashierHash("cart");
       return;
     }
-    openFirstAvailableSection(["reports", "history", "products", "customers"]);
+    openFirstAvailableSection(["reports", "history", "products", "suppliers", "promotions", "customers"]);
   };
 
   const openTeamWorkspace = () => {
@@ -727,6 +738,9 @@ export function AppView({
     cart,
     subtotal,
     discountPercent,
+    manualDiscountAmount,
+    autoPromotionDiscountAmount,
+    appliedAutoDiscountLabels,
     discountAmount,
     total,
     paymentMethod,
@@ -989,7 +1003,11 @@ export function AppView({
       <CheckoutConfirmModal
         open={showCheckoutConfirm}
         itemCount={cart.reduce((acc, item) => acc + item.qty, 0)}
+        subtotal={subtotal}
         total={total}
+        manualDiscountAmount={manualDiscountAmount}
+        autoPromotionDiscountAmount={autoPromotionDiscountAmount}
+        appliedAutoDiscountLabels={appliedAutoDiscountLabels}
         paymentMethod={paymentMethod}
         isSplitPayment={isSplitPayment}
         paymentBreakdown={isSplitPayment ? splitPayment : undefined}

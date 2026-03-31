@@ -75,6 +75,9 @@ export type AppViewProps = {
   cart: CartItem[];
   subtotal: number;
   discountPercent: number;
+  manualDiscountAmount: number;
+  autoPromotionDiscountAmount: number;
+  appliedAutoDiscountLabels: string[];
   discountAmount: number;
   paymentMethod: PaymentMethod;
   isSplitPayment: boolean;

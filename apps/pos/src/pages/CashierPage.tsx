@@ -36,6 +36,9 @@ type CashierPageProps = {
   cart: CartItem[];
   subtotal: number;
   discountPercent: number;
+  manualDiscountAmount: number;
+  autoPromotionDiscountAmount: number;
+  appliedAutoDiscountLabels: string[];
   discountAmount: number;
   total: number;
   paymentMethod: PaymentMethod;
@@ -105,6 +108,9 @@ export function CashierPage({
   cart,
   subtotal,
   discountPercent,
+  manualDiscountAmount,
+  autoPromotionDiscountAmount,
+  appliedAutoDiscountLabels,
   discountAmount,
   total,
   paymentMethod,
@@ -238,7 +244,29 @@ export function CashierPage({
       )}
 
       <div className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1.8fr)_420px]">
-        {mobileTab === "history" ? (
+        {mobileTab === "home" && (
+          <section className="grid gap-3 lg:col-span-2">
+            <CashierHomePanel
+              cartItemCount={itemCount}
+              heldOrderCount={heldOrders.length}
+              todaySalesCount={todaySalesCount}
+              todayRevenue={todayRevenue}
+            />
+            <CashierShiftPanel
+              activeShift={activeShift}
+              expectedClosingCash={shiftExpectedClosingCash}
+              shiftCashSalesTotal={shiftCashSalesTotal}
+              varianceThreshold={shiftVarianceThreshold}
+              recentShifts={recentShiftHistory}
+              onOpenShift={onOpenShift}
+              onCloseShift={onCloseShift}
+              onAddCashMovement={onAddCashMovement}
+            />
+            <ReportsPanel sales={sales} />
+          </section>
+        )}
+
+        {mobileTab === "history" && (
           <section className="lg:col-span-2">
             <SalesHistory
               sales={sales}
@@ -247,13 +275,78 @@ export function CashierPage({
               onRequestVoid={onRequestVoid}
             />
           </section>
-        ) : (
-          <>
-            <section className="rounded-2xl bg-surface p-4">
-              <ProductGrid products={products} onAdd={onAddItem} />
+        )}
+
+        {mobileTab === "products" && (
+          <section className="grid h-[calc(100vh-14rem)] min-h-[36rem] gap-6 lg:col-span-2 lg:grid-cols-[minmax(0,1.8fr)_420px]">
+            <section className="min-h-0 overflow-hidden rounded-2xl bg-surface p-4">
+              <div className="h-full overflow-y-auto pr-1">
+                <ProductGrid products={products} onAdd={onAddItem} />
+              </div>
             </section>
 
-            <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
+            <section className="min-h-0 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
+              <div className="h-full overflow-y-auto pr-1">
+                <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
+                  selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
+                  selectedCustomerMemberTier={selectedCustomerMemberTier}
+                  selectedCustomerLoyaltyMultiplier={selectedCustomerLoyaltyMultiplier}
+                  estimatedEarnedPoints={estimatedEarnedPoints}
+                  selectedCustomerOutstandingDebt={selectedCustomerOutstandingDebt}
+                  loyaltyPointValue={loyaltyPointValue}
+                  redeemedPoints={redeemedPoints}
+                  loyaltyRedeemAmount={loyaltyRedeemAmount}
+                  maxRedeemablePoints={maxRedeemablePoints}
+                  onRedeemedPointsChange={onRedeemedPointsChange}
+                  cart={cart}
+                  stockByProductId={stockByProductId}
+                  pendingDraft={pendingCartDraftSummary}
+                  subtotal={subtotal}
+                  discountPercent={discountPercent}
+                  manualDiscountAmount={manualDiscountAmount}
+                  autoPromotionDiscountAmount={autoPromotionDiscountAmount}
+                  appliedAutoDiscountLabels={appliedAutoDiscountLabels}
+                  discountAmount={discountAmount}
+                  total={total}
+                  estimatedCost={cartEstimatedCost}
+                  grossProfit={cartGrossProfit}
+                  grossMarginPercent={cartGrossMarginPercent}
+                  hasNegativeMargin={cartHasNegativeMargin}
+                  projectedLossAmount={cartProjectedLossAmount}
+                  discountApprovalThreshold={discountApprovalThreshold}
+                  minimumMarginThreshold={cartMinimumMarginThreshold}
+                  isBelowMinimumMarginThreshold={cartBelowMinimumMarginThreshold}
+                  isShiftOpen={isShiftOpen}
+                  checkoutApprovalHint={checkoutApprovalHint}
+                  paymentMethod={paymentMethod}
+                  isSplitPayment={isSplitPayment}
+                  splitPayment={splitPayment}
+                  cashReceived={cashReceived}
+                  changeAmount={changeAmount}
+                  onDiscountChange={onDiscountChange}
+                  onPaymentMethodChange={onPaymentMethodChange}
+                  onSplitPaymentToggle={onSplitPaymentToggle}
+                  onSplitPaymentAmountChange={onSplitPaymentAmountChange}
+                  onApplySplitPaymentPreset={onApplySplitPaymentPreset}
+                  onCashReceivedChange={onCashReceivedChange}
+                  onIncreaseQty={onIncreaseQty}
+                  onDecreaseQty={onDecreaseQty}
+                  onRemoveItem={onRemoveItem}
+                  onHoldOrder={onHoldOrder}
+                  onRestoreDraft={onRestoreCartDraft}
+                  onDiscardDraft={onDiscardCartDraft}
+                  onClear={onClear}
+                  onCheckout={onCheckout}
+                  disableCheckout={isSyncing}
+                />
+              </div>
+            </section>
+          </section>
+        )}
+
+        {mobileTab === "cart" && (
+          <section className="lg:col-span-2">
+            <div className="mx-auto max-w-xl rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
               <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
                 selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
                 selectedCustomerMemberTier={selectedCustomerMemberTier}
@@ -270,6 +363,9 @@ export function CashierPage({
                 pendingDraft={pendingCartDraftSummary}
                 subtotal={subtotal}
                 discountPercent={discountPercent}
+                manualDiscountAmount={manualDiscountAmount}
+                autoPromotionDiscountAmount={autoPromotionDiscountAmount}
+                appliedAutoDiscountLabels={appliedAutoDiscountLabels}
                 discountAmount={discountAmount}
                 total={total}
                 estimatedCost={cartEstimatedCost}
@@ -303,8 +399,8 @@ export function CashierPage({
                 onCheckout={onCheckout}
                 disableCheckout={isSyncing}
               />
-            </section>
-          </>
+            </div>
+          </section>
         )}
       </div>
 
@@ -353,6 +449,9 @@ export function CashierPage({
               pendingDraft={pendingCartDraftSummary}
               subtotal={subtotal}
               discountPercent={discountPercent}
+                manualDiscountAmount={manualDiscountAmount}
+                autoPromotionDiscountAmount={autoPromotionDiscountAmount}
+                appliedAutoDiscountLabels={appliedAutoDiscountLabels}
               discountAmount={discountAmount}
               total={total}
               estimatedCost={cartEstimatedCost}

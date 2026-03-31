@@ -64,6 +64,13 @@ import {
   type ManagerSystemSettings,
   type ManagerSystemSettingsInput
 } from "../managerSettings";
+import {
+  readOperationsDataset,
+  writeOperationsDataset,
+  type OperationsDataset,
+  type OpsPromotion,
+  type ProductBundle
+} from "../operations";
 import type { AppViewProps } from "../components/appViewProps";
 
 type UsePosAppControllerResult = {
@@ -97,6 +104,263 @@ const LOYALTY_TIER_MULTIPLIER: Record<Customer["member_tier"], number> = {
   Gold: 1.25,
   Platinum: 1.5
 };
+
+type AppliedAutoDiscountLine = {
+  id: string;
+  label: string;
+  amount: number;
+  source: "promotion" | "bundle";
+};
+
+type MaterialUsageRecord = {
+  materialId: string;
+  quantity: number;
+  recipeId?: string;
+  recipeName?: string;
+  productId?: string;
+};
+
+type AutoDiscountComputation = {
+  amount: number;
+  lines: AppliedAutoDiscountLine[];
+  promotionNames: string[];
+  bundleNames: string[];
+};
+
+function isOpsPromotionActive(promo: OpsPromotion, referenceDate = new Date()) {
+  if (!promo.isActive) return false;
+
+  const referenceTs = referenceDate.getTime();
+
+  if (promo.startAt) {
+    const startTs = new Date(promo.startAt).getTime();
+    if (Number.isFinite(startTs) && referenceTs < startTs) return false;
+  }
+
+  if (promo.endAt) {
+    const endTs = new Date(promo.endAt).getTime();
+    if (Number.isFinite(endTs) && referenceTs > endTs) return false;
+  }
+
+  return true;
+}
+
+function calculateBundleDiscountLines(cart: CartItem[], bundles: ProductBundle[]): AppliedAutoDiscountLine[] {
+  if (cart.length === 0 || bundles.length === 0) return [];
+
+  const qtyByProduct = new Map<string, number>();
+  const priceByProduct = new Map<string, number>();
+
+  for (const item of cart) {
+    qtyByProduct.set(item.id, (qtyByProduct.get(item.id) || 0) + Math.max(0, Number(item.qty || 0)));
+    priceByProduct.set(item.id, Math.max(0, Number(item.price || 0)));
+  }
+
+  const lines: AppliedAutoDiscountLine[] = [];
+
+  for (const bundle of bundles) {
+    if (!bundle.isActive) continue;
+    if (!Array.isArray(bundle.productIds) || bundle.productIds.length < 2) continue;
+
+    const uniqueProductIds = Array.from(new Set(bundle.productIds));
+    const eligibleSetCount = uniqueProductIds.reduce((current, productId) => {
+      const qty = Math.max(0, qtyByProduct.get(productId) || 0);
+      return Math.min(current, qty);
+    }, Number.POSITIVE_INFINITY);
+
+    if (!Number.isFinite(eligibleSetCount) || eligibleSetCount < 1) continue;
+
+    const setPrice = uniqueProductIds.reduce((acc, productId) => {
+      return acc + Math.max(0, priceByProduct.get(productId) || 0);
+    }, 0);
+
+    if (setPrice <= 0) continue;
+
+    const discountPercent = Math.max(0, Math.min(100, Number(bundle.discountPercent || 0)));
+    const amount = Math.max(0, setPrice * (discountPercent / 100) * eligibleSetCount);
+    if (amount <= 0) continue;
+
+    lines.push({
+      id: `bundle:${bundle.id}`,
+      label: `${bundle.name} x${eligibleSetCount}`,
+      amount,
+      source: "bundle"
+    });
+  }
+
+  return lines;
+}
+
+function calculatePromotionDiscountLines(
+  subtotalAfterManualDiscount: number,
+  promotions: OpsPromotion[],
+  referenceDate = new Date()
+): AppliedAutoDiscountLine[] {
+  if (subtotalAfterManualDiscount <= 0 || promotions.length === 0) return [];
+
+  const activePromotions = promotions.filter((promotion) => isOpsPromotionActive(promotion, referenceDate));
+  if (activePromotions.length === 0) return [];
+
+  const lines: AppliedAutoDiscountLine[] = [];
+
+  for (const promotion of activePromotions) {
+    let amount = 0;
+
+    if (promotion.scheme === "percent") {
+      amount = subtotalAfterManualDiscount * (Math.max(0, Number(promotion.value || 0)) / 100);
+    }
+
+    if (promotion.scheme === "nominal") {
+      amount = Math.max(0, Number(promotion.value || 0));
+    }
+
+    if (promotion.scheme === "happy_hour") {
+      const hour = referenceDate.getHours();
+      if (hour >= 14 && hour < 18) {
+        amount = subtotalAfterManualDiscount * (Math.max(0, Number(promotion.value || 0)) / 100);
+      }
+    }
+
+    if (promotion.scheme === "bundle") {
+      continue;
+    }
+
+    if (amount <= 0) continue;
+
+    lines.push({
+      id: `promo:${promotion.id}`,
+      label: promotion.name,
+      amount,
+      source: "promotion"
+    });
+  }
+
+  return lines;
+}
+
+function computeAutoDiscount(
+  cart: CartItem[],
+  subtotalAfterManualDiscount: number,
+  dataset: OperationsDataset,
+  referenceDate = new Date()
+): AutoDiscountComputation {
+  if (subtotalAfterManualDiscount <= 0 || cart.length === 0) {
+    return {
+      amount: 0,
+      lines: [],
+      promotionNames: [],
+      bundleNames: []
+    };
+  }
+
+  const bundleLines = calculateBundleDiscountLines(cart, dataset.bundles || []);
+  const promotionLines = calculatePromotionDiscountLines(
+    subtotalAfterManualDiscount,
+    dataset.promotions || [],
+    referenceDate
+  );
+
+  const lines = [...bundleLines, ...promotionLines];
+  const rawAmount = lines.reduce((acc, line) => acc + line.amount, 0);
+  const amount = Math.min(subtotalAfterManualDiscount, Math.max(0, rawAmount));
+
+  return {
+    amount,
+    lines,
+    promotionNames: promotionLines.map((line) => line.label),
+    bundleNames: bundleLines.map((line) => line.label)
+  };
+}
+
+function buildMaterialUsageForCart(dataset: OperationsDataset, items: CartItem[]): MaterialUsageRecord[] {
+  if (!items.length || !dataset.recipes.length) return [];
+
+  const activeRecipeByProduct = new Map<string, OperationsDataset["recipes"][number]>();
+
+  for (const recipe of dataset.recipes) {
+    if (recipe.status !== "active") continue;
+    if (!recipe.productId) continue;
+    if (!recipe.ingredients || recipe.ingredients.length === 0) continue;
+    if (!activeRecipeByProduct.has(recipe.productId)) {
+      activeRecipeByProduct.set(recipe.productId, recipe);
+    }
+  }
+
+  if (activeRecipeByProduct.size === 0) return [];
+
+  const usageByMaterial = new Map<string, MaterialUsageRecord>();
+
+  for (const item of items) {
+    const recipe = activeRecipeByProduct.get(item.id);
+    if (!recipe) continue;
+
+    const soldQty = Math.max(0, Number(item.qty || 0));
+    if (soldQty <= 0) continue;
+
+    const yieldPortions = Math.max(1, Number(recipe.yieldPortions || 1));
+    const usageMultiplier = soldQty / yieldPortions;
+
+    for (const ingredient of recipe.ingredients) {
+      const ingredientQty = Math.max(0, Number(ingredient.quantity || 0));
+      if (ingredientQty <= 0) continue;
+
+      const consumedQty = ingredientQty * usageMultiplier;
+      if (consumedQty <= 0) continue;
+
+      const existing = usageByMaterial.get(ingredient.materialId);
+      if (existing) {
+        existing.quantity += consumedQty;
+      } else {
+        usageByMaterial.set(ingredient.materialId, {
+          materialId: ingredient.materialId,
+          quantity: consumedQty,
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+          productId: recipe.productId
+        });
+      }
+    }
+  }
+
+  return Array.from(usageByMaterial.values()).map((entry) => ({
+    ...entry,
+    quantity: Math.max(0, Number(entry.quantity.toFixed(4)))
+  }));
+}
+
+function applyMaterialUsageToDataset(
+  dataset: OperationsDataset,
+  usage: MaterialUsageRecord[],
+  mode: "consume" | "restore"
+) {
+  if (!usage.length) return dataset;
+
+  const usageByMaterial = new Map<string, number>();
+  for (const entry of usage) {
+    const qty = Math.max(0, Number(entry.quantity || 0));
+    if (qty <= 0) continue;
+    usageByMaterial.set(entry.materialId, (usageByMaterial.get(entry.materialId) || 0) + qty);
+  }
+
+  if (usageByMaterial.size === 0) return dataset;
+
+  const nowIso = new Date().toISOString();
+
+  return {
+    ...dataset,
+    materials: dataset.materials.map((material) => {
+      const qty = usageByMaterial.get(material.id);
+      if (!qty) return material;
+
+      const delta = mode === "consume" ? -qty : qty;
+      return {
+        ...material,
+        stockQty: Math.max(0, Number((material.stockQty + delta).toFixed(4))),
+        updatedAt: nowIso
+      };
+    })
+  };
+}
 
 function getLoyaltyTierMultiplier(tier: Customer["member_tier"] | undefined) {
   if (!tier) return 1;
@@ -337,7 +601,11 @@ export function usePosAppController(): UsePosAppControllerResult {
 
     if (managerSettings.showReportsSection) sections.push("reports");
     if (managerSettings.showHistorySection) sections.push("history");
-    if (managerSettings.showProductsSection) sections.push("products");
+    if (managerSettings.showProductsSection) {
+      sections.push("products");
+      sections.push("suppliers");
+      sections.push("promotions");
+    }
     if (managerSettings.showCustomersSection) sections.push("customers");
 
     return sections.length > 0 ? sections : ["reports"];
@@ -598,15 +866,35 @@ export function usePosAppController(): UsePosAppControllerResult {
     writeAudit
   });
 
+  const operationsDataset = useMemo(
+    () => readOperationsDataset(storageScope),
+    [storageScope, activeSection]
+  );
+
   const subtotal = useMemo(
     () => cart.reduce((acc, item) => acc + item.price * item.qty, 0),
     [cart]
   );
 
-  const discountAmount = useMemo(() => {
+  const manualDiscountAmount = useMemo(() => {
     const raw = subtotal * (discountPercent / 100);
     return Math.min(raw, subtotal);
   }, [discountPercent, subtotal]);
+
+  const autoDiscountComputation = useMemo(
+    () => computeAutoDiscount(cart, Math.max(0, subtotal - manualDiscountAmount), operationsDataset),
+    [cart, subtotal, manualDiscountAmount, operationsDataset]
+  );
+
+  const autoPromotionDiscountAmount = useMemo(
+    () => Math.max(0, Number(autoDiscountComputation.amount || 0)),
+    [autoDiscountComputation.amount]
+  );
+
+  const discountAmount = useMemo(
+    () => Math.min(subtotal, manualDiscountAmount + autoPromotionDiscountAmount),
+    [subtotal, manualDiscountAmount, autoPromotionDiscountAmount]
+  );
 
   const subtotalAfterDiscount = useMemo(
     () => Math.max(0, subtotal - discountAmount),
@@ -1192,6 +1480,17 @@ export function usePosAppController(): UsePosAppControllerResult {
     const loyaltyMultiplierLabel = selectedCustomerId
       ? selectedCustomerLoyaltyMultiplier.toFixed(2).replace(/\.?0+$/, "")
       : "";
+    const operationsBeforeCheckout = readOperationsDataset(storageScope);
+    const materialUsage = buildMaterialUsageForCart(operationsBeforeCheckout, cart);
+
+    if (materialUsage.length > 0) {
+      const nextOperationsDataset = applyMaterialUsageToDataset(
+        operationsBeforeCheckout,
+        materialUsage,
+        "consume"
+      );
+      writeOperationsDataset(nextOperationsDataset, storageScope);
+    }
 
     setProductCatalog((current) => applyStockDeduction(current, cart));
 
@@ -1214,6 +1513,17 @@ export function usePosAppController(): UsePosAppControllerResult {
         subtotal,
         discountPercent,
         discountAmount,
+        manualDiscountAmount,
+        autoPromotionAmount: autoPromotionDiscountAmount > 0 ? Math.round(autoPromotionDiscountAmount) : undefined,
+        appliedPromotionNames:
+          autoDiscountComputation.promotionNames.length > 0
+            ? autoDiscountComputation.promotionNames
+            : undefined,
+        appliedBundleNames:
+          autoDiscountComputation.bundleNames.length > 0
+            ? autoDiscountComputation.bundleNames
+            : undefined,
+        materialUsage: materialUsage.length > 0 ? materialUsage : undefined,
         redeemedPoints: selectedCustomerId && appliedRedeemedPoints > 0 ? appliedRedeemedPoints : undefined,
         redeemedAmount: selectedCustomerId && loyaltyRedeemAmount > 0 ? loyaltyRedeemAmount : undefined,
         total,
@@ -1254,6 +1564,14 @@ export function usePosAppController(): UsePosAppControllerResult {
       "sale",
       undefined,
       `Total Rp ${total.toLocaleString("id-ID")} • ${cart.reduce((acc, item) => acc + item.qty, 0)} item${
+        autoPromotionDiscountAmount > 0
+          ? ` • Auto promo -Rp ${Math.round(autoPromotionDiscountAmount).toLocaleString("id-ID")}`
+          : ""
+      }${
+        materialUsage.length > 0
+          ? ` • Bahan terpakai ${materialUsage.length} item`
+          : ""
+      }${
         selectedCustomerId
           ? ` • Loyalty ${pointsDelta >= 0 ? "+" : ""}${pointsDelta} poin${loyaltyTierLabel}${
               loyaltyMultiplierLabel ? ` x${loyaltyMultiplierLabel}` : ""
@@ -1696,6 +2014,42 @@ export function usePosAppController(): UsePosAppControllerResult {
     return `Loyalty ${rollbackPoints >= 0 ? "+" : ""}${rollbackPoints} poin`;
   };
 
+  const restoreSaleMaterialUsage = (sale: {
+    items: CartItem[];
+    materialUsage?: Array<{
+      materialId: string;
+      quantity: number;
+      recipeId?: string;
+      recipeName?: string;
+      productId?: string;
+    }>;
+  }) => {
+    const usageFromSale = Array.isArray(sale.materialUsage)
+      ? sale.materialUsage
+          .map((entry) => ({
+            materialId: entry.materialId,
+            quantity: Math.max(0, Number(entry.quantity || 0)),
+            recipeId: entry.recipeId,
+            recipeName: entry.recipeName,
+            productId: entry.productId
+          }))
+          .filter((entry) => entry.materialId && entry.quantity > 0)
+      : [];
+
+    const usage = usageFromSale.length > 0
+      ? usageFromSale
+      : buildMaterialUsageForCart(readOperationsDataset(storageScope), sale.items);
+
+    if (usage.length === 0) return "";
+
+    const currentDataset = readOperationsDataset(storageScope);
+    const nextDataset = applyMaterialUsageToDataset(currentDataset, usage, "restore");
+    writeOperationsDataset(nextDataset, storageScope);
+
+    const totalUsage = usage.reduce((acc, entry) => acc + entry.quantity, 0);
+    return `Bahan dipulihkan ${Number(totalUsage.toFixed(2)).toLocaleString("id-ID")}`;
+  };
+
   const requestSaleApproval = (type: "refund" | "void", saleId: string, reason: string) => {
     const sale = readSaleById(saleId, storageScope);
     if (!sale) {
@@ -1748,12 +2102,13 @@ export function usePosAppController(): UsePosAppControllerResult {
     });
     setProductCatalog((current) => applyStockReturn(current, sale.items));
     const loyaltyRollbackDetail = applySaleLoyaltyRollback(sale);
+    const materialRollbackDetail = restoreSaleMaterialUsage(sale);
     refreshSalesState();
     writeAudit(
       "sale_refunded",
       "sale",
       saleId,
-      loyaltyRollbackDetail ? `${reason} • ${loyaltyRollbackDetail}` : reason
+      [reason, loyaltyRollbackDetail, materialRollbackDetail].filter(Boolean).join(" • ")
     );
   };
 
@@ -1771,12 +2126,13 @@ export function usePosAppController(): UsePosAppControllerResult {
     });
     setProductCatalog((current) => applyStockReturn(current, sale.items));
     const loyaltyRollbackDetail = applySaleLoyaltyRollback(sale);
+    const materialRollbackDetail = restoreSaleMaterialUsage(sale);
     refreshSalesState();
     writeAudit(
       "sale_voided",
       "sale",
       saleId,
-      loyaltyRollbackDetail ? `${reason} • ${loyaltyRollbackDetail}` : reason
+      [reason, loyaltyRollbackDetail, materialRollbackDetail].filter(Boolean).join(" • ")
     );
   };
 
@@ -1798,6 +2154,7 @@ export function usePosAppController(): UsePosAppControllerResult {
     );
 
     let approvalLoyaltyDetail = "";
+    let approvalMaterialDetail = "";
 
     if (decision === "approved" && resolved.saleId && (resolved.type === "refund" || resolved.type === "void")) {
       const sale = readSaleById(resolved.saleId, storageScope);
@@ -1809,6 +2166,7 @@ export function usePosAppController(): UsePosAppControllerResult {
         });
         setProductCatalog((current) => applyStockReturn(current, sale.items));
         approvalLoyaltyDetail = applySaleLoyaltyRollback(sale);
+        approvalMaterialDetail = restoreSaleMaterialUsage(sale);
       }
     }
 
@@ -1824,6 +2182,8 @@ export function usePosAppController(): UsePosAppControllerResult {
       resolved.id,
       `${resolved.type} • ${note || "tanpa catatan"}${
         approvalLoyaltyDetail ? ` • ${approvalLoyaltyDetail}` : ""
+      }${
+        approvalMaterialDetail ? ` • ${approvalMaterialDetail}` : ""
       }`
     );
   };
@@ -2063,6 +2423,9 @@ export function usePosAppController(): UsePosAppControllerResult {
         cart,
         subtotal,
         discountPercent,
+        manualDiscountAmount,
+        autoPromotionDiscountAmount,
+        appliedAutoDiscountLabels: autoDiscountComputation.lines.map((line) => line.label),
         discountAmount,
         paymentMethod,
         isSplitPayment,

@@ -5,6 +5,7 @@ import type { ProductItem } from "../../localData";
 import type { ManagerSystemSettings, ManagerSystemSettingsInput } from "../../managerSettings";
 import { CashierPage } from "../../pages/CashierPage";
 import CustomersPage from "../../pages/CustomersPage";
+import { OperationsPage } from "../../pages/OperationsPage";
 import { OwnerAnalyticsPage } from "../../pages/OwnerAnalyticsPage";
 import { ProductsPage } from "../../pages/ProductsPage";
 import { ReportsPage } from "../../pages/ReportsPage";
@@ -61,6 +62,9 @@ type AppSectionContentProps = {
   cart: CartItem[];
   subtotal: number;
   discountPercent: number;
+  manualDiscountAmount: number;
+  autoPromotionDiscountAmount: number;
+  appliedAutoDiscountLabels: string[];
   discountAmount: number;
   total: number;
   paymentMethod: PaymentMethod;
@@ -182,6 +186,9 @@ export function AppSectionContent({
   cart,
   subtotal,
   discountPercent,
+  manualDiscountAmount,
+  autoPromotionDiscountAmount,
+  appliedAutoDiscountLabels,
   discountAmount,
   total,
   paymentMethod,
@@ -271,6 +278,9 @@ export function AppSectionContent({
           cart={cart}
           subtotal={subtotal}
           discountPercent={discountPercent}
+          manualDiscountAmount={manualDiscountAmount}
+          autoPromotionDiscountAmount={autoPromotionDiscountAmount}
+          appliedAutoDiscountLabels={appliedAutoDiscountLabels}
           discountAmount={discountAmount}
           total={total}
           paymentMethod={paymentMethod}
@@ -327,6 +337,30 @@ export function AppSectionContent({
           onDelete={onDeleteProduct}
           canDeleteProduct={managerCanDeleteProduct}
           canAdjustStock={managerCanAdjustStock}
+        />
+      )}
+
+      {role !== "cashier" && activeSection === "suppliers" && (
+        <OperationsPage
+          storageScopeKey={storageScopeKey}
+          products={productCatalog}
+          sales={allSales}
+          managerCanExportData={managerCanExportData}
+          managerCanAdjustStock={managerCanAdjustStock}
+          onUpsertProduct={onUpsertProduct}
+          initialTab="materials"
+        />
+      )}
+
+      {role !== "cashier" && activeSection === "promotions" && (
+        <OperationsPage
+          storageScopeKey={storageScopeKey}
+          products={productCatalog}
+          sales={allSales}
+          managerCanExportData={managerCanExportData}
+          managerCanAdjustStock={managerCanAdjustStock}
+          onUpsertProduct={onUpsertProduct}
+          initialTab="promotions"
         />
       )}
 

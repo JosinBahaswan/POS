@@ -3,7 +3,11 @@ import type { PaymentBreakdown, PaymentMethod } from "../types";
 type CheckoutConfirmModalProps = {
   open: boolean;
   itemCount: number;
+  subtotal?: number;
   total: number;
+  manualDiscountAmount?: number;
+  autoPromotionDiscountAmount?: number;
+  appliedAutoDiscountLabels?: string[];
   paymentMethod: PaymentMethod;
   isSplitPayment?: boolean;
   paymentBreakdown?: PaymentBreakdown;
@@ -21,7 +25,11 @@ type CheckoutConfirmModalProps = {
 export function CheckoutConfirmModal({
   open,
   itemCount,
+  subtotal,
   total,
+  manualDiscountAmount = 0,
+  autoPromotionDiscountAmount = 0,
+  appliedAutoDiscountLabels = [],
   paymentMethod,
   isSplitPayment = false,
   paymentBreakdown,
@@ -31,6 +39,12 @@ export function CheckoutConfirmModal({
   loading = false
 }: CheckoutConfirmModalProps) {
   if (!open) return null;
+
+  const effectiveSubtotal = subtotal ?? total;
+  const autoDiscountLabel = appliedAutoDiscountLabels.length > 0
+    ? appliedAutoDiscountLabels.slice(0, 2).join(" + ")
+    : "Promo/Bundle";
+  const hasAnyDiscount = manualDiscountAmount > 0 || autoPromotionDiscountAmount > 0;
 
   return (
     <div className="fixed inset-0 z-[60] grid place-items-end bg-slate-900/40 p-3 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:place-items-center sm:p-4 animate-fade-in">
@@ -55,6 +69,31 @@ export function CheckoutConfirmModal({
               <p>QRIS: Rp {paymentBreakdown.qris.toLocaleString("id-ID")}</p>
             </div>
           )}
+
+          <div className="mt-1 rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+            <p className="flex items-center justify-between gap-3">
+              <span>Subtotal</span>
+              <strong className="text-on-surface">Rp {Math.round(effectiveSubtotal).toLocaleString("id-ID")}</strong>
+            </p>
+            {manualDiscountAmount > 0 && (
+              <p className="mt-1 flex items-center justify-between gap-3">
+                <span>Diskon manual</span>
+                <strong className="text-error">- Rp {Math.round(manualDiscountAmount).toLocaleString("id-ID")}</strong>
+              </p>
+            )}
+            {autoPromotionDiscountAmount > 0 && (
+              <p className="mt-1 flex items-center justify-between gap-3">
+                <span>Diskon otomatis ({autoDiscountLabel})</span>
+                <strong className="text-secondary">- Rp {Math.round(autoPromotionDiscountAmount).toLocaleString("id-ID")}</strong>
+              </p>
+            )}
+            {!hasAnyDiscount && effectiveSubtotal > total && (
+              <p className="mt-1 flex items-center justify-between gap-3">
+                <span>Diskon</span>
+                <strong className="text-error">- Rp {Math.round(effectiveSubtotal - total).toLocaleString("id-ID")}</strong>
+              </p>
+            )}
+          </div>
 
           {loyaltyPreview && (loyaltyPreview.earnedPoints > 0 || loyaltyPreview.redeemedPoints > 0) && (
             <div className="rounded-xl bg-secondary-container/40 px-3 py-2 text-xs text-on-secondary-container">

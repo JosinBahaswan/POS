@@ -115,11 +115,16 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
         "payment_method",
         "subtotal",
         "discount_amount",
+        "manual_discount_amount",
+        "auto_promotion_amount",
+        "applied_promotion_names",
+        "applied_bundle_names",
         "redeemed_points",
         "redeemed_amount",
         "earned_points",
         "total",
-        "items_count"
+        "items_count",
+        "material_usage_count"
       ],
       ...filteredSales.map((sale) => [
         sale.id,
@@ -128,11 +133,16 @@ export function SalesHistory({ sales, onPrint, onRequestRefund, onRequestVoid }:
         sale.paymentMethod,
         String(sale.subtotal),
         String(sale.discountAmount),
+        String(sale.manualDiscountAmount ?? 0),
+        String(sale.autoPromotionAmount ?? 0),
+        (sale.appliedPromotionNames ?? []).join(" | "),
+        (sale.appliedBundleNames ?? []).join(" | "),
         String(sale.redeemedPoints ?? 0),
         String(sale.redeemedAmount ?? 0),
         String(sale.earnedPoints ?? 0),
         String(sale.total),
-        String(sale.items.reduce((acc, item) => acc + item.qty, 0))
+        String(sale.items.reduce((acc, item) => acc + item.qty, 0)),
+        String(sale.materialUsage?.length ?? 0)
       ])
     ];
 

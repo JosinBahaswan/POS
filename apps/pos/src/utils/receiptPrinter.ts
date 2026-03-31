@@ -40,6 +40,63 @@ const buildSplitPaymentRows = (sale: LocalSale, isSplit: boolean) => {
   `;
 };
 
+const buildDiscountRows = (sale: LocalSale) => {
+  const manualDiscountAmount = Math.max(0, Number(sale.manualDiscountAmount || 0));
+  const autoPromotionAmount = Math.max(0, Number(sale.autoPromotionAmount || 0));
+  const totalDiscount = Math.max(0, Number(sale.discountAmount || 0));
+
+  if (manualDiscountAmount <= 0 && autoPromotionAmount <= 0 && totalDiscount <= 0) {
+    return "";
+  }
+
+  const rows: string[] = [];
+
+  if (manualDiscountAmount > 0) {
+    rows.push(
+      `<div class="kv-row"><span>Diskon Manual</span><strong>- Rp ${Math.round(manualDiscountAmount).toLocaleString("id-ID")}</strong></div>`
+    );
+  }
+
+  if (autoPromotionAmount > 0) {
+    const autoLabels = [
+      ...(sale.appliedPromotionNames ?? []),
+      ...(sale.appliedBundleNames ?? [])
+    ];
+    const autoLabelText = autoLabels.length > 0
+      ? ` (${escapeHtml(autoLabels.slice(0, 2).join(" + "))})`
+      : "";
+    rows.push(
+      `<div class="kv-row"><span>Diskon Otomatis${autoLabelText}</span><strong>- Rp ${Math.round(autoPromotionAmount).toLocaleString("id-ID")}</strong></div>`
+    );
+  }
+
+  if (rows.length === 0 && totalDiscount > 0) {
+    rows.push(
+      `<div class="kv-row"><span>Diskon</span><strong>- Rp ${Math.round(totalDiscount).toLocaleString("id-ID")}</strong></div>`
+    );
+  }
+
+  return rows.join("");
+};
+
+const buildAppliedCampaignRows = (sale: LocalSale) => {
+  const rows: string[] = [];
+
+  if (sale.appliedPromotionNames && sale.appliedPromotionNames.length > 0) {
+    rows.push(
+      `<div class="kv-row"><span>Promo</span><strong>${escapeHtml(sale.appliedPromotionNames.join(", "))}</strong></div>`
+    );
+  }
+
+  if (sale.appliedBundleNames && sale.appliedBundleNames.length > 0) {
+    rows.push(
+      `<div class="kv-row"><span>Bundle</span><strong>${escapeHtml(sale.appliedBundleNames.join(", "))}</strong></div>`
+    );
+  }
+
+  return rows.join("");
+};
+
 const buildReceiptHtml = (input: {
   sale: LocalSale;
   cashierName?: string;
@@ -66,6 +123,8 @@ const buildReceiptHtml = (input: {
     sale.earnedPoints !== undefined && sale.earnedPoints > 0
       ? `<div class="kv-row"><span>Poin Dapat</span><strong>+${sale.earnedPoints.toLocaleString("id-ID")}</strong></div>`
       : "";
+  const discountRows = buildDiscountRows(sale);
+  const campaignRows = buildAppliedCampaignRows(sale);
 
   return `
     <html>
@@ -250,7 +309,7 @@ const buildReceiptHtml = (input: {
 
           <section class="totals">
             <div class="kv-row"><span>Subtotal</span><strong>Rp ${sale.subtotal.toLocaleString("id-ID")}</strong></div>
-            <div class="kv-row"><span>Diskon</span><strong>- Rp ${sale.discountAmount.toLocaleString("id-ID")}</strong></div>
+            ${discountRows}
             ${loyaltyDiscountRow}
             <div class="kv-row grand"><span>Total Bayar</span><strong>Rp ${sale.total.toLocaleString("id-ID")}</strong></div>
           </section>
@@ -258,6 +317,7 @@ const buildReceiptHtml = (input: {
           <section class="meta">
             <div class="kv-row"><span>Metode</span><strong>${paymentLabel}</strong></div>
             ${splitPaymentRows}
+            ${campaignRows}
             <div class="kv-row"><span>Status</span><strong>${sale.status.toUpperCase()}</strong></div>
             ${loyaltyEarnedRow}
           </section>

@@ -8,6 +8,11 @@ type SaleDetailModalProps = {
 export function SaleDetailModal({ activeSale, onClose }: SaleDetailModalProps) {
   if (!activeSale) return null;
 
+  const manualDiscountAmount = Math.max(0, Number(activeSale.manualDiscountAmount || 0));
+  const autoPromotionAmount = Math.max(0, Number(activeSale.autoPromotionAmount || 0));
+  const promotionNames = activeSale.appliedPromotionNames ?? [];
+  const bundleNames = activeSale.appliedBundleNames ?? [];
+
   return (
     <div
       className="fixed inset-0 z-[75] flex items-end justify-center bg-black/30 px-3 pb-4 pt-20 sm:items-center sm:p-6"
@@ -64,7 +69,20 @@ export function SaleDetailModal({ activeSale, onClose }: SaleDetailModalProps) {
 
         <div className="mt-4 space-y-1 rounded-xl bg-surface-container-lowest p-3 text-sm text-on-surface-variant">
           <p>Subtotal: Rp {activeSale.subtotal.toLocaleString("id-ID")}</p>
-          <p>Diskon: Rp {activeSale.discountAmount.toLocaleString("id-ID")}</p>
+          {manualDiscountAmount > 0 && <p>Diskon Manual: - Rp {Math.round(manualDiscountAmount).toLocaleString("id-ID")}</p>}
+          {autoPromotionAmount > 0 && (
+            <p>
+              Diskon Otomatis: - Rp {Math.round(autoPromotionAmount).toLocaleString("id-ID")}
+              {promotionNames.length > 0 || bundleNames.length > 0
+                ? ` (${[...promotionNames, ...bundleNames].slice(0, 3).join(" + ")})`
+                : ""}
+            </p>
+          )}
+          {manualDiscountAmount <= 0 && autoPromotionAmount <= 0 && (
+            <p>Diskon: - Rp {activeSale.discountAmount.toLocaleString("id-ID")}</p>
+          )}
+          {promotionNames.length > 0 && <p>Promo: {promotionNames.join(", ")}</p>}
+          {bundleNames.length > 0 && <p>Bundle: {bundleNames.join(", ")}</p>}
           {activeSale.redeemedAmount !== undefined && activeSale.redeemedAmount > 0 && (
             <p>
               Tukar Poin: - Rp {Math.round(activeSale.redeemedAmount).toLocaleString("id-ID")}

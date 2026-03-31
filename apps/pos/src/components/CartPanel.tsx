@@ -23,6 +23,9 @@ type CartPanelProps = {
   } | null;
   subtotal: number;
   discountPercent: number;
+  manualDiscountAmount: number;
+  autoPromotionDiscountAmount: number;
+  appliedAutoDiscountLabels: string[];
   discountAmount: number;
   total: number;
   estimatedCost: number;
@@ -76,6 +79,9 @@ export function CartPanel({
   pendingDraft = null,
   subtotal,
   discountPercent,
+  manualDiscountAmount,
+  autoPromotionDiscountAmount,
+  appliedAutoDiscountLabels,
   discountAmount,
   total,
   estimatedCost,
@@ -136,6 +142,10 @@ export function CartPanel({
   const maxRedeemableAmount = maxRedeemablePoints * loyaltyPointValue;
   const loyaltyMultiplierLabel = selectedCustomerLoyaltyMultiplier.toFixed(2).replace(/\.?0+$/, "");
   const nonMemberEstimatedPoints = Math.max(0, Math.floor(total / 10000));
+  const autoDiscountLabel = appliedAutoDiscountLabels.length > 0
+    ? appliedAutoDiscountLabels.slice(0, 2).join(" + ")
+    : "Auto Promo";
+  const hasDiscountBreakdown = manualDiscountAmount > 0 || autoPromotionDiscountAmount > 0;
 
   const applySplitPreset = (next: PaymentBreakdown) => {
     onApplySplitPaymentPreset({
@@ -560,7 +570,23 @@ export function CartPanel({
           <span>Subtotal</span>
           <span className="font-headline text-base font-semibold sm:text-lg">Rp {subtotal.toLocaleString("id-ID")}</span>
         </div>
-        {discountAmount > 0 && (
+        {hasDiscountBreakdown && (
+          <>
+            {manualDiscountAmount > 0 && (
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span>Potongan Manual {discountPercent > 0 ? `(${discountPercent}%)` : ""}</span>
+                <span className="font-headline text-base font-semibold text-error sm:text-lg">- Rp {Math.round(manualDiscountAmount).toLocaleString("id-ID")}</span>
+              </div>
+            )}
+            {autoPromotionDiscountAmount > 0 && (
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span>Potongan Otomatis ({autoDiscountLabel})</span>
+                <span className="font-headline text-base font-semibold text-secondary sm:text-lg">- Rp {Math.round(autoPromotionDiscountAmount).toLocaleString("id-ID")}</span>
+              </div>
+            )}
+          </>
+        )}
+        {!hasDiscountBreakdown && discountAmount > 0 && (
           <div className="flex items-center justify-between text-on-surface-variant">
             <span>Potongan Diskon {discountPercent > 0 ? `(${discountPercent}%)` : ""}</span>
             <span className="font-headline text-base font-semibold text-error sm:text-lg">- Rp {discountAmount.toLocaleString("id-ID")}</span>
