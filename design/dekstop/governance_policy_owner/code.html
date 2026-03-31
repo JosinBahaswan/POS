@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Pro - Governance &amp; Policy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        
+        /* Custom Toggle Style */
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #1b6d24;
+        }
+        .toggle-checkbox:checked + .toggle-label .toggle-dot {
+            transform: translateX(100%);
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#87d0f2",
+              "surface-dim": "#d7dae0",
+              "error": "#ba1a1a",
+              "surface": "#f7f9ff",
+              "on-secondary-fixed-variant": "#005312",
+              "outline-variant": "#bfc8cd",
+              "secondary-container": "#a0f399",
+              "primary-fixed-dim": "#87d0f2",
+              "on-tertiary-fixed-variant": "#6b3b00",
+              "outline": "#70787e",
+              "secondary-fixed-dim": "#88d982",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#a2e1ff",
+              "error-container": "#ffdad6",
+              "background": "#f7f9ff",
+              "on-secondary-container": "#217128",
+              "on-error-container": "#93000a",
+              "on-surface": "#181c20",
+              "on-tertiary-fixed": "#2d1600",
+              "tertiary": "#6b3a00",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f4fa",
+              "surface-container-high": "#e5e8ee",
+              "tertiary-fixed-dim": "#ffb876",
+              "primary-container": "#006684",
+              "on-surface-variant": "#3f484d",
+              "on-primary-fixed-variant": "#004d64",
+              "surface-variant": "#dfe3e8",
+              "tertiary-container": "#885116",
+              "inverse-on-surface": "#eef1f7",
+              "primary-fixed": "#bee9ff",
+              "secondary": "#1b6d24",
+              "surface-container": "#ebeef4",
+              "primary": "#004d64",
+              "inverse-surface": "#2d3135",
+              "surface-tint": "#016684",
+              "tertiary-fixed": "#ffdcc0",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#ffcfa6",
+              "secondary-fixed": "#a3f69c",
+              "surface-container-highest": "#dfe3e8",
+              "surface-bright": "#f7f9ff",
+              "on-background": "#181c20",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#002204",
+              "on-primary-fixed": "#001f2a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-slate-100 dark:bg-slate-950 z-40">
+<div class="flex flex-col h-full py-6 px-4 space-y-2">
+<!-- Brand Header -->
+<div class="px-4 mb-8">
+<h1 class="font-manrope font-black text-cyan-950 dark:text-white text-2xl tracking-tighter">Merchant Pro</h1>
+<p class="text-xs font-medium text-slate-500 mt-1 uppercase tracking-widest">Precision Architect Mode</p>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto">
+<!-- Navigation Items -->
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-inter text-sm font-medium">Register</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-inter text-sm font-medium">Catalog</span>
+</a>
+<div class="h-[1px] bg-slate-200 dark:bg-slate-800 my-2 mx-4"></div>
+<!-- Governance Active Tab -->
+<a class="flex items-center gap-3 bg-white dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-200 shadow-sm rounded-lg font-bold px-4 py-3 transition-transform duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="policy" style="font-variation-settings: 'FILL' 1;">policy</span>
+<span class="font-inter text-sm">Governance</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-inter text-sm font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-sm font-medium">Settings</span>
+</a>
+</nav>
+<!-- Footer Nav -->
+<div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 px-4 py-2 text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 text-error hover:bg-error-container/20 px-4 py-2 text-sm font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar Component -->
+<header class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4">
+<div class="flex items-center gap-4">
+<h2 class="text-cyan-900 dark:text-cyan-100 font-manrope font-bold text-lg tracking-tight">Governance &amp; Policy Settings</h2>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-widest">Active Security</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center bg-surface-container-low rounded-lg px-3 py-1.5 focus-within:bg-white border border-transparent focus-within:border-primary/20 transition-all">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 placeholder:text-outline-variant" placeholder="Search rules..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a store owner in a suit with clean office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMV6UCu8ejQ4tNwzkA_A1apD50tr3AVF4Y6S6A36Aik9BuuyLoiqObGVps9IKJXTddw5UJdxhxmzdmHedjA94aLCiIWb-3ElbrcMtnn424A5PD4acHOhFiAjksyis_iWQMeNOm1A0Wfdpj119vA7soiqrwvlOly0jS0OFm6EgavO12lnHpubP8g8au5ZcXgFkKwoPt31CSWo6QFU6IKcXaXKCLtUd5ZOQWVPFrzFlReDZvrdD6yd1mIxqVxn90bbUEgY-VuSC2_oc"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full"></div>
+</header>
+<!-- Page Content -->
+<div class="p-10 max-w-7xl mx-auto">
+<!-- Hero Title Section -->
+<div class="mb-12">
+<h3 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Authority &amp; Control</h3>
+<p class="text-on-surface-variant max-w-2xl leading-relaxed">Establish the boundaries of operational freedom. Manage sensitive overrides, monetary thresholds, and high-level manager permissions to ensure fiscal integrity.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Section: Discount Threshold -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow">
+<div class="flex items-center gap-4 mb-8">
+<div class="p-3 bg-primary-fixed text-on-primary-fixed-variant rounded-xl group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="percent">percent</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-lg text-primary">Discount Threshold</h4>
+<p class="text-xs text-on-surface-variant">Policy: Approval Limit</p>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Max Discount (Self-Approved)</label>
+<div class="flex items-end gap-2">
+<input class="bg-transparent border-none focus:ring-0 text-5xl font-headline font-black text-on-surface p-0 w-24" type="number" value="15"/>
+<span class="text-2xl font-bold text-outline-variant mb-1">%</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant italic leading-snug">Any discount exceeding this value will trigger a "Manager Override" prompt on the terminal screen.</p>
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold rounded-lg shadow-lg active:scale-95 transition-all">
+                            Update Threshold
+                        </button>
+</div>
+</div>
+<!-- Section: Approval Rules -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-start mb-10">
+<div class="flex items-center gap-4">
+<div class="p-3 bg-secondary-fixed text-on-secondary-fixed-variant rounded-xl">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-lg text-secondary">Approval Rules</h4>
+<p class="text-xs text-on-surface-variant">Operational Integrity Gates</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="info">info</span>
+</div>
+<div class="grid md:grid-cols-2 gap-6">
+<!-- Rule 1 -->
+<div class="p-6 bg-surface-container-low rounded-xl flex flex-col justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="mb-6">
+<span class="material-symbols-outlined text-secondary mb-4" data-icon="payments">payments</span>
+<h5 class="font-bold text-on-surface mb-2">Mandatory Refund Approval</h5>
+<p class="text-sm text-on-surface-variant">Require senior manager credentials for all cash and card returns.</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-secondary">Status: Enabled</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only toggle-checkbox" type="checkbox"/>
+<div class="toggle-label w-12 h-6 bg-slate-300 rounded-full p-1 transition-colors duration-200">
+<div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform duration-200"></div>
+</div>
+</label>
+</div>
+</div>
+<!-- Rule 2 -->
+<div class="p-6 bg-surface-container-low rounded-xl flex flex-col justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="mb-6">
+<span class="material-symbols-outlined text-tertiary mb-4" data-icon="cancel">cancel</span>
+<h5 class="font-bold text-on-surface mb-2">Mandatory Void Approval</h5>
+<p class="text-sm text-on-surface-variant">Prevent cart clearing or item deletion without authenticated manager override.</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-tertiary">Status: Pending</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" type="checkbox"/>
+<div class="toggle-label w-12 h-6 bg-slate-300 rounded-full p-1 transition-colors duration-200">
+<div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform duration-200"></div>
+</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Manager Permissions -->
+<div class="col-span-12 bg-surface-container-low rounded-2xl p-10 mt-4 overflow-hidden relative">
+<div class="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
+<img class="w-full h-full object-cover" data-alt="circuit board abstract background with glowing blue nodes representing high security and data integrity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCue-bnEVzhcjjHGLSRNCFghA59jcjoHXjYeJP2Af-wivLkxJ6QT1gJkK6mVp4JSIAGRbFSfb366OOZwtZ9PQYK4w_CCfiFTCx9fxkReF7QZVaxpqpaBgzjHcQn20Ljafo9YtqCm0hLpTRfazmrCC2LedK520osu6UaSJvlude1RbrT6BKUcXHGsYVZsMifPwxfunXwJpkZinmn8u_nCjfbRaLibtIHoTjXiFdH9sRloiGgfIwy5KamZkTmOxf0LgyJY6IJ-eSh7e0"/>
+</div>
+<div class="relative z-10">
+<div class="mb-10">
+<h4 class="font-headline font-extrabold text-2xl text-on-surface mb-2">Manager Permissions</h4>
+<p class="text-on-surface-variant">Define granular access levels for administrative roles.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Permission 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 flex gap-4 items-start">
+<div class="mt-1">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div>
+<label class="block font-bold text-on-surface mb-1">Data Export (CSV/JSON)</label>
+<p class="text-xs text-on-surface-variant leading-relaxed">Allows downloading sensitive financial reports and customer databases.</p>
+</div>
+</div>
+<!-- Permission 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 flex gap-4 items-start">
+<div class="mt-1">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div>
+<label class="block font-bold text-on-surface mb-1">Product Deletion</label>
+<p class="text-xs text-on-surface-variant leading-relaxed">Grants the ability to permanently remove inventory items from the central catalog.</p>
+</div>
+</div>
+<!-- Permission 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 flex gap-4 items-start border-l-4 border-l-tertiary">
+<div class="mt-1">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div>
+<label class="block font-bold text-on-surface mb-1">Stock Adjustment</label>
+<p class="text-xs text-on-surface-variant leading-relaxed">Enables manual inventory count overrides and shrinkage reconciliation.</p>
+</div>
+</div>
+</div>
+<div class="mt-12 flex justify-end gap-4">
+<button class="px-8 py-3 text-sm font-bold text-on-surface-variant hover:bg-slate-200 rounded-lg transition-colors">Discard Changes</button>
+<button class="px-10 py-3 bg-primary text-on-primary font-bold rounded-lg shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98]">Save Governance Policy</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Audit Log Summary -->
+<div class="mt-12 p-6 bg-surface-container rounded-xl border border-outline-variant/10 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="menu_book">menu_book</span>
+<span class="text-sm font-medium text-on-surface-variant">Last policy update by <strong class="text-on-surface">Admin_Sarah_K</strong> on Oct 12, 2023 14:32:01</span>
+</div>
+<button class="text-primary font-bold text-sm flex items-center gap-2 hover:underline">
+                    View Change Log
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+</body></html>

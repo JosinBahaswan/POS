@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Pro | Cashier Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#a3f69c",
+                        "secondary-fixed-dim": "#88d982",
+                        "surface-container-high": "#e5e8ee",
+                        "outline-variant": "#bfc8cd",
+                        "primary-fixed": "#bee9ff",
+                        "inverse-surface": "#2d3135",
+                        "surface-container": "#ebeef4",
+                        "on-secondary-fixed-variant": "#005312",
+                        "on-tertiary-fixed": "#2d1600",
+                        "tertiary": "#6b3a00",
+                        "on-tertiary-container": "#ffcfa6",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#3f484d",
+                        "tertiary-container": "#885116",
+                        "secondary-container": "#a0f399",
+                        "inverse-primary": "#87d0f2",
+                        "surface": "#f7f9ff",
+                        "primary-container": "#006684",
+                        "inverse-on-surface": "#eef1f7",
+                        "background": "#f7f9ff",
+                        "surface-bright": "#f7f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d7dae0",
+                        "on-surface": "#181c20",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "on-secondary-container": "#217128",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-container-highest": "#dfe3e8",
+                        "on-error": "#ffffff",
+                        "primary": "#004d64",
+                        "surface-container-low": "#f1f4fa",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "secondary": "#1b6d24",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-secondary-fixed": "#002204",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dfe3e8",
+                        "surface-tint": "#016684",
+                        "outline": "#70787e",
+                        "on-primary-fixed": "#001f2a",
+                        "on-primary-fixed-variant": "#004d64",
+                        "on-primary-container": "#a2e1ff",
+                        "on-background": "#181c20"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased overflow-hidden h-screen flex">
+<!-- SideNavBar (Shared Component) -->
+<aside class="bg-slate-100 dark:bg-slate-950 h-screen w-64 fixed left-0 top-0 z-50 flex flex-col py-6 gap-2">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">point_of_sale</span>
+</div>
+<div>
+<h2 class="font-manrope font-black text-cyan-900 dark:text-cyan-50 leading-tight">Main Branch</h2>
+<p class="text-xs text-on-surface-variant">Terminal 01</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="bg-white dark:bg-slate-900 text-cyan-700 dark:text-cyan-300 shadow-sm rounded-lg mx-2 flex items-center px-4 py-3 gap-3 transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-manrope font-semibold text-sm">Register</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-manrope font-semibold text-sm">Catalog</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-manrope font-semibold text-sm">Inventory</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-manrope font-semibold text-sm">Reports</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-slate-200/50 dark:border-slate-800/50 pt-4 space-y-1">
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope font-semibold text-sm">Settings</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-manrope font-semibold text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<main class="ml-64 flex flex-col flex-1 h-screen overflow-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-3 z-40 sticky top-0 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-8 flex-1">
+<h1 class="text-cyan-900 dark:text-cyan-50 font-extrabold tracking-tighter text-xl">Merchant Pro</h1>
+<div class="flex-1 max-w-md relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Search products, SKUs, or barcodes..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-lg text-sm font-semibold text-primary hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm">sync_alt</span>
+                    Role Switcher
+                </button>
+<div class="flex items-center gap-1">
+<button class="p-2 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-colors"><span class="material-symbols-outlined">settings</span></button>
+<button class="p-2 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-colors"><span class="material-symbols-outlined">help_outline</span></button>
+</div>
+<div class="ml-2 w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User Profile Avatar" data-alt="professional headshot of a smiling male employee wearing a neutral business casual shirt in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDM5UzjK7eHoCz4akfN5hCbqicfTxVUKH10GNi8xdFDaPza9vfVfBnd2nhXCW6zb6RxLLDvZbO9_uZd8KWiRj6qQ_bZsZe4ozHTUZbq1EXIEZHqSsgC4As2ISs63X4HGxQAwoGNYlramzwjCdwZMud__cvuBLtIarEtHCIbblY5h3MmZZ5TVBiRsnVrIKp82NGdcfzHPy_7d1Ae2I3qekK1h7gVrIoBzkt-vjT0X1NhPugZFU-KOKvm4qarnqzCC90oulwnKPn25Wk"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Left: Catalog Area -->
+<section class="flex-1 overflow-y-auto no-scrollbar p-8 bg-surface">
+<div class="flex items-center justify-between mb-8">
+<div class="space-y-1">
+<h2 class="font-headline text-2xl font-bold text-on-surface tracking-tight">Product Catalog</h2>
+<p class="text-on-surface-variant text-sm">64 items in Bakery &amp; Café</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-lowest shadow-sm px-4 py-2 rounded-lg text-sm font-medium text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                            Category
+                        </button>
+<button class="bg-surface-container-lowest shadow-sm px-4 py-2 rounded-lg text-sm font-medium text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">sort</span>
+                            Popular
+                        </button>
+</div>
+</div>
+<!-- Product Grid (Asymmetric Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Product Card 1 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="close-up of artisan sourdough bread loaf with a crispy golden crust sitting on a clean wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5ZyOrw-wPXDsLmlc5n9fq5t1K_1YhS0tRXir8h0q75ty3_cGNDzjByhaL444PNbehFkyFgOA5dJBtyDSzyNKzn9ru0BrRgpp4NzMbLl5TqghhdzkfPwjKBLNV6e1AUbPoU7eXUHJG-hNA8hej_PpCYlD6tWsj7dmWLYOMaWecY6MtLMxpuuNHOStz51LkqGQI2YdYpkGUwcVRtjBME7Vfti_1BjQP8K2AtP-ej2BPmnTakB4CC8J00OpY9LTmIN-JBHuLp5CeikU"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-secondary-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-on-secondary-container">24 IN STOCK</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">Artisan Sourdough</h3>
+<p class="text-on-surface-variant text-xs mb-3">Freshly baked daily, 800g</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$8.50</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="rich dark roast coffee beans being poured into a white ceramic cup with steam rising in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcKFKWks2kug9BZ07E9XTFbpKeg1VXkm-1Dtm4nhHFOewi0yA25llVDjigp5SmtZsCmOdQaZSRZtRjav8xZr32JlWNTHzMOlhp5ye3CLp4ntxYv0lpoveZVx6UH1sUUV2HXafzK-Qx7cJpa70g4L9507yIVMQb9Glj5c13MhTtZ65ebPz76EW-uCA4e5u8EcBMwtLnJ8WzI5kCouA1OFUpbzfv7c2XTmccIrhNOblu__2x3DifgNJ7Ww5Yed-DadEzUKSN0Ms7R8o"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-secondary-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-on-secondary-container">IN STOCK</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">Single Origin Espresso</h3>
+<p class="text-on-surface-variant text-xs mb-3">Ethiopian Yirgacheffe, Med-Dark</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$4.25</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="a selection of colorful french macarons arranged neatly on a pastel pink background with soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6nKPUhD1BCV7js6KS5qgAxOlDDtZdjMc8dpio3avjQnmy7P_kmuXSrs_ZGLz-LvzoiXh-z-nCPOkPLCGjTqjNnwTRBmwd0PFrwG55Zbc8ACSDU1zATpNM_WtCVoLDEJzsGd0f7v7UIuWCI6Rc4FJG2AUYvPSsuTCtJHUQjoAuPsg8EUFdIBrAD24YH3eLiOpkQd-bbzQdcBC8_gsp7W6wB2swlhBeJW_5FJ-OY2oAfi6oRXu3n28950aCs_YjOWaCeqrN2RX7Res"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-error-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-error">LOW STOCK (3)</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">French Macaron Box</h3>
+<p class="text-on-surface-variant text-xs mb-3">Assorted flavors, set of 6</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$18.00</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="fluffy vanilla cupcakes with swirls of pink buttercream frosting and edible pearls on a marble surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdWAqxcoErK4e1hKQh5808qq6WixqHMlffuBt67MNbZHvTkNqj2CAltJbVf3ZNPz5lbLnT7EUKjxy--6NNU0UOM3M77y_oA92OsxbhXwiR21Dsi37IutOz8UI5D6BbQuE02iGstBXowY-6TmO2YbVRWvChX_mma613q2ccWfUi8LbDR4qrPO2Co0lyqOgvBD2xzMhpMgLB4R_EjlKmWw-x7qjAuCf2PVv-0-mL0BFCBISwhxCUyt8_tyoaqvK-bSoTWr-JF6_IvLY"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-secondary-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-on-secondary-container">12 IN STOCK</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">Vanilla Velvet Cupcake</h3>
+<p class="text-on-surface-variant text-xs mb-3">Madagascar vanilla bean</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$3.75</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="golden brown flaky butter croissant sliced open on a white plate with crumbs scattered around" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKtKzcWjA328ibOaKuWm9SEEQyVTPLhyU3SxtAw5q5K48wbxDh6XRW_Q8tiCgCniUoS40uuIVtzkUNHyHx5CBwBsirO6FOU7YeD_wBRKtWe0p8IgFcAHIkI-KmzQkGaclcpxV1DZQjqZGODIn-n_VXByJuzBnfcnZTte71FhLuAmMzYonZZ4jBKGQmev-1GI5FIwxdgByIjNO-xaqnI3QjkqOcqxcpZUu0wx0tS8CMi2cKUsr81D99KKyGeGLM99PfAmagD2MD4gM"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-secondary-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-on-secondary-container">8 IN STOCK</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">Butter Croissant</h3>
+<p class="text-on-surface-variant text-xs mb-3">Authentic French recipe</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$3.50</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="fresh vibrant avocado toast on thick sourdough with chili flakes and poached egg on top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVtWc6Q__ufF50CUsP33EzEEASfVOjk4wfJQr82i3TP0X70HE7J1toWQOXE8f3u1WuYQ5H16UBtaEL-F6sEMr9KriE_DDF9rvM5gW-Vd_QSGIyvOcLHV6ckmiIwZsFR_HQICPMcKmn69RHfye0UTxzCTcj-umyYGkTQCK7109OeIj8VSeubrTk6mXjkCOLQa7Lj2O23rs0Nu99d6BXciwOAPnFpIGqWYu8hORWvpTrYnNE68K3Gh8emIkBGHGu4WFdxK44i3XUrMM"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-secondary-container/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-on-secondary-container">IN STOCK</div>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface text-lg">Avocado Artisan Toast</h3>
+<p class="text-on-surface-variant text-xs mb-3">Smashed avocado, radish, chili</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-headline font-bold text-xl text-primary">$12.50</span>
+<button class="w-10 h-10 rounded-lg bg-surface-container-low text-primary flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Dynamic Cart/Checkout Area -->
+<section class="w-[420px] bg-surface-container-low border-l border-slate-200/50 flex flex-col shadow-2xl relative z-10">
+<!-- Customer Selection -->
+<div class="p-6 bg-surface-container-lowest border-b border-slate-200/50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold">JD</div>
+<div>
+<p class="text-xs text-on-surface-variant font-medium">Customer</p>
+<h3 class="text-sm font-bold text-on-surface">John Doe</h3>
+</div>
+</div>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- Cart Items List -->
+<div class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="macro photo of espresso shot swirling with golden crema in a glass cup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGF6tfXY_u0MTNKlj1DUQ8icjyMOyR3vc0PCqIyOehvMHKWSub4v76UjwlvOIjfYad8s97qHIXMlWARMM6uJT-CgGN5NQkAmPwgpLZbZwxQUWKEsByZAOKl-PFfNh4odqIenh5CbOsw2P0r0snQT5Nv7CnqMScXlXlXEdodnGStUOq6-nAUuthztVsd32ybLdOM_ViGB08LiNY_qnBeTcrgd6dxISqerxboyZ5ItD84H09-AsuzI8fc7L6lZVotDf3UQdFvJWDKoA"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Single Origin Espresso</h4>
+<p class="text-xs text-on-surface-variant">Qty: 2</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">$8.50</p>
+<button class="text-[10px] text-error opacity-0 group-hover:opacity-100 transition-opacity font-bold">REMOVE</button>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="crusty loaf of sourdough bread with flour dusting on a rustic wooden tray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvH-GJgeAZDSUFRmux7gqxCiaGq6pSUuBM2fdNJNAnznmVRTnRjVjXDiyngWWSgqybMv1qWwJd5QB1HVNTq52DmdDq8uXTowZ3hjdN95RdR1wqdpwORzocgFnwgDyPVxtl0IRDBvLFbsJU1h-axun52BOW0B5i8LYap5-qFpnDkL_21b2ItVOkLULgXs10z4das-oktcRLNwoz60Qcql3xkRAa7wgA1bVmxnYTh_n6Sc2NjQF0IPB1-diwxja00JatZyEFuchgcIc"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Artisan Sourdough</h4>
+<p class="text-xs text-on-surface-variant">Qty: 1</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">$8.50</p>
+<button class="text-[10px] text-error opacity-0 group-hover:opacity-100 transition-opacity font-bold">REMOVE</button>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="slices of bread topped with avocado and sprouts on a plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvQPv0sweXEChpO0ICTPSYLzo51w_NAXaXPHwsMG4imxjBhD83hu_6NHXNUYBdoyLEtvklTftqiTh4QzmIMPUNTm0g3YVCfJvHQPcLxH3WCtvaY4KObP2zvG1yKDBgVHz5Y3x7DfONGOr9oMhp-US4_LdY2AtPAQyQghMzMcC7PwZ4jAnkmCMDAvqzRNL6MGeAATzQoRZu480olbT7eBbyI326udy9cn0DHC4yj5ifM1SC40uTuaX7xTj9ilgVHskmk_fdKmMnEFU"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Avocado Artisan Toast</h4>
+<p class="text-xs text-on-surface-variant">Qty: 1</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">$12.50</p>
+<button class="text-[10px] text-error opacity-0 group-hover:opacity-100 transition-opacity font-bold">REMOVE</button>
+</div>
+</div>
+</div>
+<!-- Checkout Summary -->
+<div class="bg-surface-container-lowest p-6 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-sm text-on-surface-variant">
+<span>Subtotal</span>
+<span class="font-medium">$29.50</span>
+</div>
+<div class="flex justify-between text-sm text-on-surface-variant">
+<span>Tax (8.5%)</span>
+<span class="font-medium">$2.51</span>
+</div>
+<div class="pt-2 flex justify-between items-end border-t border-slate-100 mt-2">
+<span class="text-on-surface font-bold">TOTAL DUE</span>
+<span class="font-headline text-3xl font-extrabold text-primary tracking-tight">$32.01</span>
+</div>
+</div>
+<!-- Payment Methods -->
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Payment Method</p>
+<div class="grid grid-cols-3 gap-2 mb-6">
+<button class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-primary text-on-primary ring-2 ring-primary ring-offset-2">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-bold">CASH</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">credit_card</span>
+<span class="text-[10px] font-bold">CARD</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">qr_code_2</span>
+<span class="text-[10px] font-bold">DIGITAL</span>
+</button>
+</div>
+<!-- CTA -->
+<button class="w-full py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-manrope font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">check_circle</span>
+                        Complete Sale
+                    </button>
+<button class="w-full mt-3 py-3 rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors">
+                        Add Order Note
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating Action Button for quick scan (Bottom NavBar fallback for focus) -->
+<button class="fixed bottom-8 right-[440px] w-14 h-14 bg-tertiary text-on-tertiary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+</button>
+</body></html>

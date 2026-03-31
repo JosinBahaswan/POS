@@ -7,6 +7,12 @@ type CheckoutConfirmModalProps = {
   paymentMethod: PaymentMethod;
   isSplitPayment?: boolean;
   paymentBreakdown?: PaymentBreakdown;
+  loyaltyPreview?: {
+    tier: "Silver" | "Gold" | "Platinum";
+    earnedPoints: number;
+    redeemedPoints: number;
+    redeemedAmount: number;
+  } | null;
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
@@ -19,6 +25,7 @@ export function CheckoutConfirmModal({
   paymentMethod,
   isSplitPayment = false,
   paymentBreakdown,
+  loyaltyPreview = null,
   onClose,
   onConfirm,
   loading = false
@@ -46,6 +53,21 @@ export function CheckoutConfirmModal({
               <p>Tunai: Rp {paymentBreakdown.cash.toLocaleString("id-ID")}</p>
               <p>Kartu: Rp {paymentBreakdown.card.toLocaleString("id-ID")}</p>
               <p>QRIS: Rp {paymentBreakdown.qris.toLocaleString("id-ID")}</p>
+            </div>
+          )}
+
+          {loyaltyPreview && (loyaltyPreview.earnedPoints > 0 || loyaltyPreview.redeemedPoints > 0) && (
+            <div className="rounded-xl bg-secondary-container/40 px-3 py-2 text-xs text-on-secondary-container">
+              <p>Tier: {loyaltyPreview.tier}</p>
+              {loyaltyPreview.redeemedPoints > 0 && (
+                <p>
+                  Tukar poin: {loyaltyPreview.redeemedPoints.toLocaleString("id-ID")}
+                  {" "}(Rp {Math.round(loyaltyPreview.redeemedAmount).toLocaleString("id-ID")})
+                </p>
+              )}
+              {loyaltyPreview.earnedPoints > 0 && (
+                <p>Dapat poin: +{loyaltyPreview.earnedPoints.toLocaleString("id-ID")}</p>
+              )}
             </div>
           )}
 

@@ -1,39 +1,46 @@
 ﻿import { useEffect } from "react";
-import { readApprovalRequests, writeApprovalRequests } from "../approvals";
+
+const APPROVAL_REQUESTS_KEY = "pos_approval_requests";
+const LOCAL_SYNC_EVENT = "local-storage-sync";
+
+function scopedApprovalKey(scopeKey: string) {
+  return `${APPROVAL_REQUESTS_KEY}:${scopeKey}`;
+}
 
 export function useRemoteApprovalSync(storageScope: string, refreshInterval = 5000) {
   useEffect(() => {
-    // Polling simulation for Real-Time Remote Approval
-    // In a full production env, you would use supabase.channel("approval_requests").on(...)
-    const interval = setInterval(() => {
-      const requests = readApprovalRequests(storageScope);
-      let changed = false;
+    const approvalStorageKey = scopedApprovalKey(storageScope);
+    let lastSnapshot = localStorage.getItem(approvalStorageKey) ?? "[]";
 
-      const updated = requests.map((req) => {
-        if (req.status === "pending" && req.createdAt) {
-          // Auto-approve after 30 seconds for demonstration purposes
-          // or ideally sync with Supabase here.
-          const age = Date.now() - new Date(req.createdAt).getTime();
-          if (age > 30000) {
-            changed = true;
-            return {
-              ...req,
-              status: "approved" as const,
-              resolvedAt: new Date().toISOString(),
-              resolvedBy: "remote-manager-auto"
-            };
-          }
-        }
-        return req;
-      });
+    const notifySync = () => {
+      window.dispatchEvent(new Event(LOCAL_SYNC_EVENT));
+    };
 
-      if (changed) {
-        writeApprovalRequests(updated, storageScope);
-        // Force a window event so the usePosAppController knows to re-render
-        window.dispatchEvent(new Event("local-storage-sync"));
+    const onStorage = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage || event.key !== approvalStorageKey) {
+        return;
       }
-    }, refreshInterval);
 
-    return () => clearInterval(interval);
+      const nextSnapshot = event.newValue ?? "[]";
+      if (nextSnapshot === lastSnapshot) return;
+
+      lastSnapshot = nextSnapshot;
+      notifySync();
+    };
+
+    const interval = window.setInterval(() => {
+      const nextSnapshot = localStorage.getItem(approvalStorageKey) ?? "[]";
+      if (nextSnapshot === lastSnapshot) return;
+
+      lastSnapshot = nextSnapshot;
+      notifySync();
+    }, Math.max(1000, refreshInterval));
+
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.clearInterval(interval);
+    };
   }, [storageScope, refreshInterval]);
 }

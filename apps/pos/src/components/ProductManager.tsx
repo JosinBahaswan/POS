@@ -7,12 +7,17 @@ import {
 } from "../hpp";
 import {
   DEFAULT_PRODUCT_IMAGE,
+  ProductDeleteConfirmModal,
   ProductEditorModal,
+  ProductInfoModal,
+  ProductManagerDesktopPanel,
   ProductManagerList,
   ProductManagerSummary,
   ProductManagerToolbar,
   ProductOpnameModal,
   productManagerInitialState,
+  type DeleteDialogState,
+  type InfoDialogState,
   type ProductManagerFormState
 } from "./product-manager";
 
@@ -22,19 +27,6 @@ type ProductManagerProps = {
   onDelete: (id: string) => void;
   canDeleteProduct: boolean;
   canAdjustStock: boolean;
-};
-
-type InfoDialogState = {
-  title: string;
-  message: string;
-  tone: "info" | "error";
-};
-
-type DeleteDialogState = {
-  ids: string[];
-  title: string;
-  message: string;
-  confirmLabel: string;
 };
 
 export function ProductManager({
@@ -122,6 +114,41 @@ export function ProductManager({
     () => products.filter((item) => item.stock > 0 && item.stock <= 2).length,
     [products]
   );
+
+  const totalStockValue = useMemo(
+    () => products.reduce((sum, item) => sum + item.price * item.stock, 0),
+    [products]
+  );
+
+  const maxStockValue = useMemo(
+    () => Math.max(...products.map((item) => item.stock), 1),
+    [products]
+  );
+
+  const categoryConcentration = useMemo(() => {
+    const stockByCategory = new Map<string, number>();
+
+    for (const item of products) {
+      const key = item.category || "uncategorized";
+      stockByCategory.set(key, (stockByCategory.get(key) ?? 0) + item.stock);
+    }
+
+    const totalUnits = Math.max(
+      Array.from(stockByCategory.values()).reduce((sum, units) => sum + units, 0),
+      1
+    );
+
+    return Array.from(stockByCategory.entries())
+      .map(([category, units]) => ({
+        category,
+        units,
+        percent: Math.max(1, Math.round((units / totalUnits) * 100))
+      }))
+      .sort((a, b) => b.units - a.units)
+      .slice(0, 3);
+  }, [products]);
+
+  const catalogHealth = criticalStockCount === 0 ? "Optimal" : lowStockCount > 0 ? "Attention" : "Stable";
 
   const closeForm = () => setIsFormOpen(false);
 
@@ -480,82 +507,113 @@ export function ProductManager({
 
   return (
     <section className="relative grid gap-4">
-      <ProductManagerToolbar
+      <ProductManagerDesktopPanel
+        products={products}
+        filtered={filtered}
         search={search}
-        onSearchChange={setSearch}
         categoryFilter={categoryFilter}
-        onCategoryFilterChange={setCategoryFilter}
         categoryOptions={categoryOptions}
-      />
-
-      <ProductManagerSummary
-        totalProducts={products.length}
-        hiddenByFilter={Math.max(products.length - filtered.length, 0)}
-        lowStockCount={lowStockCount}
-        criticalStockCount={criticalStockCount}
-      />
-
-      <section className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <label className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface">
-            <input
-              type="checkbox"
-              checked={allVisibleSelected}
-              onChange={toggleSelectAllVisible}
-              disabled={filteredProductIds.length === 0}
-            />
-            Pilih semua hasil filter ({filteredProductIds.length})
-          </label>
-          <p className="text-xs text-on-surface-variant">
-            Terpilih: {selectedProductIds.length} produk
-          </p>
-        </div>
-
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={requestBulkDeleteSelected}
-            disabled={!canDeleteProduct || selectedProductIds.length === 0}
-            className="h-10 rounded-xl bg-error-container text-xs font-bold text-on-error-container disabled:opacity-40"
-          >
-            Hapus Terpilih
-          </button>
-          <button
-            type="button"
-            onClick={requestBulkDeleteFiltered}
-            disabled={!canDeleteProduct || filteredProductIds.length === 0}
-            className="h-10 rounded-xl bg-surface-container-high text-xs font-bold text-on-surface-variant disabled:opacity-40"
-          >
-            Hapus Semua Terfilter
-          </button>
-        </div>
-
-        <p className="mt-2 text-xs text-on-surface-variant">
-          Gunakan tombol +/- pada kartu produk untuk menyesuaikan stok cepat. Menu "Opname" tersedia untuk input jumlah aktual.
-        </p>
-      </section>
-
-      <ProductManagerList
-        products={filtered}
-        selectedIds={selectedIdSet}
+        selectedIdSet={selectedIdSet}
+        allVisibleSelected={allVisibleSelected}
+        filteredProductIds={filteredProductIds}
+        selectedProductIds={selectedProductIds}
         canDeleteProduct={canDeleteProduct}
         canAdjustStock={canAdjustStock}
-        onToggleSelect={toggleSelectProduct}
-        onAdjustStock={adjustStock}
-        onRestock={restock}
-        onOpenOpname={openOpname}
+        totalStockValue={totalStockValue}
+        lowStockCount={lowStockCount}
+        catalogHealth={catalogHealth}
+        maxStockValue={maxStockValue}
+        categoryConcentration={categoryConcentration}
+        onOpenCreateForm={openCreateForm}
+        onSearchChange={setSearch}
+        onCategoryFilterChange={setCategoryFilter}
+        onToggleSelectAllVisible={toggleSelectAllVisible}
+        onRequestBulkDeleteSelected={requestBulkDeleteSelected}
+        onRequestBulkDeleteFiltered={requestBulkDeleteFiltered}
+        onToggleSelectProduct={toggleSelectProduct}
         onEdit={edit}
-        onRequestDelete={requestDeleteProduct}
+        onRestock={restock}
+        onRequestDeleteProduct={requestDeleteProduct}
       />
 
-      <button
-        type="button"
-        onClick={openCreateForm}
-        className="fixed bottom-24 right-6 z-40 grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-lg shadow-primary/20 transition-all active:scale-90 lg:bottom-8"
-        aria-label="Tambah produk"
-      >
-        <span className="material-symbols-outlined text-3xl">add</span>
-      </button>
+      <section className="grid gap-4 lg:hidden">
+        <ProductManagerToolbar
+          search={search}
+          onSearchChange={setSearch}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          categoryOptions={categoryOptions}
+        />
+
+        <ProductManagerSummary
+          totalProducts={products.length}
+          hiddenByFilter={Math.max(products.length - filtered.length, 0)}
+          lowStockCount={lowStockCount}
+          criticalStockCount={criticalStockCount}
+        />
+
+        <section className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface">
+              <input
+                type="checkbox"
+                checked={allVisibleSelected}
+                onChange={toggleSelectAllVisible}
+                disabled={filteredProductIds.length === 0}
+              />
+              Pilih semua hasil filter ({filteredProductIds.length})
+            </label>
+            <p className="text-xs text-on-surface-variant">
+              Terpilih: {selectedProductIds.length} produk
+            </p>
+          </div>
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={requestBulkDeleteSelected}
+              disabled={!canDeleteProduct || selectedProductIds.length === 0}
+              className="h-10 rounded-xl bg-error-container text-xs font-bold text-on-error-container disabled:opacity-40"
+            >
+              Hapus Terpilih
+            </button>
+            <button
+              type="button"
+              onClick={requestBulkDeleteFiltered}
+              disabled={!canDeleteProduct || filteredProductIds.length === 0}
+              className="h-10 rounded-xl bg-surface-container-high text-xs font-bold text-on-surface-variant disabled:opacity-40"
+            >
+              Hapus Semua Terfilter
+            </button>
+          </div>
+
+          <p className="mt-2 text-xs text-on-surface-variant">
+            Gunakan tombol +/- pada kartu produk untuk menyesuaikan stok cepat. Menu "Opname" tersedia untuk input jumlah aktual.
+          </p>
+        </section>
+
+        <ProductManagerList
+          products={filtered}
+          selectedIds={selectedIdSet}
+          canDeleteProduct={canDeleteProduct}
+          canAdjustStock={canAdjustStock}
+          onToggleSelect={toggleSelectProduct}
+          onAdjustStock={adjustStock}
+          onRestock={restock}
+          onOpenOpname={openOpname}
+          onEdit={edit}
+          onRequestDelete={requestDeleteProduct}
+        />
+
+        <button
+          type="button"
+          onClick={openCreateForm}
+          className="fixed bottom-24 right-6 z-40 grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-lg shadow-primary/20 transition-all active:scale-90 lg:hidden"
+          aria-label="Tambah produk"
+        >
+          <span className="material-symbols-outlined text-3xl">add</span>
+        </button>
+      </section>
 
       <ProductEditorModal
         open={isFormOpen}
@@ -594,90 +652,5 @@ export function ProductManager({
         onConfirm={confirmDeleteProducts}
       />
     </section>
-  );
-}
-
-type ProductInfoModalProps = {
-  dialog: InfoDialogState | null;
-  onClose: () => void;
-};
-
-function ProductInfoModal({ dialog, onClose }: ProductInfoModalProps) {
-  if (!dialog) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[85] flex items-end justify-center bg-black/35 px-3 pb-4 pt-20 sm:items-center sm:p-6"
-      onClick={onClose}
-    >
-      <aside
-        className="w-full max-w-sm rounded-2xl bg-surface-container-low p-4 editorial-shadow"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h3
-          className={
-            dialog.tone === "error"
-              ? "font-headline text-xl font-extrabold text-error"
-              : "font-headline text-xl font-extrabold text-on-surface"
-          }
-        >
-          {dialog.title}
-        </h3>
-        <p className="mt-2 text-sm text-on-surface-variant">{dialog.message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-4 h-10 w-full rounded-xl bg-primary text-sm font-semibold text-on-primary"
-        >
-          Tutup
-        </button>
-      </aside>
-    </div>
-  );
-}
-
-type ProductDeleteConfirmModalProps = {
-  dialog: DeleteDialogState | null;
-  onClose: () => void;
-  onConfirm: () => void;
-};
-
-function ProductDeleteConfirmModal({
-  dialog,
-  onClose,
-  onConfirm
-}: ProductDeleteConfirmModalProps) {
-  if (!dialog) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[86] flex items-end justify-center bg-black/35 px-3 pb-4 pt-20 sm:items-center sm:p-6"
-      onClick={onClose}
-    >
-      <aside
-        className="w-full max-w-sm rounded-2xl bg-surface-container-low p-4 editorial-shadow"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h3 className="font-headline text-xl font-extrabold text-on-surface">{dialog.title}</h3>
-        <p className="mt-2 text-sm text-on-surface-variant">{dialog.message}</p>
-
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-10 rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="h-10 rounded-xl bg-error-container text-sm font-semibold text-on-error-container"
-          >
-            {dialog.confirmLabel}
-          </button>
-        </div>
-      </aside>
-    </div>
   );
 }

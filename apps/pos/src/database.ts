@@ -7,11 +7,15 @@ export type LocalSale = {
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
+  redeemedPoints?: number;
+  redeemedAmount?: number;
   total: number;
   paymentMethod: PaymentMethod;
   paymentBreakdown?: PaymentBreakdown;
   shiftId?: string;
   outletId?: string;
+  cashierId?: string;
+  cashierName?: string;
   customerId?: string;
   earnedPoints?: number;
   status: TransactionStatus;
@@ -98,6 +102,14 @@ export function readLocalSales(scopeKey = "default"): LocalSale[] {
       ...sale,
       status: normalizeTransactionStatus(sale.status),
       outletId: sale.outletId || "MAIN",
+      cashierId:
+        typeof sale.cashierId === "string" && sale.cashierId.trim().length > 0
+          ? sale.cashierId.trim()
+          : undefined,
+      cashierName:
+        typeof sale.cashierName === "string" && sale.cashierName.trim().length > 0
+          ? sale.cashierName.trim()
+          : undefined,
       paymentBreakdown: sale.paymentBreakdown
         ? {
             cash: Number(sale.paymentBreakdown.cash || 0),
@@ -105,6 +117,18 @@ export function readLocalSales(scopeKey = "default"): LocalSale[] {
             qris: Number(sale.paymentBreakdown.qris || 0)
           }
         : undefined,
+      earnedPoints:
+        sale.earnedPoints === undefined
+          ? undefined
+          : Math.max(0, Math.round(Number(sale.earnedPoints || 0))),
+      redeemedPoints:
+        sale.redeemedPoints === undefined
+          ? undefined
+          : Math.max(0, Math.round(Number(sale.redeemedPoints || 0))),
+      redeemedAmount:
+        sale.redeemedAmount === undefined
+          ? undefined
+          : Math.max(0, Number(sale.redeemedAmount || 0)),
       items: normalizeCartItems(sale.items)
     }));
   } catch {

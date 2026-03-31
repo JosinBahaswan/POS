@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Pro | Owner Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#a3f69c",
+                        "secondary-fixed-dim": "#88d982",
+                        "surface-container-high": "#e5e8ee",
+                        "outline-variant": "#bfc8cd",
+                        "primary-fixed": "#bee9ff",
+                        "inverse-surface": "#2d3135",
+                        "surface-container": "#ebeef4",
+                        "on-secondary-fixed-variant": "#005312",
+                        "on-tertiary-fixed": "#2d1600",
+                        "tertiary": "#6b3a00",
+                        "on-tertiary-container": "#ffcfa6",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#3f484d",
+                        "tertiary-container": "#885116",
+                        "secondary-container": "#a0f399",
+                        "inverse-primary": "#87d0f2",
+                        "surface": "#f7f9ff",
+                        "primary-container": "#006684",
+                        "inverse-on-surface": "#eef1f7",
+                        "background": "#f7f9ff",
+                        "surface-bright": "#f7f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d7dae0",
+                        "on-surface": "#181c20",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "on-secondary-container": "#217128",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-container-highest": "#dfe3e8",
+                        "on-error": "#ffffff",
+                        "primary": "#004d64",
+                        "surface-container-low": "#f1f4fa",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "secondary": "#1b6d24",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-secondary-fixed": "#002204",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dfe3e8",
+                        "surface-tint": "#016684",
+                        "outline": "#70787e",
+                        "on-primary-fixed": "#001f2a",
+                        "on-primary-fixed-variant": "#004d64",
+                        "on-primary-container": "#a2e1ff",
+                        "on-background": "#181c20"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9ff; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+        }
+        .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl font-manrope font-bold text-lg tracking-tight docked full-width top-0 z-40 sticky shadow-sm dark:shadow-none flex justify-between items-center w-full px-8 py-3">
+<div class="flex items-center gap-8">
+<div class="text-cyan-900 dark:text-cyan-50 font-extrabold tracking-tighter text-2xl">Merchant Pro</div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-cyan-700 dark:text-cyan-300 font-bold border-b-2 border-cyan-700 py-1" href="#">Command Center</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors px-3 py-1 rounded-lg" href="#">Transactions</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors px-3 py-1 rounded-lg" href="#">Inventory</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-surface-container-low px-4 py-1.5 rounded-full gap-2">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-normal" placeholder="Search analytics..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-slate-200/50 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-slate-200/50 rounded-full transition-all">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold text-on-surface">Alex Stratton</p>
+<p class="text-[10px] text-on-surface-variant">Owner</p>
+</div>
+<img alt="User Profile Avatar" class="h-9 w-9 rounded-full object-cover ring-2 ring-primary-fixed" data-alt="portrait of a professional man with short hair and a confident smile, clean studio background, professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiVGYdv7661SjFQROCmff1SigfMlC8SjImBbd6YSTqXdhtbQuLZOFjslyCZtrJ_IhVd2U4m_hpnetx53mdY_ZGMAD9hvQxAfrF-pwP0-ZMBzLSQNfYXL9LQHoesTOo12UwVa6eLFCAvLOEJm-jYUHnD2KuphxKTrPxvfHAkEbQFPbTM3lmKicxcVJ-9NkXqJ6wVxmALqrnR2IBAe83tcm6hZC72w8EaOGSwoMKaReEMfMqAnW8Kt85FTucyrBlu9wSFhjhs_7xTWI"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 z-50 bg-slate-100 dark:bg-slate-950 py-6 gap-2">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<div>
+<h3 class="font-black text-cyan-900 dark:text-cyan-50 text-sm leading-tight">Main Branch</h3>
+<p class="text-slate-500 text-[10px] uppercase tracking-widest font-bold">Terminal 01</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">point_of_sale</span>
+<span class="font-manrope font-semibold text-sm">Register</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-manrope font-semibold text-sm">Catalog</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-manrope font-semibold text-sm">Inventory</span>
+</a>
+<a class="bg-white dark:bg-slate-900 text-cyan-700 dark:text-cyan-300 shadow-sm rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-manrope font-semibold text-sm">Reports</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-manrope font-semibold text-sm">Analytics</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-manrope font-semibold text-sm">Team</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                Complete Sale
+            </button>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-manrope font-semibold text-sm">Settings</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-300 px-4 py-3 mx-2 flex items-center gap-3 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-manrope font-semibold text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 min-h-screen p-6 md:p-10 lg:p-16">
+<!-- Header Section -->
+<header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<nav class="flex items-center gap-2 text-on-surface-variant text-xs font-medium mb-3">
+<span>Admin</span>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span>Dashboard</span>
+</nav>
+<h1 class="font-headline font-extrabold text-4xl lg:text-5xl text-on-surface tracking-tight">Owner Command Center</h1>
+<p class="text-on-surface-variant mt-2 font-body max-w-xl">Real-time performance monitoring and administrative controls for your Merchant Pro ecosystem.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low p-1.5 rounded-xl flex gap-1">
+<button class="px-4 py-1.5 rounded-lg bg-surface-container-lowest shadow-sm text-xs font-bold text-primary">Live View</button>
+<button class="px-4 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">Historical</button>
+</div>
+<button class="bg-secondary text-on-secondary px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:brightness-110 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">download</span>
+                    Export PDF
+                </button>
+</div>
+</header>
+<!-- Analytics Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+<!-- Revenue Trend Card -->
+<div class="md:col-span-2 lg:col-span-2 bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-8">
+<div class="flex flex-col items-end">
+<span class="text-secondary font-bold flex items-center gap-1 text-sm bg-secondary-container/30 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            12.5%
+                        </span>
+<p class="text-[10px] text-on-surface-variant mt-1 font-bold uppercase tracking-tighter">Vs. last month</p>
+</div>
+</div>
+<h3 class="font-headline font-bold text-lg mb-1">Monthly Revenue Trend</h3>
+<p class="text-on-surface-variant text-sm mb-8">Performance metrics for Jan 1 - Oct 28</p>
+<div class="h-64 flex items-end justify-between gap-4 mt-4">
+<!-- Simple CSS bar chart visualization -->
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[40%] relative group/bar">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-primary text-white text-[10px] px-2 py-1 rounded">24k</div>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[55%] relative group/bar">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-primary text-white text-[10px] px-2 py-1 rounded">32k</div>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[45%] relative group/bar"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[70%] relative group/bar"></div>
+<div class="flex-1 bg-primary/20 rounded-t-xl h-[85%] relative group/bar border-x-2 border-t-2 border-primary/40">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-100 bg-primary text-white text-[10px] px-2 py-1 rounded font-bold tracking-tighter">$52,480</div>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[60%] relative group/bar"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-xl hover:bg-primary/10 transition-colors h-[50%] relative group/bar"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-2">
+<span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span>
+</div>
+</div>
+<!-- Quick Stats Column -->
+<div class="flex flex-col gap-6">
+<!-- Transaction Volume -->
+<div class="bg-primary text-on-primary rounded-[2rem] p-8 shadow-xl shadow-primary/10 flex flex-col justify-between h-full group hover:scale-[1.02] transition-transform duration-300">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="p-3 bg-white/10 rounded-2xl backdrop-blur-md">
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+</div>
+<span class="material-symbols-outlined text-on-primary/40 group-hover:text-on-primary transition-colors cursor-pointer">info</span>
+</div>
+<p class="text-on-primary/70 font-medium text-sm">Daily Transactions</p>
+<h2 class="text-4xl font-headline font-black mt-1">1,482</h2>
+</div>
+<div class="mt-8 pt-6 border-t border-white/10">
+<p class="text-xs text-on-primary/60 font-medium italic">"Busiest time: 12:45 PM - 2:15 PM"</p>
+</div>
+</div>
+<!-- Active Cashiers -->
+<div class="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border border-surface-container flex flex-col justify-between h-full">
+<div>
+<p class="text-on-surface-variant font-medium text-sm">Active Terminals</p>
+<h2 class="text-3xl font-headline font-bold text-on-surface mt-1">08 <span class="text-lg text-on-surface-variant">/ 12</span></h2>
+</div>
+<div class="mt-6 flex -space-x-3 overflow-hidden">
+<img alt="Staff" class="inline-block h-10 w-10 rounded-full ring-4 ring-surface-container-lowest object-cover" data-alt="portrait of a professional woman with a friendly expression, soft office lighting, modern business attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZXdYEG1ql6vqoYhRCCbQPhH25yNs9sfQL5sqFXoorl73UmVc22WkYniBoYPTHd9x5SZJgKpoHH32z-fmTz29VGp_-l05SqSIwQGul_KPocxx9-m5VTNfC-tBfE-ABlrgMN0dC_2wLuOHGisIe-BPs6efaT4r6X1Um7ViZ7QNoDAjgQOYknW8Quxb0MaLXfJSQoHNQAIOwghNj8ZDJOfidq_Mj_mNAlUiZMJdJQUnf5MgXImVr6awyYEL6OiHJ2P9kPbOINPgt6a8"/>
+<img alt="Staff" class="inline-block h-10 w-10 rounded-full ring-4 ring-surface-container-lowest object-cover" data-alt="portrait of a smiling man with glasses, professional business setting, soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIDNMMSJruQdrqD4SR0JbgWuXBe_L3AALRYyTztc3xM2G3EA4AXIfpdiCgkem3aPsl9Y6PIh7AtNewNE1nVTp1FSiUx4JreEev3o-SB2UcklkWezffS3sTlFX2x_wpjzDhyphrnGLX5aRMp837QrP4hoxth30jX_gqOIB-5IafXTcGiPCZP5zQvWYc0H1qedNMiMF_orDLT0m9ttc-tD5MqyVs_KoLqvHNLlx_QQdYc3wqJVpeufrqLon53lGQkAdDKm60_Qo1rzA"/>
+<img alt="Staff" class="inline-block h-10 w-10 rounded-full ring-4 ring-surface-container-lowest object-cover" data-alt="portrait of a man with a beard and confident look, neutral studio background, corporate photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSihVUQQC0hPCVrCvBCWxQ6A0CGoO2BIykW_tk5P4t2hr8u6p_DJiS-3_il4bwgZOze0g7dVwzzeGV9rRiRsBQK7RkGpxAEZLzUuPpF5UFzQozd19Plad8HWjhipkLycqbVj8oiXJX8UCm0BXZedYUlgn8GT-kHJUS6YipUJGZCRcd0eY3sjqd1PDnM9J9L5BZCVvxGPQq0hki8xz9PS35A9upGHENG0g-_b8O7K8Dd-O0KhdPl9LVz4tUorYA5Pv4gDSSd3DLj7U"/>
+<div class="flex items-center justify-center h-10 w-10 rounded-full ring-4 ring-surface-container-lowest bg-primary-container text-on-primary-container text-xs font-bold">+5</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Team Management & Performance Reports Section -->
+<section class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+<!-- User Management List -->
+<div class="xl:col-span-2 space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline font-bold text-2xl text-on-surface">Team Management</h3>
+<p class="text-on-surface-variant text-sm mt-1">Assign roles and monitor staff activity</p>
+</div>
+<button class="text-primary font-bold text-sm flex items-center gap-2 px-4 py-2 hover:bg-primary/5 rounded-xl transition-colors">
+<span class="material-symbols-outlined text-sm">person_add</span>
+                        Invite Member
+                    </button>
+</div>
+<div class="bg-surface-container-low rounded-[2rem] overflow-hidden">
+<div class="grid grid-cols-12 px-8 py-5 border-b border-surface-container-high text-[10px] uppercase font-black tracking-widest text-on-surface-variant/60">
+<div class="col-span-5">Staff Member</div>
+<div class="col-span-3">Role</div>
+<div class="col-span-2">Status</div>
+<div class="col-span-2 text-right">Activity</div>
+</div>
+<!-- Team Item -->
+<div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<div class="col-span-5 flex items-center gap-4">
+<div class="h-12 w-12 rounded-2xl bg-slate-200 overflow-hidden">
+<img alt="Marcus" class="h-full w-full object-cover" data-alt="close-up of a man in professional attire, confident and calm expression, blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr4U73mzQtQtaO5uuDlT-mfUp-aMZFCLyZIGG9xZeDV5ZrqyZG1jqn3ummlz40-ci_8VUEQtzypUKKBMjjJTd9kn8oHOunyBeCESAPfv5S-Y_TDhfIENAtNhUEk-yQ9r1UNWcNh6T9m0r3UHKIKffqKGAtulYceMGjI7Nvo955CZSN4lXhISl76IKxszlvpY0DlF2TYzta0qFAQkLrvG6g3EgfMLDVLpYOvMXvmFTe118heeYLt_ZXdlUUyVs20mvxRCb1GBZfbBU"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface text-sm">Marcus Chen</h4>
+<p class="text-xs text-on-surface-variant">marcus.c@merchantpro.io</p>
+</div>
+</div>
+<div class="col-span-3">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold">Store Manager</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<div class="h-2 w-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-semibold text-on-surface">Active</span>
+</div>
+<div class="col-span-2 text-right text-xs font-bold text-on-surface-variant">
+                            4m ago
+                        </div>
+</div>
+<!-- Team Item -->
+<div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-surface-container-lowest transition-colors border-t border-surface-container-high group cursor-pointer">
+<div class="col-span-5 flex items-center gap-4">
+<div class="h-12 w-12 rounded-2xl bg-slate-200 overflow-hidden">
+<img alt="Sarah" class="h-full w-full object-cover" data-alt="professional portrait of a woman with curly hair, natural light, smiling, soft focus architectural background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoDREECKlLd8H0eTaCX4tVfy1TB1S91-kPS6MSDvWCYWitZ1zR9zfdthyHVpTS_PexW3WvAOQd3gm-GaUzchlogBZ0iNkeRgw_FdmM7340dMtxR3qm_2T2EkkLiwuQQ937GSwH0hS9q8YwqKJgMw8ISIWRVp8mZUcW6qpQBX1PMXSzkHpnIwY4lqG9--c1LWjABvtwY1vxQBNlTrDbJTWdke7vmd9hit_ogUAMb01LZQZIuwEFvSR4qUlVf8NXSPXNimjbE7UOHvA"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface text-sm">Sarah Jenkins</h4>
+<p class="text-xs text-on-surface-variant">s.jenkins@merchantpro.io</p>
+</div>
+</div>
+<div class="col-span-3">
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold">Senior Cashier</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<div class="h-2 w-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-semibold text-on-surface">Active</span>
+</div>
+<div class="col-span-2 text-right text-xs font-bold text-on-surface-variant">
+                            12m ago
+                        </div>
+</div>
+<!-- Team Item -->
+<div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-surface-container-lowest transition-colors border-t border-surface-container-high group cursor-pointer">
+<div class="col-span-5 flex items-center gap-4">
+<div class="h-12 w-12 rounded-2xl bg-slate-200 overflow-hidden">
+<img alt="Derek" class="h-full w-full object-cover" data-alt="sharp portrait of a man in a business suit, thoughtful expression, high-end office interior lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdGDHzKjMp0xpesavni76BYfF2VpKUMLOM1nNZHf4q7bE8wLhgohh2XokEjl5XKbrghJslB9AW-ck1D8RedttFGh7yyKtKTzJNEn1gO4OCnsDPiMlyGQ7szPEWzELXIGe7Ls0zS76SpVWo3zyxpOIjGx6LGfAu3f_vQO0kZIPdrmZPj_HiHBTHghcjDVPaByVmQggRhi9xeAD5NeU6l4wLT1f01mEzgHqK4LF1KP4Vg9SKRaNdbX2-6-to8Nge3-EjI0tGcoUOQyM"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface text-sm">Derek Vaughn</h4>
+<p class="text-xs text-on-surface-variant">d.vaughn@merchantpro.io</p>
+</div>
+</div>
+<div class="col-span-3">
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold">Junior Cashier</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<div class="h-2 w-2 rounded-full bg-outline-variant"></div>
+<span class="text-xs font-semibold text-on-surface-variant">Offline</span>
+</div>
+<div class="col-span-2 text-right text-xs font-bold text-on-surface-variant">
+                            2h ago
+                        </div>
+</div>
+</div>
+</div>
+<!-- Performance Reports Widget -->
+<div class="bg-surface-container-high rounded-[2rem] p-8 flex flex-col shadow-inner">
+<h3 class="font-headline font-bold text-xl text-on-surface mb-6">Store Reports</h3>
+<div class="space-y-4 flex-1">
+<!-- Report Item -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center gap-4 group cursor-pointer hover:shadow-md transition-all">
+<div class="h-12 w-12 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex-1">
+<h5 class="font-bold text-sm text-on-surface">Quarterly Tax Audit</h5>
+<p class="text-[10px] text-on-surface-variant font-medium">Updated 3h ago • 2.4 MB</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">download</span>
+</div>
+<!-- Report Item -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center gap-4 group cursor-pointer hover:shadow-md transition-all">
+<div class="h-12 w-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+<div class="flex-1">
+<h5 class="font-bold text-sm text-on-surface">Inventory Discrepancy</h5>
+<p class="text-[10px] text-on-surface-variant font-medium">Updated Yesterday • 1.1 MB</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">download</span>
+</div>
+<!-- Report Item -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center gap-4 group cursor-pointer hover:shadow-md transition-all">
+<div class="h-12 w-12 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined">monitoring</span>
+</div>
+<div class="flex-1">
+<h5 class="font-bold text-sm text-on-surface">Staff Productivity Peak</h5>
+<p class="text-[10px] text-on-surface-variant font-medium">Updated 2 days ago • 840 KB</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">download</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-on-surface-variant/10">
+<button class="w-full bg-surface-container-lowest border-2 border-primary/10 text-primary py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">
+                        View All Reports
+                    </button>
+</div>
+</div>
+</section>
+<!-- Bottom Action Bar (Transactional Logic) -->
+<footer class="mt-20 py-10 border-t border-surface-container flex flex-col md:flex-row items-center justify-between gap-8 opacity-60 hover:opacity-100 transition-opacity">
+<div class="flex items-center gap-6">
+<div class="text-cyan-900 font-black tracking-tighter text-lg">Merchant Pro</div>
+<div class="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+<a class="hover:text-primary" href="#">System Status</a>
+<a class="hover:text-primary" href="#">API Docs</a>
+<a class="hover:text-primary" href="#">Support</a>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant font-medium">© 2024 Merchant Pro POS. Securely encrypted. Version 4.8.2-alpha</p>
+</footer>
+</main>
+<!-- FAB Suppression Logic: No FAB rendered here as per Command Center context -->
+</body></html>

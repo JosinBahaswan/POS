@@ -15,7 +15,7 @@ export const allowedSectionsByRole: Record<UserRole, ActiveSection[]> = {
 export const defaultSectionByRole: Record<UserRole, ActiveSection> = {
   cashier: "cashier",
   manager: "reports",
-  owner: "reports"
+  owner: "analytics"
 };
 
 export const mobileRoleNavByRole: Record<UserRole, MobileRoleNavItem[]> = {
@@ -27,10 +27,10 @@ export const mobileRoleNavByRole: Record<UserRole, MobileRoleNavItem[]> = {
     { section: "customers", label: "Pelanggan", icon: "group" }
   ],
   owner: [
-    { section: "reports", label: "Home", icon: "home" },
+    { section: "analytics", label: "Home", icon: "analytics" },
+    { section: "reports", label: "Laporan", icon: "home" },
     { section: "history", label: "Riwayat", icon: "history" },
     { section: "products", label: "Stok", icon: "inventory_2" },
-    { section: "analytics", label: "Analytics", icon: "analytics" },
     { section: "users", label: "Pengguna", icon: "groups" },
     { section: "customers", label: "Pelanggan", icon: "group" }
   ]

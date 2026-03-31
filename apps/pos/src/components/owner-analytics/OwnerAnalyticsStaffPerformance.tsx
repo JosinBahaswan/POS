@@ -1,17 +1,32 @@
 ﻿import { useMemo } from "react";
 import type { LocalSale } from "../../database";
+import type { ShiftSession } from "../../shift";
 
 type Props = {
   sales: LocalSale[];
+  shifts: ShiftSession[];
 };
 
-export function OwnerAnalyticsStaffPerformance({ sales }: Props) {
+export function OwnerAnalyticsStaffPerformance({ sales, shifts }: Props) {
+  const shiftCashierLookup = useMemo(() => {
+    const lookup: Record<string, string> = {};
+    for (const shift of shifts) {
+      const cashierName = shift.openedByName?.trim() || shift.openedById?.trim();
+      if (!cashierName) continue;
+      lookup[shift.id] = cashierName;
+    }
+    return lookup;
+  }, [shifts]);
+
   const staffStats = useMemo(() => {
     const stats: Record<string, { trxCount: number; omzet: number }> = {};
     for (const sale of sales) {
       if (sale.status !== "completed") continue;
-      const cashierStr = sale.shiftId ? sale.shiftId.split("-")[0] ?? "Unknown" : "Unknown"; // Mocking cashier from shiftId
-      
+
+      const cashierFromSale = sale.cashierName?.trim() || sale.cashierId?.trim();
+      const cashierFromShift = sale.shiftId ? shiftCashierLookup[sale.shiftId]?.trim() : "";
+      const cashierStr = cashierFromSale || cashierFromShift || "Unknown";
+
       if (!stats[cashierStr]) stats[cashierStr] = { trxCount: 0, omzet: 0 };
       stats[cashierStr].trxCount += 1;
       stats[cashierStr].omzet += sale.total;
@@ -19,7 +34,7 @@ export function OwnerAnalyticsStaffPerformance({ sales }: Props) {
     return Object.entries(stats)
       .map(([name, data]) => ({ name, ...data }))
       .sort((a, b) => b.omzet - a.omzet);
-  }, [sales]);
+  }, [sales, shiftCashierLookup]);
 
   return (
     <article className="rounded-3xl bg-surface-container-low p-5 sm:p-6 mb-6">

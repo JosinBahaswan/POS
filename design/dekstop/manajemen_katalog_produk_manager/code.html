@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#87d0f2",
+              "surface-dim": "#d7dae0",
+              "error": "#ba1a1a",
+              "surface": "#f7f9ff",
+              "on-secondary-fixed-variant": "#005312",
+              "outline-variant": "#bfc8cd",
+              "secondary-container": "#a0f399",
+              "primary-fixed-dim": "#87d0f2",
+              "on-tertiary-fixed-variant": "#6b3b00",
+              "outline": "#70787e",
+              "secondary-fixed-dim": "#88d982",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#a2e1ff",
+              "error-container": "#ffdad6",
+              "background": "#f7f9ff",
+              "on-secondary-container": "#217128",
+              "on-error-container": "#93000a",
+              "on-surface": "#181c20",
+              "on-tertiary-fixed": "#2d1600",
+              "tertiary": "#6b3a00",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f4fa",
+              "surface-container-high": "#e5e8ee",
+              "tertiary-fixed-dim": "#ffb876",
+              "primary-container": "#006684",
+              "on-surface-variant": "#3f484d",
+              "on-primary-fixed-variant": "#004d64",
+              "surface-variant": "#dfe3e8",
+              "tertiary-container": "#885116",
+              "inverse-on-surface": "#eef1f7",
+              "primary-fixed": "#bee9ff",
+              "secondary": "#1b6d24",
+              "surface-container": "#ebeef4",
+              "primary": "#004d64",
+              "inverse-surface": "#2d3135",
+              "surface-tint": "#016684",
+              "tertiary-fixed": "#ffdcc0",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#ffcfa6",
+              "secondary-fixed": "#a3f69c",
+              "surface-container-highest": "#dfe3e8",
+              "surface-bright": "#f7f9ff",
+              "on-background": "#181c20",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#002204",
+              "on-primary-fixed": "#001f2a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bfc8cd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 top-0 flex-col bg-slate-100 dark:bg-slate-950 z-40 py-6 px-4 space-y-2">
+<div class="px-4 mb-8">
+<h1 class="font-headline font-black text-cyan-950 dark:text-white text-2xl tracking-tighter">Merchant Pro</h1>
+<p class="text-xs text-slate-500 font-medium mt-1">Precision Architect Mode</p>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
+<!-- Active: Catalog -->
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 bg-white dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-200 shadow-sm rounded-lg font-bold px-4 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-inter text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="warehouse">warehouse</span>
+<span class="font-inter text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-inter text-sm font-medium">Reports</span>
+</a>
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-inter text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+<span class="font-inter text-sm font-medium">Team Management</span>
+</a>
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="pt-4 mt-auto border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center space-x-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-inter text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center space-x-3 text-error px-4 py-2 hover:bg-error/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-inter text-sm font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-3">
+<div class="flex items-center space-x-4">
+<span class="md:hidden material-symbols-outlined text-cyan-900 dark:text-cyan-100" data-icon="menu">menu</span>
+<h2 class="font-headline font-bold text-lg tracking-tight text-cyan-900 dark:text-cyan-100">Product Catalog Management</h2>
+</div>
+<div class="flex items-center space-x-6">
+<div class="hidden sm:flex items-center bg-surface-container-low rounded-lg px-3 py-1.5 focus-within:bg-surface-container-lowest transition-colors group">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-medium placeholder:text-outline-variant" placeholder="Quick search products..." type="text"/>
+</div>
+<div class="flex items-center space-x-3">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-full relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-cyan-100 border border-cyan-200">
+<img alt="Manager Profile" class="w-full h-full object-cover" data-alt="professional portrait of a store manager in a clean business environment with soft office lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM2H0cdGfdUyCeTGcOxxlgn3vRcSLP_D-jiCVo4_BLL3XEbyi3YYyxKh3EhfCJXvljS4aoCjYXG472Lvvpfg0OaU84p1DGJmdmxB4D_6KtBKeAize917jIRHDHEmuZ_30wosPkFTgFbgsoYvqFxd1aPzEI-6iDDvhLztutBccFxGchRDFnOizTiyPwThJCFHiGdIqIkWpK1HOA1BsKv9xOy7iXYwCUYMk4y_Lc7oYuTMuDT5etAiqOzb6pERw-_et59wbBPiWpOMQ"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full"></div>
+</header>
+<!-- Catalog Content -->
+<section class="p-8 space-y-8 max-w-[1400px]">
+<!-- Contextual Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h3 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Catalog Repository</h3>
+<p class="text-on-surface-variant text-sm mt-1">Manage pricing, promotions, inventory levels, and product identities.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center space-x-2 bg-surface-container-high text-on-surface px-5 py-2.5 rounded-lg font-semibold hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="filter_list">filter_list</span>
+<span>Advanced Filters</span>
+</button>
+<button class="flex items-center space-x-2 bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]" data-icon="add_circle">add_circle</span>
+<span>Add New Product</span>
+</button>
+</div>
+</div>
+<!-- Stats Bar (Editorial Layering) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl space-y-2">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Total Stock Value</p>
+<h4 class="font-headline text-2xl font-black text-primary">$428,950.00</h4>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-2">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Active SKUs</p>
+<h4 class="font-headline text-2xl font-black text-primary">1,204</h4>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-2">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Low Stock Alerts</p>
+<h4 class="font-headline text-2xl font-black text-tertiary">14 Items</h4>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-2 border-l-4 border-secondary">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Catalog Health</p>
+<h4 class="font-headline text-2xl font-black text-secondary">Optimal</h4>
+</div>
+</div>
+<!-- Product Table Module -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-transparent">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Product Image</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Details</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Category</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Stock Level</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Price</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Product Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Running Shoe" class="w-full h-full object-cover" data-alt="vibrant red athletic running shoe isolated on a minimalist white background with clean studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzzUxBdCnylOR1ql16jSJISc9ousKaI791jaR1Owf7HPu0rY_jSkq2vYgw3QyA0YXIB15rJHEDOhNE6xnTFXv8wQET-ZHX6BtMueMgPkTLrWfkEVN9NRZi567dTfM6X21_pCRn5YU4LbUjqvO7EuANClaoGUe5rtKMp-iotbhoI7O9ikGDlMCjGNpspJL1YwrlQG2nhytSM1F2lvi5BDU2Hr3E_btK8lizTrJUe46LlUn03tdrWdz1R4DQTe019NQ_wXxS4OYfnaI"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-headline font-bold text-on-surface text-base">Vaporfly Elite X2</span>
+<span class="text-xs font-medium text-on-surface-variant">SKU: NIKE-VP-772</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800">Footwear</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-bold">
+<span>42 units</span>
+<span class="text-secondary">Healthy</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[70%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-headline font-black text-on-surface">$249.99</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end space-x-2">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Product">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-all" title="Delete Product">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Headphones" class="w-full h-full object-cover" data-alt="sleek matte black wireless headphones on a clean reflective surface with dramatic top lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuN-6tPIKeWEkpsymhwrUEJjl33Qiy-CrNRn7f1ZAo7Xvw-NxtuwRb1rVhJwOj9u767PgJywdE-uEi8kDspUDLbX_RXlhqEAWMRITwNjUiZ5e4XAcE3VvzZJge-tRA7x4KTvtmRsl1jkMQsJAp2vMPzpcYLkZeDaNTibSVUL8mlSAMjf3OXU4QIvKt_yNXU4mtTdK8jgEsmUZhUH0PpeDPjNGBs_00_bXm79Gyl0xlCuyB8MY8fxmnOLF52txihhmbOvdBQoo7zgs"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-headline font-bold text-on-surface text-base">SonicMax Over-Ear</span>
+<span class="text-xs font-medium text-on-surface-variant">SKU: AUD-SN-901</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800">Electronics</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-bold">
+<span>8 units</span>
+<span class="text-error">Critical</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error w-[15%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-headline font-black text-on-surface">$185.00</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end space-x-2">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Product">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-all" title="Delete Product">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Wristwatch" class="w-full h-full object-cover" data-alt="luxury minimalist wristwatch with white face and leather strap on a textured gray background with soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkCXqDDVwS7-5d-YWGt-po6uxCOzC7Tna8bDHmu36byoXfM9Px7aE04CZjXTZAhYuS2wJdsdvm-PMQEh_rkA9txJJP-IudHgGAEbkAxWVYVtxOjOCDa0pY_yYGtbNsjI1_uMRte7whvFzOueHeH0KcNYsftfS2DPP63EzdzbPihme-yAAXu6AK_Mi2ezcLrGCsn_orVTp8637EgRIAheCgwd5G0rJqMRgJJ5rKrdPwrgrlbGX_Ye58hHWfmqkpVoBKPoFvYE6EIVQ"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-headline font-bold text-on-surface text-base">Chronos Series 7</span>
+<span class="text-xs font-medium text-on-surface-variant">SKU: WCH-CH-442</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800">Accessories</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-bold">
+<span>24 units</span>
+<span class="text-tertiary">Restock Soon</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[40%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-headline font-black text-on-surface">$599.00</span>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-tight">Promo: 10% Off</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end space-x-2">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Product">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-all" title="Delete Product">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Sunglasses" class="w-full h-full object-cover" data-alt="high-fashion designer sunglasses with gold frames on a warm sandy background with hard direct sunlight shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn_1cm3gaop5sWKKOZVRxRQTplr-M6IQliZ1gEotUD8dDEd83BEKzrAyDfSnf6HsztmHdWQ3Hf8_o_KzqNY_DEfSWPKu2cSxMCAF6TekPgesBcvZokhac9JLdX9byP3-orfXWkSDVkMbl-xl1L_uStVui9x9LkUkxjgmZVfMyIDu5oG1PIUjlA32gcXx01CSgEXShwcXaXPkmkgA6tGRovdvGr__MYQSRH2z5HdgIhNDXdHGEF4IKDEdlU6X_HbsslNIfMrPfuyUE"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-headline font-bold text-on-surface text-base">Ray-Ban Aviator Gold</span>
+<span class="text-xs font-medium text-on-surface-variant">SKU: SUN-RB-102</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800">Accessories</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-bold">
+<span>156 units</span>
+<span class="text-secondary">Abundant</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-headline font-black text-on-surface">$168.00</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end space-x-2">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Product">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-all" title="Delete Product">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 bg-surface-container-low/30 border-t border-surface-container flex items-center justify-between">
+<p class="text-xs font-medium text-on-surface-variant">Showing <span class="text-on-surface">1 to 10</span> of 1,204 products</p>
+<div class="flex items-center space-x-2">
+<button class="p-1.5 rounded-lg hover:bg-surface-container transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold text-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-xs font-medium">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-xs font-medium">3</button>
+<span class="text-xs px-1">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-xs font-medium">121</button>
+</div>
+<button class="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bento Layout Info Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Recent Activity -->
+<div class="md:col-span-2 bg-surface-container-low p-8 rounded-2xl flex flex-col justify-between">
+<div>
+<h5 class="font-headline font-bold text-xl mb-6">Catalog Audit Logs</h5>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="price_change">price_change</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-on-surface">Price Update: SonicMax Over-Ear</p>
+<p class="text-xs text-on-surface-variant">Adjusted from $199.00 to $185.00 by Admin-Sarah</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">2m ago</span>
+</div>
+<div class="flex items-start space-x-4">
+<div class="bg-secondary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-secondary text-xl" data-icon="add_box">add_box</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-on-surface">New Inventory Receipt</p>
+<p class="text-xs text-on-surface-variant">Batch #4421: 50 units Vaporfly Elite X2</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">1h ago</span>
+</div>
+</div>
+</div>
+<button class="mt-8 text-sm font-bold text-primary flex items-center space-x-1 group">
+<span>View All Activity</span>
+<span class="material-symbols-outlined text-base transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Category Breakdown -->
+<div class="bg-gradient-to-br from-cyan-900 to-primary p-8 rounded-2xl text-on-primary-container relative overflow-hidden shadow-xl">
+<div class="relative z-10">
+<h5 class="font-headline font-bold text-xl mb-1 text-white">Categories</h5>
+<p class="text-white/60 text-xs mb-8">Inventory concentration</p>
+<div class="space-y-5">
+<div>
+<div class="flex justify-between text-xs font-bold text-white/80 mb-2">
+<span>Footwear</span>
+<span>34%</span>
+</div>
+<div class="w-full h-1.5 bg-white/10 rounded-full">
+<div class="h-full bg-white w-[34%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-bold text-white/80 mb-2">
+<span>Electronics</span>
+<span>28%</span>
+</div>
+<div class="w-full h-1.5 bg-white/10 rounded-full">
+<div class="h-full bg-white w-[28%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-bold text-white/80 mb-2">
+<span>Accessories</span>
+<span>22%</span>
+</div>
+<div class="w-full h-1.5 bg-white/10 rounded-full">
+<div class="h-full bg-white w-[22%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Abstract Element -->
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+</div>
+</div>
+</section>
+<!-- Contextual FAB (Suppressing as per mandate for detailed screens, but placing here for "Add" focus if needed by design context) -->
+<!-- Suppression rule applied: FAB is omitted on detailed management/catalog screen as per mandate. -->
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around items-center py-2 px-4 z-50">
+<a class="flex flex-col items-center p-2 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Dash</span>
+</a>
+<a class="flex flex-col items-center p-2 text-cyan-700 font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="text-[10px]">Catalog</span>
+</a>
+<a class="flex flex-col items-center p-2 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px]">New</span>
+</a>
+<a class="flex flex-col items-center p-2 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-[10px]">Reports</span>
+</a>
+<a class="flex flex-col items-center p-2 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="text-[10px]">Profile</span>
+</a>
+</nav>
+</main>
+</body></html>

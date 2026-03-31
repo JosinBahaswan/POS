@@ -1,6 +1,6 @@
 import type { UserRole } from "./types";
 
-export type ApprovalRequestType = "large-discount" | "refund" | "void";
+export type ApprovalRequestType = "large-discount" | "loss-risk" | "refund" | "void";
 
 export type ApprovalRequestStatus = "pending" | "approved" | "rejected";
 
@@ -8,6 +8,7 @@ export type ApprovalDecision = Exclude<ApprovalRequestStatus, "pending">;
 
 export type ApprovalRules = {
   largeDiscountPercentThreshold: number;
+  minimumMarginPercentThreshold: number;
   requireRefundApproval: boolean;
   requireVoidApproval: boolean;
   updatedAt: string;
@@ -71,6 +72,7 @@ function normalizeNumber(value: unknown, fallback: number) {
 function defaultRules(): ApprovalRules {
   return {
     largeDiscountPercentThreshold: 15,
+    minimumMarginPercentThreshold: 5,
     requireRefundApproval: true,
     requireVoidApproval: true,
     updatedAt: new Date().toISOString(),
@@ -91,6 +93,10 @@ export function readApprovalRules(scopeKey = "default"): ApprovalRules {
         100,
         Math.max(0, Math.round(normalizeNumber(parsed.largeDiscountPercentThreshold, baseline.largeDiscountPercentThreshold)))
       ),
+      minimumMarginPercentThreshold: Math.min(
+        100,
+        Math.max(0, Math.round(normalizeNumber(parsed.minimumMarginPercentThreshold, baseline.minimumMarginPercentThreshold)))
+      ),
       requireRefundApproval: normalizeBoolean(parsed.requireRefundApproval, baseline.requireRefundApproval),
       requireVoidApproval: normalizeBoolean(parsed.requireVoidApproval, baseline.requireVoidApproval),
       updatedAt:
@@ -108,12 +114,16 @@ export function readApprovalRules(scopeKey = "default"): ApprovalRules {
 }
 
 export function saveApprovalRules(
-  input: Pick<ApprovalRules, "largeDiscountPercentThreshold" | "requireRefundApproval" | "requireVoidApproval">,
+  input: Pick<
+    ApprovalRules,
+    "largeDiscountPercentThreshold" | "minimumMarginPercentThreshold" | "requireRefundApproval" | "requireVoidApproval"
+  >,
   updatedBy: string,
   scopeKey = "default"
 ): ApprovalRules {
   const next: ApprovalRules = {
     largeDiscountPercentThreshold: Math.min(100, Math.max(0, Math.round(input.largeDiscountPercentThreshold))),
+    minimumMarginPercentThreshold: Math.min(100, Math.max(0, Math.round(input.minimumMarginPercentThreshold))),
     requireRefundApproval: Boolean(input.requireRefundApproval),
     requireVoidApproval: Boolean(input.requireVoidApproval),
     updatedAt: new Date().toISOString(),
@@ -132,7 +142,12 @@ function normalizeRequest(raw: Partial<ApprovalRequest>): ApprovalRequest | null
     return null;
   }
 
-  if (raw.type !== "large-discount" && raw.type !== "refund" && raw.type !== "void") {
+  if (
+    raw.type !== "large-discount" &&
+    raw.type !== "loss-risk" &&
+    raw.type !== "refund" &&
+    raw.type !== "void"
+  ) {
     return null;
   }
 
@@ -188,7 +203,7 @@ export function createApprovalRequest(input: CreateApprovalInput, scopeKey = "de
   const duplicate = requests.find((request) => {
     if (request.status !== "pending" || request.type !== input.type) return false;
 
-    if (input.type === "large-discount") {
+    if (input.type === "large-discount" || input.type === "loss-risk") {
       return request.contextHash === input.contextHash && request.requestedBy === input.requestedBy;
     }
 

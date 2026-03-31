@@ -5,6 +5,8 @@ import type { ManagerSystemSettings, ManagerSystemSettingsInput } from "../../ma
 type OwnerAnalyticsGovernanceSectionProps = {
   threshold: number;
   setThreshold: (value: number) => void;
+  minimumMarginThreshold: number;
+  setMinimumMarginThreshold: (value: number) => void;
   requireRefundApproval: boolean;
   setRequireRefundApproval: (value: boolean) => void;
   requireVoidApproval: boolean;
@@ -21,6 +23,8 @@ type OwnerAnalyticsGovernanceSectionProps = {
 export function OwnerAnalyticsGovernanceSection({
   threshold,
   setThreshold,
+  minimumMarginThreshold,
+  setMinimumMarginThreshold,
   requireRefundApproval,
   setRequireRefundApproval,
   requireVoidApproval,
@@ -58,6 +62,21 @@ export function OwnerAnalyticsGovernanceSection({
               onChange={(event) => setThreshold(Number(event.target.value || 0))}
               className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
             />
+
+            <label className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+              Margin Minimum Tanpa Approval (%)
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={minimumMarginThreshold}
+              onChange={(event) => setMinimumMarginThreshold(Number(event.target.value || 0))}
+              className="h-11 rounded-xl border-none bg-surface-container-lowest px-3 text-sm text-on-surface outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary/30"
+            />
+            <p className="text-xs text-on-surface-variant">
+              Jika margin checkout di bawah nilai ini, kasir wajib meminta approval manager/owner.
+            </p>
 
             <label className="mt-1 flex items-center justify-between rounded-xl bg-surface-container-lowest px-3 py-2 text-sm text-on-surface">
               <span>Refund wajib approval</span>

@@ -15,8 +15,23 @@ type CashierPageProps = {
   products: ProductItem[];
   customers?: Customer[];
   selectedCustomerId?: string;
+  selectedCustomerLoyaltyPoints: number;
+  selectedCustomerMemberTier?: Customer["member_tier"];
+  selectedCustomerLoyaltyMultiplier: number;
+  estimatedEarnedPoints: number;
+  selectedCustomerOutstandingDebt: number;
+  loyaltyPointValue: number;
+  redeemedPoints: number;
+  loyaltyRedeemAmount: number;
+  maxRedeemablePoints: number;
   onSelectCustomer?: (id: string | undefined) => void;
+  onRedeemedPointsChange: (value: number) => void;
   heldOrders: HeldOrder[];
+  pendingCartDraftSummary: {
+    updatedAt: string;
+    itemCount: number;
+    subtotal: number;
+  } | null;
   sales: LocalSale[];
   cart: CartItem[];
   subtotal: number;
@@ -29,13 +44,25 @@ type CashierPageProps = {
   cashReceived: number;
   changeAmount: number;
   activeShift: ShiftSession | null;
+  shiftExpectedClosingCash: number | null;
+  shiftCashSalesTotal: number;
+  shiftVarianceThreshold: number;
   recentShiftHistory: ShiftSession[];
   isSyncing: boolean;
+  cartEstimatedCost: number;
+  cartGrossProfit: number;
+  cartGrossMarginPercent: number | null;
+  cartHasNegativeMargin: boolean;
+  cartProjectedLossAmount: number;
+  discountApprovalThreshold: number;
+  cartMinimumMarginThreshold: number;
+  cartBelowMinimumMarginThreshold: boolean;
   onAddItem: (id: string, name: string, price: number) => void;
   onDiscountChange: (value: number) => void;
   onPaymentMethodChange: (value: PaymentMethod) => void;
   onSplitPaymentToggle: (enabled: boolean) => void;
   onSplitPaymentAmountChange: (method: PaymentMethod, value: number) => void;
+  onApplySplitPaymentPreset: (next: PaymentBreakdown) => void;
   onCashReceivedChange: (value: number) => void;
   onOpenShift: (openingCash: number) => void;
   onCloseShift: (closingCash: number, note: string) => void;
@@ -45,6 +72,11 @@ type CashierPageProps = {
   onRemoveItem: (id: string) => void;
   onHoldOrder: () => void;
   onResumeOrder: (id: string) => void;
+  onDiscardHoldOrder: (id: string) => void;
+  onDiscardExpiredHoldOrders: () => void;
+  onClearAllHoldOrders: () => void;
+  onRestoreCartDraft: () => void;
+  onDiscardCartDraft: () => void;
   onClear: () => void;
   onCheckout: () => void;
   onPrintReceipt: (saleId: string) => void;
@@ -56,8 +88,19 @@ export function CashierPage({
   products,
   customers = [],
   selectedCustomerId,
+  selectedCustomerLoyaltyPoints,
+  selectedCustomerMemberTier,
+  selectedCustomerLoyaltyMultiplier,
+  estimatedEarnedPoints,
+  selectedCustomerOutstandingDebt,
+  loyaltyPointValue,
+  redeemedPoints,
+  loyaltyRedeemAmount,
+  maxRedeemablePoints,
   onSelectCustomer,
+  onRedeemedPointsChange,
   heldOrders,
+  pendingCartDraftSummary,
   sales,
   cart,
   subtotal,
@@ -70,13 +113,25 @@ export function CashierPage({
   cashReceived,
   changeAmount,
   activeShift,
+  shiftExpectedClosingCash,
+  shiftCashSalesTotal,
+  shiftVarianceThreshold,
   recentShiftHistory,
   isSyncing,
+  cartEstimatedCost,
+  cartGrossProfit,
+  cartGrossMarginPercent,
+  cartHasNegativeMargin,
+  cartProjectedLossAmount,
+  discountApprovalThreshold,
+  cartMinimumMarginThreshold,
+  cartBelowMinimumMarginThreshold,
   onAddItem,
   onDiscountChange,
   onPaymentMethodChange,
   onSplitPaymentToggle,
   onSplitPaymentAmountChange,
+  onApplySplitPaymentPreset,
   onCashReceivedChange,
   onOpenShift,
   onCloseShift,
@@ -86,6 +141,11 @@ export function CashierPage({
   onRemoveItem,
   onHoldOrder,
   onResumeOrder,
+  onDiscardHoldOrder,
+  onDiscardExpiredHoldOrders,
+  onClearAllHoldOrders,
+  onRestoreCartDraft,
+  onDiscardCartDraft,
   onClear,
   onCheckout,
   onPrintReceipt,
@@ -131,44 +191,121 @@ export function CashierPage({
       .reduce((acc, sale) => acc + sale.total, 0);
   }, [sales]);
 
+  const stockByProductId = useMemo(() => {
+    const lookup: Record<string, number> = {};
+    for (const product of products) {
+      lookup[product.id] = Math.max(0, Number(product.stock || 0));
+    }
+    return lookup;
+  }, [products]);
+
+  const isShiftOpen = Boolean(activeShift);
+
+  const checkoutApprovalHint = useMemo(() => {
+    const requiresDiscountApproval = discountPercent > discountApprovalThreshold;
+    const requiresMarginApproval = cartHasNegativeMargin || cartBelowMinimumMarginThreshold;
+
+    if (!requiresDiscountApproval && !requiresMarginApproval) {
+      return "";
+    }
+
+    if (requiresDiscountApproval && requiresMarginApproval) {
+      return `Checkout akan memicu approval manager/owner karena diskon > ${discountApprovalThreshold}% dan margin berisiko.`;
+    }
+
+    if (requiresDiscountApproval) {
+      return `Checkout akan memicu approval manager/owner karena diskon > ${discountApprovalThreshold}%.`;
+    }
+
+    return "Checkout akan memicu approval manager/owner karena margin checkout berisiko.";
+  }, [
+    discountPercent,
+    discountApprovalThreshold,
+    cartHasNegativeMargin,
+    cartBelowMinimumMarginThreshold
+  ]);
+
   return (
     <section className="mt-3 grid gap-3 pb-36 sm:mt-4 sm:gap-4 sm:pb-32 lg:pb-0">
-      {heldOrders.length > 0 && <HoldOrdersBar orders={heldOrders} onResume={onResumeOrder} />}
+      {heldOrders.length > 0 && (
+        <HoldOrdersBar
+          orders={heldOrders}
+          onResume={onResumeOrder}
+          onRemove={onDiscardHoldOrder}
+          onRemoveExpired={onDiscardExpiredHoldOrders}
+          onClearAll={onClearAllHoldOrders}
+        />
+      )}
 
-      <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <ProductGrid products={products} onAdd={onAddItem} />
-        <div className="grid gap-4">
-          <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
-            cart={cart}
-            subtotal={subtotal}
-            discountPercent={discountPercent}
-            discountAmount={discountAmount}
-            total={total}
-            paymentMethod={paymentMethod}
-            isSplitPayment={isSplitPayment}
-            splitPayment={splitPayment}
-            cashReceived={cashReceived}
-            changeAmount={changeAmount}
-            onDiscountChange={onDiscountChange}
-            onPaymentMethodChange={onPaymentMethodChange}
-            onSplitPaymentToggle={onSplitPaymentToggle}
-            onSplitPaymentAmountChange={onSplitPaymentAmountChange}
-            onCashReceivedChange={onCashReceivedChange}
-            onIncreaseQty={onIncreaseQty}
-            onDecreaseQty={onDecreaseQty}
-            onRemoveItem={onRemoveItem}
-            onHoldOrder={onHoldOrder}
-            onClear={onClear}
-            onCheckout={onCheckout}
-            disableCheckout={isSyncing}
-          />
-          <SalesHistory
-            sales={sales}
-            onPrint={onPrintReceipt}
-            onRequestRefund={onRequestRefund}
-            onRequestVoid={onRequestVoid}
-          />
-        </div>
+      <div className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1.8fr)_420px]">
+        {mobileTab === "history" ? (
+          <section className="lg:col-span-2">
+            <SalesHistory
+              sales={sales}
+              onPrint={onPrintReceipt}
+              onRequestRefund={onRequestRefund}
+              onRequestVoid={onRequestVoid}
+            />
+          </section>
+        ) : (
+          <>
+            <section className="rounded-2xl bg-surface p-4">
+              <ProductGrid products={products} onAdd={onAddItem} />
+            </section>
+
+            <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
+              <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
+                selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
+                selectedCustomerMemberTier={selectedCustomerMemberTier}
+                selectedCustomerLoyaltyMultiplier={selectedCustomerLoyaltyMultiplier}
+                estimatedEarnedPoints={estimatedEarnedPoints}
+                selectedCustomerOutstandingDebt={selectedCustomerOutstandingDebt}
+                loyaltyPointValue={loyaltyPointValue}
+                redeemedPoints={redeemedPoints}
+                loyaltyRedeemAmount={loyaltyRedeemAmount}
+                maxRedeemablePoints={maxRedeemablePoints}
+                onRedeemedPointsChange={onRedeemedPointsChange}
+                cart={cart}
+                stockByProductId={stockByProductId}
+                pendingDraft={pendingCartDraftSummary}
+                subtotal={subtotal}
+                discountPercent={discountPercent}
+                discountAmount={discountAmount}
+                total={total}
+                estimatedCost={cartEstimatedCost}
+                grossProfit={cartGrossProfit}
+                grossMarginPercent={cartGrossMarginPercent}
+                hasNegativeMargin={cartHasNegativeMargin}
+                projectedLossAmount={cartProjectedLossAmount}
+                discountApprovalThreshold={discountApprovalThreshold}
+                minimumMarginThreshold={cartMinimumMarginThreshold}
+                isBelowMinimumMarginThreshold={cartBelowMinimumMarginThreshold}
+                isShiftOpen={isShiftOpen}
+                checkoutApprovalHint={checkoutApprovalHint}
+                paymentMethod={paymentMethod}
+                isSplitPayment={isSplitPayment}
+                splitPayment={splitPayment}
+                cashReceived={cashReceived}
+                changeAmount={changeAmount}
+                onDiscountChange={onDiscountChange}
+                onPaymentMethodChange={onPaymentMethodChange}
+                onSplitPaymentToggle={onSplitPaymentToggle}
+                onSplitPaymentAmountChange={onSplitPaymentAmountChange}
+                onApplySplitPaymentPreset={onApplySplitPaymentPreset}
+                onCashReceivedChange={onCashReceivedChange}
+                onIncreaseQty={onIncreaseQty}
+                onDecreaseQty={onDecreaseQty}
+                onRemoveItem={onRemoveItem}
+                onHoldOrder={onHoldOrder}
+                onRestoreDraft={onRestoreCartDraft}
+                onDiscardDraft={onDiscardCartDraft}
+                onClear={onClear}
+                onCheckout={onCheckout}
+                disableCheckout={isSyncing}
+              />
+            </section>
+          </>
+        )}
       </div>
 
       <div className="lg:hidden relative overflow-hidden">
@@ -182,6 +319,9 @@ export function CashierPage({
             />
             <CashierShiftPanel
               activeShift={activeShift}
+              expectedClosingCash={shiftExpectedClosingCash}
+              shiftCashSalesTotal={shiftCashSalesTotal}
+              varianceThreshold={shiftVarianceThreshold}
               recentShifts={recentShiftHistory}
               onOpenShift={onOpenShift}
               onCloseShift={onCloseShift}
@@ -198,11 +338,33 @@ export function CashierPage({
         {mobileTab === "cart" && (
           <div className="animate-slide-in-right">
             <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
+              selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
+              selectedCustomerMemberTier={selectedCustomerMemberTier}
+              selectedCustomerLoyaltyMultiplier={selectedCustomerLoyaltyMultiplier}
+              estimatedEarnedPoints={estimatedEarnedPoints}
+              selectedCustomerOutstandingDebt={selectedCustomerOutstandingDebt}
+              loyaltyPointValue={loyaltyPointValue}
+              redeemedPoints={redeemedPoints}
+              loyaltyRedeemAmount={loyaltyRedeemAmount}
+              maxRedeemablePoints={maxRedeemablePoints}
+              onRedeemedPointsChange={onRedeemedPointsChange}
               cart={cart}
+              stockByProductId={stockByProductId}
+              pendingDraft={pendingCartDraftSummary}
               subtotal={subtotal}
               discountPercent={discountPercent}
               discountAmount={discountAmount}
               total={total}
+              estimatedCost={cartEstimatedCost}
+              grossProfit={cartGrossProfit}
+              grossMarginPercent={cartGrossMarginPercent}
+              hasNegativeMargin={cartHasNegativeMargin}
+              projectedLossAmount={cartProjectedLossAmount}
+              discountApprovalThreshold={discountApprovalThreshold}
+              minimumMarginThreshold={cartMinimumMarginThreshold}
+              isBelowMinimumMarginThreshold={cartBelowMinimumMarginThreshold}
+              isShiftOpen={isShiftOpen}
+              checkoutApprovalHint={checkoutApprovalHint}
               paymentMethod={paymentMethod}
               isSplitPayment={isSplitPayment}
               splitPayment={splitPayment}
@@ -212,11 +374,14 @@ export function CashierPage({
               onPaymentMethodChange={onPaymentMethodChange}
               onSplitPaymentToggle={onSplitPaymentToggle}
               onSplitPaymentAmountChange={onSplitPaymentAmountChange}
+              onApplySplitPaymentPreset={onApplySplitPaymentPreset}
               onCashReceivedChange={onCashReceivedChange}
               onIncreaseQty={onIncreaseQty}
               onDecreaseQty={onDecreaseQty}
               onRemoveItem={onRemoveItem}
               onHoldOrder={onHoldOrder}
+              onRestoreDraft={onRestoreCartDraft}
+              onDiscardDraft={onDiscardCartDraft}
               onClear={onClear}
               onCheckout={onCheckout}
               disableCheckout={isSyncing}

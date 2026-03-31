@@ -3,6 +3,8 @@ import type { OwnerAnalyticsData, OwnerAnalyticsPeriod } from "./types";
 type OwnerAnalyticsReportsSectionProps = {
   period: OwnerAnalyticsPeriod;
   onPeriodChange: (value: OwnerAnalyticsPeriod) => void;
+  monthlyTarget: number;
+  onMonthlyTargetChange: (value: number) => void;
   onExportCsv: () => void;
   onExportJson: () => void;
   analytics: OwnerAnalyticsData;
@@ -11,6 +13,8 @@ type OwnerAnalyticsReportsSectionProps = {
 export function OwnerAnalyticsReportsSection({
   period,
   onPeriodChange,
+  monthlyTarget,
+  onMonthlyTargetChange,
   onExportCsv,
   onExportJson,
   analytics
@@ -20,7 +24,18 @@ export function OwnerAnalyticsReportsSection({
       <article className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-on-surface-variant">Laporan Periodik</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="grid gap-1">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Target Bulanan (Rp)</label>
+              <input
+                type="number"
+                min={0}
+                value={monthlyTarget}
+                onChange={(event) => onMonthlyTargetChange(Math.max(0, Number(event.target.value || 0)))}
+                className="h-9 w-40 rounded-lg border-none bg-surface-container-high px-2 text-xs text-on-surface outline-none"
+                placeholder="0"
+              />
+            </div>
             <select
               value={period}
               onChange={(event) => onPeriodChange(event.target.value as OwnerAnalyticsPeriod)}
@@ -59,6 +74,18 @@ export function OwnerAnalyticsReportsSection({
           </p>
           <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-on-surface-variant">
             Transaksi valid: <span className="font-semibold text-on-surface">{analytics.periodCompleted.length}</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-on-surface-variant">
+            Progress target: <span className="font-semibold text-on-surface">{analytics.targetProgressPct.toFixed(1)}%</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-on-surface-variant">
+            Time progress: <span className="font-semibold text-on-surface">{analytics.timeProgressPct.toFixed(1)}%</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-on-surface-variant">
+            Proyeksi bulan: <span className="font-semibold text-on-surface">Rp {Math.round(analytics.projectedMonthEndRevenue).toLocaleString("id-ID")}</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-on-surface-variant">
+            Gap target: <span className="font-semibold text-on-surface">Rp {Math.round(analytics.targetGap).toLocaleString("id-ID")}</span>
           </p>
         </div>
       </article>

@@ -1,0 +1,157 @@
+import type { ApprovalDecision, ApprovalRequest, ApprovalRules } from "../approvals";
+import type { AuditLogEntry } from "../auditLog";
+import type { ManagedUser, ManagedUserRole, AuthenticatedUser } from "../auth";
+import type { LocalSale } from "../database";
+import type { ProductItem } from "../localData";
+import type { ManagerSystemSettings, ManagerSystemSettingsInput } from "../managerSettings";
+import type {
+  ActiveSection,
+  CartItem,
+  Customer,
+  PaymentBreakdown,
+  PaymentMethod,
+  UserRole
+} from "../types";
+import type { CashMovementType, ShiftSession } from "../shift";
+import type { HeldOrder } from "./HoldOrdersBar";
+import type { MobileRoleNavItem } from "./app-view";
+
+export type AppViewProps = {
+  authUser: AuthenticatedUser;
+  storageScopeKey: string;
+  role: UserRole;
+  activeSection: ActiveSection;
+  hasProductAccess: boolean;
+  hasReportsAccess: boolean;
+  hasAnalyticsAccess: boolean;
+  hasOwnerAccess: boolean;
+  hasCustomersAccess: boolean;
+  managerSettings: ManagerSystemSettings;
+  managerCanExportData: boolean;
+  managerCanResolveApproval: boolean;
+  managerCanDeleteProduct: boolean;
+  managerCanAdjustStock: boolean;
+  mobileRoleNavItems: MobileRoleNavItem[];
+  mobileRoleNavGridClass: string;
+  isOnline: boolean;
+  pendingSales: number;
+  isSyncing: boolean;
+  cartItemCount: number;
+  total: number;
+  cartEstimatedCost: number;
+  cartGrossProfit: number;
+  cartGrossMarginPercent: number | null;
+  cartHasNegativeMargin: boolean;
+  cartProjectedLossAmount: number;
+  discountApprovalThreshold: number;
+  cartMinimumMarginThreshold: number;
+  cartBelowMinimumMarginThreshold: boolean;
+  todayRevenue: number;
+  lowStockCount: number;
+  lowStockItems: ProductItem[];
+  outOfStockCount: number;
+  checkoutError: string;
+  productCatalog: ProductItem[];
+  customers: Customer[];
+  selectedCustomerId?: string;
+  selectedCustomerLoyaltyPoints: number;
+  selectedCustomerMemberTier?: Customer["member_tier"];
+  selectedCustomerLoyaltyMultiplier: number;
+  estimatedEarnedPoints: number;
+  selectedCustomerOutstandingDebt: number;
+  loyaltyPointValue: number;
+  redeemedPoints: number;
+  loyaltyRedeemAmount: number;
+  maxRedeemablePoints: number;
+  onSelectCustomer: (id: string | undefined) => void;
+  onRedeemedPointsChange: (value: number) => void;
+  heldOrders: HeldOrder[];
+  pendingCartDraftSummary: {
+    updatedAt: string;
+    itemCount: number;
+    subtotal: number;
+  } | null;
+  allSales: LocalSale[];
+  cart: CartItem[];
+  subtotal: number;
+  discountPercent: number;
+  discountAmount: number;
+  paymentMethod: PaymentMethod;
+  isSplitPayment: boolean;
+  splitPayment: PaymentBreakdown;
+  cashReceived: number;
+  changeAmount: number;
+  activeShift: ShiftSession | null;
+  shiftExpectedClosingCash: number | null;
+  shiftCashSalesTotal: number;
+  shiftVarianceThreshold: number;
+  recentShiftHistory: ShiftSession[];
+  shiftSessions: ShiftSession[];
+  approvalRequests: ApprovalRequest[];
+  managedUsers: ManagedUser[];
+  usersLoading: boolean;
+  usersError: string;
+  approvalRules: ApprovalRules;
+  auditLogs: AuditLogEntry[];
+  showCheckoutConfirm: boolean;
+  onSectionChange: (section: ActiveSection) => void;
+  onLogout: () => void;
+  onAddItem: (id: string, name: string, price: number) => void;
+  onDiscountChange: (value: number) => void;
+  onPaymentMethodChange: (value: PaymentMethod) => void;
+  onSplitPaymentToggle: (enabled: boolean) => void;
+  onSplitPaymentAmountChange: (method: PaymentMethod, value: number) => void;
+  onApplySplitPaymentPreset: (next: PaymentBreakdown) => void;
+  onCashReceivedChange: (value: number) => void;
+  onOpenShift: (openingCash: number) => void;
+  onCloseShift: (closingCash: number, note: string) => void;
+  onAddCashMovement: (type: CashMovementType, amount: number, note: string) => void;
+  onIncreaseQty: (id: string) => void;
+  onDecreaseQty: (id: string) => void;
+  onRemoveItem: (id: string) => void;
+  onHoldOrder: () => void;
+  onResumeOrder: (id: string) => void;
+  onDiscardHoldOrder: (id: string) => void;
+  onDiscardExpiredHoldOrders: () => void;
+  onClearAllHoldOrders: () => void;
+  onRestoreCartDraft: () => void;
+  onDiscardCartDraft: () => void;
+  onClear: () => void;
+  onCheckout: () => void;
+  onPrintReceipt: (saleId: string) => void;
+  onRequestRefund: (saleId: string, reason: string) => void;
+  onRequestVoid: (saleId: string, reason: string) => void;
+  onUpsertProduct: (product: ProductItem) => void;
+  onDeleteProduct: (id: string) => void;
+  onResolveApprovalRequest: (requestId: string, decision: ApprovalDecision, note: string) => Promise<void>;
+  onUpdateApprovalRules: (input: {
+    largeDiscountPercentThreshold: number;
+    minimumMarginPercentThreshold: number;
+    requireRefundApproval: boolean;
+    requireVoidApproval: boolean;
+  }) => void;
+  onUpdateManagerSettings: (input: ManagerSystemSettingsInput) => void;
+  onRefreshManagedUsers: () => void;
+  onCreateManagedUser: (input: {
+    email: string;
+    password: string;
+    fullName: string;
+    role: ManagedUserRole;
+  }) => Promise<void>;
+  onUpdateManagedUser: (input: {
+    userId: string;
+    role?: ManagedUserRole;
+    isActive?: boolean;
+    fullName?: string;
+  }) => Promise<void>;
+  onCreateCustomer: (input: {
+    name: string;
+    phone?: string;
+    email?: string;
+    memberTier?: Customer["member_tier"];
+  }) => void;
+  onUpdateCustomerTier: (customerId: string, tier: Customer["member_tier"]) => void;
+  onSettleCustomerDebt: (customerId: string) => void;
+  onCloseCheckoutConfirm: () => void;
+  onConfirmCheckout: () => void;
+};

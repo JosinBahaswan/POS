@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CashMovementType, ShiftSession } from "../shift";
 
 type CashierShiftPanelProps = {
   activeShift: ShiftSession | null;
+  expectedClosingCash: number | null;
+  shiftCashSalesTotal: number;
+  varianceThreshold: number;
   recentShifts: ShiftSession[];
   onOpenShift: (openingCash: number) => void;
   onCloseShift: (closingCash: number, note: string) => void;
@@ -11,6 +14,9 @@ type CashierShiftPanelProps = {
 
 export function CashierShiftPanel({
   activeShift,
+  expectedClosingCash,
+  shiftCashSalesTotal,
+  varianceThreshold,
   recentShifts,
   onOpenShift,
   onCloseShift,
@@ -23,6 +29,12 @@ export function CashierShiftPanel({
   const [closingCash, setClosingCash] = useState<number>(0);
   const [closingNote, setClosingNote] = useState("");
   const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    if (!activeShift || expectedClosingCash === null) return;
+    setClosingCash(Math.round(expectedClosingCash));
+    setClosingNote("");
+  }, [activeShift?.id, expectedClosingCash]);
 
   const summary = useMemo(() => {
     if (!activeShift) {
@@ -42,6 +54,13 @@ export function CashierShiftPanel({
       net: cashIn - cashOut
     };
   }, [activeShift]);
+
+  const closingVariance = useMemo(() => {
+    if (expectedClosingCash === null) return 0;
+    return Math.round(closingCash - expectedClosingCash);
+  }, [closingCash, expectedClosingCash]);
+
+  const hasLargeVariance = Math.abs(closingVariance) >= varianceThreshold;
 
   const submitOpenShift = () => {
     setFormError("");
@@ -139,6 +158,12 @@ export function CashierShiftPanel({
             <p className="mt-2 text-sm text-on-surface-variant">
               Net Kas Kecil: <span className="font-semibold text-on-surface">Rp {summary.net.toLocaleString("id-ID")}</span>
             </p>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              Tunai dari transaksi shift: <span className="font-semibold text-on-surface">Rp {Math.round(shiftCashSalesTotal).toLocaleString("id-ID")}</span>
+            </p>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              Saldo ekspektasi sistem: <span className="font-semibold text-on-surface">Rp {Math.round(expectedClosingCash ?? 0).toLocaleString("id-ID")}</span>
+            </p>
           </article>
 
           <article className="rounded-2xl bg-surface-container-lowest p-4">
@@ -178,7 +203,16 @@ export function CashierShiftPanel({
           </article>
 
           <article className="rounded-2xl bg-surface-container-lowest p-4">
-            <p className="text-sm font-semibold text-on-surface">Tutup Shift</p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-on-surface">Tutup Shift</p>
+              <button
+                type="button"
+                onClick={() => setClosingCash(Math.round(expectedClosingCash ?? 0))}
+                className="h-8 rounded-lg border border-outline-variant/40 bg-surface-container-low px-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-on-surface-variant"
+              >
+                Isi Sesuai Ekspektasi
+              </button>
+            </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
               <input
                 type="number"
@@ -203,6 +237,15 @@ export function CashierShiftPanel({
                 Tutup Shift
               </button>
             </div>
+
+            <p className={`mt-2 text-xs font-semibold ${closingVariance === 0 ? "text-emerald-700" : hasLargeVariance ? "text-rose-700" : "text-amber-700"}`}>
+              Selisih vs ekspektasi: {closingVariance > 0 ? "+" : ""}Rp {Math.abs(closingVariance).toLocaleString("id-ID")}
+            </p>
+            {hasLargeVariance && (
+              <p className="mt-1 text-xs text-rose-700">
+                Selisih besar terdeteksi. Isi catatan penutupan untuk menjelaskan penyebab selisih kas.
+              </p>
+            )}
           </article>
         </div>
       )}

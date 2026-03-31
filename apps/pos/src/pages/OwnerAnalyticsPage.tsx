@@ -4,6 +4,8 @@ import type { AuditLogEntry } from "../auditLog";
 import type { LocalSale } from "../database";
 import type { ProductItem } from "../localData";
 import type { ManagerSystemSettings, ManagerSystemSettingsInput } from "../managerSettings";
+import type { ShiftSession } from "../shift";
+import { OwnerAnalyticsAdvancedSection } from "../components/owner-analytics/OwnerAnalyticsAdvancedSection";
 import { OwnerAnalyticsGovernanceSection } from "../components/owner-analytics/OwnerAnalyticsGovernanceSection";
 import { OwnerAnalyticsInsightsSection } from "../components/owner-analytics/OwnerAnalyticsInsightsSection";
 import { OwnerAnalyticsKpiCards } from "../components/owner-analytics/OwnerAnalyticsKpiCards";
@@ -14,12 +16,14 @@ import { downloadOwnerAnalyticsCsv, useOwnerAnalyticsData } from "../hooks/useOw
 
 type OwnerAnalyticsPageProps = {
   sales: LocalSale[];
+  shifts: ShiftSession[];
   products: ProductItem[];
   approvalRules: ApprovalRules;
   auditLogs: AuditLogEntry[];
   managerSettings: ManagerSystemSettings;
   onUpdateApprovalRules: (input: {
     largeDiscountPercentThreshold: number;
+    minimumMarginPercentThreshold: number;
     requireRefundApproval: boolean;
     requireVoidApproval: boolean;
   }) => void;
@@ -39,8 +43,24 @@ function toManagerSettingsInput(settings: ManagerSystemSettings): ManagerSystemS
   };
 }
 
+const MONTHLY_TARGET_STORAGE_KEY = "owner_analytics_monthly_target";
+
+function readMonthlyTargetFromStorage() {
+  if (typeof window === "undefined") return 0;
+
+  try {
+    const rawValue = window.localStorage.getItem(MONTHLY_TARGET_STORAGE_KEY);
+    if (!rawValue) return 0;
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function OwnerAnalyticsPage({
   sales,
+  shifts,
   products,
   approvalRules,
   auditLogs,
@@ -49,7 +69,11 @@ export function OwnerAnalyticsPage({
   onUpdateManagerSettings
 }: OwnerAnalyticsPageProps) {
   const [period, setPeriod] = useState<OwnerAnalyticsPeriod>("7d");
+  const [monthlyTarget, setMonthlyTarget] = useState<number>(() => readMonthlyTargetFromStorage());
   const [threshold, setThreshold] = useState(approvalRules.largeDiscountPercentThreshold);
+  const [minimumMarginThreshold, setMinimumMarginThreshold] = useState(
+    approvalRules.minimumMarginPercentThreshold
+  );
   const [requireRefundApproval, setRequireRefundApproval] = useState(approvalRules.requireRefundApproval);
   const [requireVoidApproval, setRequireVoidApproval] = useState(approvalRules.requireVoidApproval);
   const [managerSettingsDraft, setManagerSettingsDraft] = useState<ManagerSystemSettingsInput>(() =>
@@ -58,6 +82,7 @@ export function OwnerAnalyticsPage({
 
   useEffect(() => {
     setThreshold(approvalRules.largeDiscountPercentThreshold);
+    setMinimumMarginThreshold(approvalRules.minimumMarginPercentThreshold);
     setRequireRefundApproval(approvalRules.requireRefundApproval);
     setRequireVoidApproval(approvalRules.requireVoidApproval);
   }, [approvalRules]);
@@ -66,15 +91,26 @@ export function OwnerAnalyticsPage({
     setManagerSettingsDraft(toManagerSettingsInput(managerSettings));
   }, [managerSettings]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(MONTHLY_TARGET_STORAGE_KEY, String(Math.max(0, Math.round(monthlyTarget))));
+    } catch {
+      // ignore storage failures, analytics should still work without persistence
+    }
+  }, [monthlyTarget]);
+
   const analytics = useOwnerAnalyticsData({
     sales,
     products,
-    period
+    period,
+    monthlyTarget
   });
 
   const saveRules = () => {
     onUpdateApprovalRules({
       largeDiscountPercentThreshold: Math.max(0, Math.min(100, Math.round(threshold))),
+      minimumMarginPercentThreshold: Math.max(0, Math.min(100, Math.round(minimumMarginThreshold))),
       requireRefundApproval,
       requireVoidApproval
     });
@@ -96,7 +132,22 @@ export function OwnerAnalyticsPage({
       },
       sales: analytics.periodSales,
       outletSummary: analytics.outletSummary,
-      topProducts: analytics.topProducts
+      topProducts: analytics.topProducts,
+      monthlyTarget: analytics.monthlyTarget,
+      monthlyTracking: {
+        monthToDateRevenue: analytics.monthToDateRevenue,
+        monthToDateTransactions: analytics.monthToDateTransactions,
+        targetProgressPct: analytics.targetProgressPct,
+        timeProgressPct: analytics.timeProgressPct,
+        projectedMonthEndRevenue: analytics.projectedMonthEndRevenue,
+        targetGap: analytics.targetGap
+      },
+      anomalyRadar: analytics.anomalyRadar,
+      consistencyRadar: analytics.consistencyRadar,
+      executionPlanner: analytics.executionPlanner,
+      dailyMission: analytics.dailyMission,
+      targetScenarioSimulator: analytics.targetScenarioSimulator,
+      paymentMomentum: analytics.paymentMomentum
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -119,12 +170,15 @@ export function OwnerAnalyticsPage({
       </section>
 
       <OwnerAnalyticsKpiCards analytics={analytics} />
-      <OwnerAnalyticsStaffPerformance sales={sales} />
+      <OwnerAnalyticsStaffPerformance sales={sales} shifts={shifts} />
       <OwnerAnalyticsInsightsSection analytics={analytics} />
+      <OwnerAnalyticsAdvancedSection analytics={analytics} />
 
       <OwnerAnalyticsReportsSection
         period={period}
         onPeriodChange={setPeriod}
+        monthlyTarget={monthlyTarget}
+        onMonthlyTargetChange={setMonthlyTarget}
         onExportCsv={() => downloadOwnerAnalyticsCsv(period, analytics.periodSales)}
         onExportJson={exportAnalyticsJson}
         analytics={analytics}
@@ -133,6 +187,8 @@ export function OwnerAnalyticsPage({
       <OwnerAnalyticsGovernanceSection
         threshold={threshold}
         setThreshold={setThreshold}
+        minimumMarginThreshold={minimumMarginThreshold}
+        setMinimumMarginThreshold={setMinimumMarginThreshold}
         requireRefundApproval={requireRefundApproval}
         setRequireRefundApproval={setRequireRefundApproval}
         requireVoidApproval={requireVoidApproval}

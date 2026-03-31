@@ -3,11 +3,26 @@
 @tailwind utilities;
 
 :root {
-  color: #10213f;
-  background-color: #f4f7ff;
+  color: #0f172a;
+  background-color: #f8fafc;
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  font-family: var(--font-body), "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f172a;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(34, 211, 238, 0.15), transparent 38%),
+    radial-gradient(circle at 90% 100%, rgba(251, 191, 36, 0.14), transparent 40%),
+    #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }

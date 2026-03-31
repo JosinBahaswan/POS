@@ -243,6 +243,9 @@ export function ProductEditorModal({
                   Advanced
                 </button>
               </div>
+              <p className="px-1 text-[11px] text-on-surface-variant">
+                Basic: isi 1 nilai HPP langsung. Advanced: hitung HPP otomatis dari komponen biaya + susut + pajak, lalu sistem beri harga jual saran sesuai target margin.
+              </p>
             </div>
           </div>
 
@@ -265,6 +268,14 @@ export function ProductEditorModal({
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
                 Komponen HPP Advanced
               </p>
+              <div className="rounded-xl bg-surface-container p-3 text-xs text-on-surface-variant">
+                <p>
+                  Keterangan: total biaya dasar dihitung dari bahan baku + tenaga kerja + overhead + kemasan + logistik + biaya lain.
+                </p>
+                <p className="mt-1">
+                  Rumus: HPP final = biaya dasar + susut + pajak biaya. Harga saran mengikuti target margin dan pembulatan harga.
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <input
@@ -410,6 +421,9 @@ export function ProductEditorModal({
               </div>
 
               <div className="rounded-xl bg-surface-container p-3 text-xs text-on-surface-variant">
+                <p>Biaya dasar: Rp {hppPreview.baseCost.toLocaleString("id-ID")}</p>
+                <p>Biaya susut: Rp {hppPreview.wastageCost.toLocaleString("id-ID")}</p>
+                <p>Biaya pajak: Rp {hppPreview.taxCost.toLocaleString("id-ID")}</p>
                 <p>HPP final per unit: Rp {hppPreview.unitHpp.toLocaleString("id-ID")}</p>
                 <p>
                   Harga jual saran (margin {normalizedHppProfile.targetMarginPercent}%): Rp {hppPreview.suggestedPrice.toLocaleString("id-ID")}

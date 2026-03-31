@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Pro - Transaction History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-primary": "#87d0f2",
+                        "surface-dim": "#d7dae0",
+                        "error": "#ba1a1a",
+                        "surface": "#f7f9ff",
+                        "on-secondary-fixed-variant": "#005312",
+                        "outline-variant": "#bfc8cd",
+                        "secondary-container": "#a0f399",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "outline": "#70787e",
+                        "secondary-fixed-dim": "#88d982",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#a2e1ff",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9ff",
+                        "on-secondary-container": "#217128",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#181c20",
+                        "on-tertiary-fixed": "#2d1600",
+                        "tertiary": "#6b3a00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f1f4fa",
+                        "surface-container-high": "#e5e8ee",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "primary-container": "#006684",
+                        "on-surface-variant": "#3f484d",
+                        "on-primary-fixed-variant": "#004d64",
+                        "surface-variant": "#dfe3e8",
+                        "tertiary-container": "#885116",
+                        "inverse-on-surface": "#eef1f7",
+                        "primary-fixed": "#bee9ff",
+                        "secondary": "#1b6d24",
+                        "surface-container": "#ebeef4",
+                        "primary": "#004d64",
+                        "inverse-surface": "#2d3135",
+                        "surface-tint": "#016684",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#ffcfa6",
+                        "secondary-fixed": "#a3f69c",
+                        "surface-container-highest": "#dfe3e8",
+                        "surface-bright": "#f7f9ff",
+                        "on-background": "#181c20",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#002204",
+                        "on-primary-fixed": "#001f2a"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-slate-100 dark:bg-slate-950 z-40">
+<div class="flex flex-col h-full py-6 px-4 space-y-2">
+<div class="mb-8 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="store">store</span>
+</div>
+<div>
+<h2 class="font-manrope font-black text-cyan-950 dark:text-white leading-tight">Main Terminal</h2>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest">Precision Architect Mode</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-inter text-sm font-medium">Register</span>
+</a>
+<a class="flex items-center gap-3 bg-white dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-200 shadow-sm rounded-lg font-bold px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-inter text-sm font-medium">History</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-inter text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-inter text-sm font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-sm font-medium">Settings</span>
+</a>
+</nav>
+<button class="mt-4 bg-primary text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span>New Sale</span>
+</button>
+<div class="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-200 px-4 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-inter text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 text-error px-4 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-inter text-sm font-medium">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky z-50 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-3">
+<div class="flex items-center gap-2">
+<h1 class="text-xl font-extrabold text-cyan-900 dark:text-cyan-50 tracking-tighter">Merchant Pro</h1>
+<span class="text-slate-300 mx-2 text-xl font-thin">|</span>
+<span class="font-manrope font-bold text-lg tracking-tight text-cyan-900 dark:text-cyan-100">Transaction History</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-80 focus:ring-2 focus:ring-primary/20" placeholder="Search Order ID or Customer..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="flex items-center gap-2 ml-2 p-1 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors duration-200">
+<img class="w-8 h-8 rounded-full border border-slate-200" data-alt="close-up portrait of a professional male cashier in a smart uniform smiling confidently with soft retail store lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHusSu0tdxWjeCebqqSMxnkzTYzDsBeP0w9hSm_w2V0W1w1zIe5biaSft8Q3g61GB2hUKXa0M-6rrQo8LR9eu1CY7Ns6wLYwrWncDnXs66LfLqk4dkyYJVZk1x6aCBuNjtts0lEJAbWf2y1wgiTRCAO53BL5pu-CzfIc8FCHuNq5fQjmsBwAoVHFV3DcDBbNu0EPO9q8_LPtGZmnl45ouzx-e4RO5K0MjinyXvZ3zlfI6xV5TCzU6gAESVElPzZogp6svPxDlHGSk"/>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Alex Cashier</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full"></div>
+</header>
+<!-- Content Canvas -->
+<div class="p-8 space-y-8 flex-1">
+<!-- Filters & Stats Bento Layout -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- Main Controls -->
+<div class="md:col-span-3 bg-surface-container-lowest p-6 rounded-xl shadow-sm space-y-6">
+<div class="flex flex-wrap items-center gap-4">
+<div class="flex flex-col gap-1">
+<label class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">Date Range</label>
+<div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-lg">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="calendar_month">calendar_month</span>
+<input class="bg-transparent border-none p-0 text-sm font-medium focus:ring-0" type="text" value="Oct 24, 2023 - Oct 25, 2023"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">Status</label>
+<select class="bg-surface-container-low border-none rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary/20 appearance-none min-w-[140px]">
+<option>All Status</option>
+<option>Success</option>
+<option>Refunded</option>
+<option>Voided</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">Payment</label>
+<select class="bg-surface-container-low border-none rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary/20 appearance-none min-w-[140px]">
+<option>All Methods</option>
+<option>Cash</option>
+<option>Card</option>
+<option>QRIS</option>
+</select>
+</div>
+<div class="flex items-end h-full">
+<button class="bg-primary text-white h-[40px] px-6 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all mb-[1px]">Apply Filter</button>
+</div>
+</div>
+</div>
+<!-- Mini Stat Card -->
+<div class="bg-primary-container p-6 rounded-xl flex flex-col justify-between text-white relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-xs font-medium opacity-80 uppercase tracking-widest">Today's Volume</p>
+<h3 class="text-2xl font-black mt-1">$12,450.80</h3>
+</div>
+<div class="flex items-center gap-2 mt-4 relative z-10">
+<span class="material-symbols-outlined text-secondary-container" data-icon="trending_up">trending_up</span>
+<span class="text-xs font-bold text-secondary-container">+12.5% from yesterday</span>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+</div>
+</div>
+<!-- Transaction Table Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-8 py-5 border-b border-surface-container-low flex justify-between items-center">
+<h2 class="font-headline font-bold text-lg text-on-surface">Recent Transactions</h2>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="file_download">file_download</span>
+                            Export CSV
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Date &amp; Time</th>
+<th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Order ID</th>
+<th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Customer</th>
+<th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Amount</th>
+<th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Method</th>
+<th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Status</th>
+<th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Transaction 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Oct 25, 2023</span>
+<span class="text-xs text-on-surface-variant">14:22 PM</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-mono font-medium text-primary">#MP-99281</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-xs font-bold text-primary">JD</div>
+<span class="text-sm font-medium">Jane Doe</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold">$142.50</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg" data-icon="credit_card">credit_card</span>
+<span class="text-sm text-on-surface-variant">Visa **** 4242</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                        Success
+                                    </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-primary text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="print">print</span>
+                                            Print
+                                        </button>
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-on-surface-variant text-xs font-bold rounded-lg hover:bg-error-container hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="assignment_return">assignment_return</span>
+                                            Refund
+                                        </button>
+</div>
+</td>
+</tr>
+<!-- Transaction 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group bg-surface-container-low/10">
+<td class="px-8 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Oct 25, 2023</span>
+<span class="text-xs text-on-surface-variant">13:45 PM</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-mono font-medium text-primary">#MP-99280</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-xs font-bold text-primary">MS</div>
+<span class="text-sm font-medium">Michael Smith</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold">$12.00</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg" data-icon="payments">payments</span>
+<span class="text-sm text-on-surface-variant">Cash</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-error text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                        Refunded
+                                    </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-primary text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="print">print</span>
+                                            Print
+                                        </button>
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-on-surface-variant text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors" disabled="">
+<span class="material-symbols-outlined text-[16px]" data-icon="info">info</span>
+                                            Details
+                                        </button>
+</div>
+</td>
+</tr>
+<!-- Transaction 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Oct 25, 2023</span>
+<span class="text-xs text-on-surface-variant">12:10 PM</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-mono font-medium text-primary">#MP-99279</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-xs font-bold text-primary">AK</div>
+<span class="text-sm font-medium">Anisa Kurnia</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold">$56.20</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg" data-icon="qr_code_2">qr_code_2</span>
+<span class="text-sm text-on-surface-variant">QRIS / GoPay</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                        Success
+                                    </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-primary text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="print">print</span>
+                                            Print
+                                        </button>
+<button class="flex items-center gap-1 px-3 py-1.5 bg-surface-container-low text-on-surface-variant text-xs font-bold rounded-lg hover:bg-error-container hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="assignment_return">assignment_return</span>
+                                            Refund
+                                        </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-8 py-5 bg-surface-container-low/30 border-t border-surface-container-low flex justify-between items-center">
+<p class="text-xs text-on-surface-variant font-medium">Showing 1 to 3 of 124 transactions</p>
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-lg hover:bg-white text-on-surface-variant disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 rounded-lg hover:bg-white text-on-surface-variant text-xs font-bold">2</button>
+<button class="w-8 h-8 rounded-lg hover:bg-white text-on-surface-variant text-xs font-bold">3</button>
+<span class="px-2 text-on-surface-variant">...</span>
+<button class="w-8 h-8 rounded-lg hover:bg-white text-on-surface-variant text-xs font-bold">12</button>
+<button class="p-2 rounded-lg hover:bg-white text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contextual Help / Shortcuts -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/50 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-white shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="print">print</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface">Thermal Printer Active</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">System connected to EPSON-TM88. Automatic printing is enabled for all successful cash sales.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/50 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-white shadow-sm">
+<span class="material-symbols-outlined text-tertiary" data-icon="warning">warning</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface">Refund Policy</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Transactions over $500.00 require Manager approval. Reasons are mandatory for all voids.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/50 flex items-start gap-4">
+<div class="p-3 rounded-lg bg-white shadow-sm">
+<span class="material-symbols-outlined text-secondary" data-icon="support_agent">support_agent</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface">Need Assistance?</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Hotline active. Tap the Support tab for immediate remote assistance or terminal diagnostics.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Refund Modal (Hidden State Example) -->
+<div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
+<div class="bg-surface-container-lowest w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="px-8 py-6 border-b border-surface-container-low">
+<h3 class="font-headline font-bold text-xl text-on-surface">Request Refund / Void</h3>
+<p class="text-xs text-on-surface-variant mt-1">Order #MP-99281 • Jane Doe • $142.50</p>
+</div>
+<div class="p-8 space-y-6">
+<div>
+<label class="text-[11px] font-black uppercase tracking-widest text-on-surface-variant block mb-2">Reason for Refund</label>
+<select class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20">
+<option>Customer changed mind</option>
+<option>Defective product</option>
+<option>Incorrect item charged</option>
+<option>System error / Double charge</option>
+<option>Other (Specify below)</option>
+</select>
+</div>
+<div>
+<label class="text-[11px] font-black uppercase tracking-widest text-on-surface-variant block mb-2">Additional Notes</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 h-24 resize-none" placeholder="Provide more context for the supervisor..."></textarea>
+</div>
+<div class="p-4 rounded-xl bg-error-container/20 border border-error/10 flex gap-3">
+<span class="material-symbols-outlined text-error text-sm" data-icon="info">info</span>
+<p class="text-[11px] text-error font-medium leading-relaxed">This action cannot be undone. Once refunded, the inventory items will be restocked and the payment will be reversed to the original card.</p>
+</div>
+</div>
+<div class="px-8 py-6 bg-surface-container-low/50 flex gap-3 justify-end">
+<button class="px-6 py-2.5 rounded-lg text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">Cancel</button>
+<button class="px-6 py-2.5 rounded-lg text-sm font-bold bg-error text-white shadow-lg shadow-error/20 hover:opacity-90 active:scale-95 transition-all">Submit Refund</button>
+</div>
+</div>
+</div>
+</body></html>

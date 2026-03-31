@@ -58,6 +58,14 @@ const buildReceiptHtml = (input: {
     splitPaymentRows,
     itemRows
   } = input;
+  const loyaltyDiscountRow =
+    sale.redeemedAmount !== undefined && sale.redeemedAmount > 0
+      ? `<div class="kv-row"><span>Loyalty${sale.redeemedPoints ? ` (${sale.redeemedPoints.toLocaleString("id-ID")} poin)` : ""}</span><strong>- Rp ${Math.round(sale.redeemedAmount).toLocaleString("id-ID")}</strong></div>`
+      : "";
+  const loyaltyEarnedRow =
+    sale.earnedPoints !== undefined && sale.earnedPoints > 0
+      ? `<div class="kv-row"><span>Poin Dapat</span><strong>+${sale.earnedPoints.toLocaleString("id-ID")}</strong></div>`
+      : "";
 
   return `
     <html>
@@ -243,6 +251,7 @@ const buildReceiptHtml = (input: {
           <section class="totals">
             <div class="kv-row"><span>Subtotal</span><strong>Rp ${sale.subtotal.toLocaleString("id-ID")}</strong></div>
             <div class="kv-row"><span>Diskon</span><strong>- Rp ${sale.discountAmount.toLocaleString("id-ID")}</strong></div>
+            ${loyaltyDiscountRow}
             <div class="kv-row grand"><span>Total Bayar</span><strong>Rp ${sale.total.toLocaleString("id-ID")}</strong></div>
           </section>
 
@@ -250,6 +259,7 @@ const buildReceiptHtml = (input: {
             <div class="kv-row"><span>Metode</span><strong>${paymentLabel}</strong></div>
             ${splitPaymentRows}
             <div class="kv-row"><span>Status</span><strong>${sale.status.toUpperCase()}</strong></div>
+            ${loyaltyEarnedRow}
           </section>
 
           <footer class="footer">
