@@ -38,11 +38,31 @@ type PeriodSummary = {
   growthPercent: number | null;
 };
 
+type ShiftReconciliationRow = {
+  id: string;
+  openedAt: string;
+  closedAt?: string;
+  status: "open" | "closed";
+  openedByName?: string;
+  closedByName?: string;
+  openingCash: number;
+  cashIn: number;
+  cashOut: number;
+  cashSalesTotal: number;
+  expectedClosingCash: number;
+  actualClosingCash: number | null;
+  variance: number | null;
+  movementCount: number;
+  closingNote?: string;
+};
+
 const periodOptions: Array<{ key: ReportPeriod; label: string }> = [
   { key: "daily", label: "Harian" },
   { key: "weekly", label: "Mingguan" },
   { key: "monthly", label: "Bulanan" }
 ];
+
+const SHIFT_VARIANCE_ALERT_THRESHOLD = 5000;
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
@@ -190,6 +210,84 @@ export function ReportsPanel({
         ? analytics.monthly
         : analytics.daily;
 
+  const shiftReconciliationRows = useMemo<ShiftReconciliationRow[]>(() => {
+    const shiftInRange = shifts.filter(
+      (shift) => new Date(shift.openedAt).getTime() >= selectedSummary.start
+    );
+
+    return shiftInRange
+      .map((shift) => {
+        const completedShiftSales = sales.filter(
+          (sale) => sale.shiftId === shift.id && sale.status === "completed"
+        );
+
+        const cashSalesTotal = completedShiftSales.reduce((acc, sale) => {
+          if (sale.paymentBreakdown) {
+            return acc + Math.max(0, Number(sale.paymentBreakdown.cash || 0));
+          }
+
+          return sale.paymentMethod === "cash" ? acc + Math.max(0, Number(sale.total || 0)) : acc;
+        }, 0);
+
+        const cashIn = shift.movements.reduce((acc, movement) => {
+          if (movement.type !== "in") return acc;
+          return acc + Math.max(0, Number(movement.amount || 0));
+        }, 0);
+
+        const cashOut = shift.movements.reduce((acc, movement) => {
+          if (movement.type !== "out") return acc;
+          return acc + Math.max(0, Number(movement.amount || 0));
+        }, 0);
+
+        const expectedClosingCash = Math.max(0, Number(shift.openingCash || 0) + cashIn - cashOut + cashSalesTotal);
+        const isClosed = Boolean(shift.closedAt);
+        const actualClosingCash = isClosed ? Math.max(0, Number(shift.closingCash || 0)) : null;
+        const variance = actualClosingCash === null ? null : Math.round(actualClosingCash - expectedClosingCash);
+
+        return {
+          id: shift.id,
+          openedAt: shift.openedAt,
+          closedAt: shift.closedAt,
+          status: (isClosed ? "closed" : "open") as ShiftReconciliationRow["status"],
+          openedByName: shift.openedByName,
+          closedByName: shift.closedByName,
+          openingCash: Math.max(0, Number(shift.openingCash || 0)),
+          cashIn,
+          cashOut,
+          cashSalesTotal,
+          expectedClosingCash,
+          actualClosingCash,
+          variance,
+          movementCount: shift.movements.length,
+          closingNote: shift.closingNote
+        };
+      })
+      .sort((a, b) => new Date(b.openedAt).getTime() - new Date(a.openedAt).getTime());
+  }, [selectedSummary.start, shifts, sales]);
+
+  const shiftReconciliationStats = useMemo(() => {
+    const total = shiftReconciliationRows.length;
+    const open = shiftReconciliationRows.filter((row) => row.status === "open").length;
+    const closed = total - open;
+    const largeVariance = shiftReconciliationRows.filter(
+      (row) => row.variance !== null && Math.abs(row.variance) >= SHIFT_VARIANCE_ALERT_THRESHOLD
+    ).length;
+
+    const closedRows = shiftReconciliationRows.filter((row) => row.variance !== null);
+    const averageVarianceAbs =
+      closedRows.length === 0
+        ? 0
+        : closedRows.reduce((acc, row) => acc + Math.abs(Number(row.variance || 0)), 0) / closedRows.length;
+
+    return {
+      total,
+      open,
+      closed,
+      largeVariance,
+      averageVarianceAbs
+    };
+  }, [shiftReconciliationRows]);
+
   const exportSalesCsv = () => {
     if (!exportEnabled) return;
 
@@ -263,7 +361,8 @@ export function ReportsPanel({
       selectedPeriodData: {
         sales: selectedSummary.allSales,
         approvals: approvalInRange,
-        shifts: shiftsInRange
+        shifts: shiftsInRange,
+        shiftReconciliation: shiftReconciliationRows
       },
       masterData: {
         products,
@@ -275,6 +374,55 @@ export function ReportsPanel({
       JSON.stringify(payload, null, 2),
       `data-lengkap-${selectedPeriod}-${new Date().toISOString().slice(0, 10)}.json`,
       "application/json;charset=utf-8;"
+    );
+  };
+
+  const exportShiftReconciliationCsv = () => {
+    if (!exportEnabled) return;
+
+    const header = [
+      "id_shift",
+      "status",
+      "dibuka_pada",
+      "ditutup_pada",
+      "dibuka_oleh",
+      "ditutup_oleh",
+      "kas_awal",
+      "kas_masuk",
+      "kas_keluar",
+      "tunai_transaksi",
+      "saldo_ekspektasi",
+      "saldo_aktual",
+      "selisih",
+      "jumlah_mutasi",
+      "catatan_penutupan"
+    ];
+
+    const rows = shiftReconciliationRows.map((row) =>
+      [
+        escapeCsvValue(row.id),
+        escapeCsvValue(row.status),
+        escapeCsvValue(row.openedAt),
+        escapeCsvValue(row.closedAt || ""),
+        escapeCsvValue(row.openedByName || ""),
+        escapeCsvValue(row.closedByName || ""),
+        escapeCsvValue(Math.round(row.openingCash)),
+        escapeCsvValue(Math.round(row.cashIn)),
+        escapeCsvValue(Math.round(row.cashOut)),
+        escapeCsvValue(Math.round(row.cashSalesTotal)),
+        escapeCsvValue(Math.round(row.expectedClosingCash)),
+        escapeCsvValue(row.actualClosingCash === null ? "" : Math.round(row.actualClosingCash)),
+        escapeCsvValue(row.variance === null ? "" : row.variance),
+        escapeCsvValue(row.movementCount),
+        escapeCsvValue(row.closingNote || "")
+      ].join(",")
+    );
+
+    const content = [header.join(","), ...rows].join("\n");
+    downloadBlob(
+      content,
+      `rekonsiliasi-shift-${selectedPeriod}-${new Date().toISOString().slice(0, 10)}.csv`,
+      "text/csv;charset=utf-8;"
     );
   };
 
@@ -354,6 +502,14 @@ export function ReportsPanel({
             </button>
             <button
               type="button"
+              onClick={exportShiftReconciliationCsv}
+              disabled={!exportEnabled}
+              className="h-9 rounded-lg bg-surface-container-high px-3 text-xs font-semibold text-on-primary-fixed-variant disabled:opacity-50"
+            >
+              Export Rekonsiliasi Shift
+            </button>
+            <button
+              type="button"
               onClick={exportAllDataJson}
               disabled={!exportEnabled}
               className="h-9 rounded-lg bg-primary px-3 text-xs font-semibold text-on-primary disabled:opacity-50"
@@ -368,6 +524,124 @@ export function ReportsPanel({
         {!exportEnabled && (
           <p className="mt-2 rounded-xl bg-error-container/60 px-3 py-2 text-xs font-semibold text-on-error-container">
             Fitur ekspor dinonaktifkan owner untuk akun manager.
+          </p>
+        )}
+      </article>
+
+      <article className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface-variant">Rekonsiliasi Kas Shift</h3>
+          <span className="rounded-full bg-secondary-container px-2.5 py-1 text-[11px] font-bold text-on-secondary-container">
+            {shiftReconciliationStats.total} shift
+          </span>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+            Shift Terbuka
+            <span className="mt-1 block font-headline text-lg font-bold text-on-surface">{shiftReconciliationStats.open}</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+            Shift Ditutup
+            <span className="mt-1 block font-headline text-lg font-bold text-on-surface">{shiftReconciliationStats.closed}</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+            Selisih Besar
+            <span className="mt-1 block font-headline text-lg font-bold text-rose-700">{shiftReconciliationStats.largeVariance}</span>
+          </p>
+          <p className="rounded-xl bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+            Rata2 Selisih
+            <span className="mt-1 block font-headline text-lg font-bold text-on-surface">
+              Rp {Math.round(shiftReconciliationStats.averageVarianceAbs).toLocaleString("id-ID")}
+            </span>
+          </p>
+        </div>
+
+        <ul className="mt-3 grid gap-2">
+          {shiftReconciliationRows.length === 0 && (
+            <li className="rounded-xl bg-surface-container-lowest p-3 text-sm text-on-surface-variant">
+              Belum ada data shift pada periode ini.
+            </li>
+          )}
+
+          {shiftReconciliationRows.slice(0, 6).map((row) => {
+            const isLargeVariance = row.variance !== null && Math.abs(row.variance) >= SHIFT_VARIANCE_ALERT_THRESHOLD;
+            return (
+              <li key={row.id} className="rounded-xl bg-surface-container-lowest p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-headline text-base font-bold text-on-surface">{row.id}</p>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                      row.status === "open"
+                        ? "bg-amber-100 text-amber-800"
+                        : isLargeVariance
+                          ? "bg-rose-100 text-rose-700"
+                          : "bg-emerald-100 text-emerald-700"
+                    }`}
+                  >
+                    {row.status === "open" ? "Aktif" : isLargeVariance ? "Selisih Tinggi" : "Normal"}
+                  </span>
+                </div>
+
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  {new Date(row.openedAt).toLocaleString("id-ID")}
+                  {row.closedAt ? ` • ditutup ${new Date(row.closedAt).toLocaleString("id-ID")}` : " • belum ditutup"}
+                </p>
+
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                  <p className="rounded-lg bg-surface-container-low px-2 py-1 text-on-surface-variant">
+                    Kas Awal
+                    <span className="mt-0.5 block font-semibold text-on-surface">Rp {Math.round(row.openingCash).toLocaleString("id-ID")}</span>
+                  </p>
+                  <p className="rounded-lg bg-surface-container-low px-2 py-1 text-on-surface-variant">
+                    Tunai Transaksi
+                    <span className="mt-0.5 block font-semibold text-on-surface">Rp {Math.round(row.cashSalesTotal).toLocaleString("id-ID")}</span>
+                  </p>
+                  <p className="rounded-lg bg-surface-container-low px-2 py-1 text-on-surface-variant">
+                    Kas Kecil (Net)
+                    <span className="mt-0.5 block font-semibold text-on-surface">
+                      {(row.cashIn - row.cashOut) >= 0 ? "+" : "-"}Rp {Math.abs(Math.round(row.cashIn - row.cashOut)).toLocaleString("id-ID")}
+                    </span>
+                  </p>
+                  <p className="rounded-lg bg-surface-container-low px-2 py-1 text-on-surface-variant">
+                    Selisih
+                    <span
+                      className={`mt-0.5 block font-semibold ${
+                        row.variance === null
+                          ? "text-on-surface"
+                          : row.variance === 0
+                            ? "text-emerald-700"
+                            : isLargeVariance
+                              ? "text-rose-700"
+                              : "text-amber-700"
+                      }`}
+                    >
+                      {row.variance === null
+                        ? "-"
+                        : `${row.variance >= 0 ? "+" : "-"}Rp ${Math.abs(row.variance).toLocaleString("id-ID")}`}
+                    </span>
+                  </p>
+                </div>
+
+                <p className="mt-2 text-xs text-on-surface-variant">
+                  Ekspektasi Rp {Math.round(row.expectedClosingCash).toLocaleString("id-ID")}
+                  {row.actualClosingCash === null ? " • Aktual: -" : ` • Aktual Rp ${Math.round(row.actualClosingCash).toLocaleString("id-ID")}`}
+                  {row.movementCount > 0 ? ` • ${row.movementCount} mutasi` : " • tanpa mutasi"}
+                </p>
+
+                {row.closingNote && (
+                  <p className="mt-1 rounded-lg bg-surface-container-low px-2 py-1 text-xs text-on-surface-variant">
+                    Catatan: {row.closingNote}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+
+        {shiftReconciliationRows.length > 6 && (
+          <p className="mt-2 text-xs text-on-surface-variant">
+            Menampilkan 6 data terbaru dari {shiftReconciliationRows.length} shift pada periode ini.
           </p>
         )}
       </article>

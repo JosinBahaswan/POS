@@ -48,15 +48,15 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
   }, [products, query, filter]);
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-4">
+    <section className="space-y-5">
+      <div className="space-y-3">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
           <div className="relative group">
             <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-outline">
               search
             </span>
             <input
-              className="h-12 w-full rounded-xl border-none bg-surface-container-low py-4 pl-12 pr-4 text-sm font-medium text-on-surface outline-none transition placeholder:text-outline/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+              className="h-11 w-full rounded-xl border-none bg-surface-container-low py-3 pl-12 pr-4 text-sm font-medium text-on-surface outline-none transition placeholder:text-outline/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
               type="text"
               placeholder="Cari nama produk atau SKU..."
               value={query}
@@ -69,11 +69,11 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
             onDetected={(barcode) => {
               setQuery(barcode);
             }}
-            className="inline-flex h-12 items-center justify-center gap-1 rounded-xl bg-surface-container-high px-3 text-xs font-semibold text-on-surface"
+            className="inline-flex h-11 items-center justify-center gap-1 rounded-xl bg-surface-container-high px-3 text-xs font-semibold text-on-surface"
           />
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+        <div className="flex gap-2 overflow-x-auto pb-1.5 hide-scrollbar">
           {categoryOptions.map((item) => (
             <button
               key={item}
@@ -81,8 +81,8 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
               onClick={() => setFilter(item)}
               className={
                 filter === item
-                  ? "whitespace-nowrap rounded-full bg-primary-container px-6 py-2 text-sm font-semibold text-white"
-                  : "whitespace-nowrap rounded-full bg-surface-container-highest px-6 py-2 text-sm font-semibold text-on-surface-variant"
+                  ? "whitespace-nowrap rounded-full bg-primary-container px-4 py-1.5 text-xs font-semibold text-white"
+                  : "whitespace-nowrap rounded-full bg-surface-container-highest px-4 py-1.5 text-xs font-semibold text-on-surface-variant"
               }
             >
               {normalizeCategoryLabel(item)}
@@ -91,7 +91,7 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
         {filteredProducts.map((product) => {
           const promoPercent = Math.max(0, Math.min(100, Number(product.promoPercent || 0)));
           const effectivePrice = Math.round(product.price * (1 - promoPercent / 100));
@@ -118,10 +118,10 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
 
           return (
             <article
-              className="group min-w-0 overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm transition-all duration-300 hover:shadow-md active:scale-95 border border-transparent hover:border-outline-variant/30"
+              className="group min-w-0 overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm transition-all duration-300 hover:shadow-md active:scale-95 border border-transparent hover:border-outline-variant/30"
               key={product.id}
             >
-              <div className="relative aspect-square overflow-hidden bg-surface-container">
+              <div className="relative aspect-[4/3] overflow-hidden bg-surface-container">
                 <img
                   src={product.imageUrl}
                   alt={product.name}
@@ -132,25 +132,25 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
                     event.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
                   }}
                 />
-                <span className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${stockState.badgeClass}`}>
+                <span className={`absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] ${stockState.badgeClass}`}>
                   {stockState.label}
                 </span>
               </div>
 
-              <div className="p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-outline">{categoryLabel}</p>
-                <p className="mb-2 line-clamp-2 min-h-[2.5rem] font-headline text-base font-bold leading-tight text-on-surface">
+              <div className="p-3">
+                <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-outline">{categoryLabel}</p>
+                <p className="mb-2 line-clamp-2 min-h-[2.25rem] font-headline text-sm font-bold leading-tight text-on-surface">
                   {product.name}
                 </p>
 
                 <div className="flex items-end justify-between gap-2">
                   <div>
-                    <p className={`mb-0.5 text-[10px] font-medium ${stockState.helperClass}`}>
+                    <p className={`mb-0.5 text-[9px] font-medium ${stockState.helperClass}`}>
                       {product.stock > 0 ? `${product.stock} tersisa` : "Tidak tersedia"}
                     </p>
-                    <p className="font-headline text-lg font-extrabold text-primary">Rp {effectivePrice.toLocaleString("id-ID")}</p>
+                    <p className="font-headline text-base font-extrabold text-primary">Rp {effectivePrice.toLocaleString("id-ID")}</p>
                     {promoPercent > 0 && (
-                      <p className="text-[10px] font-semibold text-on-surface-variant">
+                      <p className="text-[9px] font-semibold text-on-surface-variant">
                         <span className="line-through">Rp {product.price.toLocaleString("id-ID")}</span>
                         {` • Promo ${promoPercent}%`}
                       </p>
@@ -162,12 +162,12 @@ export function ProductGrid({ products, onAdd }: ProductGridProps) {
                     disabled={product.stock <= 0}
                     className={
                       product.stock <= 0
-                        ? "grid h-10 w-10 place-items-center rounded-xl bg-surface-container-high text-outline"
-                        : "grid h-10 w-10 place-items-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110 active:scale-90"
+                        ? "grid h-9 w-9 place-items-center rounded-lg bg-surface-container-high text-outline"
+                        : "grid h-9 w-9 place-items-center rounded-lg bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110 active:scale-90"
                     }
                     aria-label={`Tambah ${product.name}`}
                   >
-                    <span className="material-symbols-outlined">add</span>
+                    <span className="material-symbols-outlined text-[20px]">add</span>
                   </button>
                 </div>
               </div>

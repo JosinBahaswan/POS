@@ -93,6 +93,8 @@ type CartDraftSnapshot = {
 };
 
 const SHIFT_VARIANCE_REQUIRES_NOTE = 5000;
+const SHIFT_LARGE_CASH_MOVEMENT_REQUIRES_NOTE = 50000;
+const SHIFT_MOVEMENT_NOTE_MIN_LENGTH = 6;
 const HELD_ORDERS_STORAGE_KEY = "pos_held_orders";
 const HELD_ORDER_TTL_MS = 12 * 60 * 60 * 1000;
 const MAX_HELD_ORDERS = 10;
@@ -1973,13 +1975,55 @@ export function usePosAppController(): UsePosAppControllerResult {
   };
 
   const handleAddCashMovement = (type: CashMovementType, amount: number, note: string) => {
-    addCashMovement(type, amount, note, storageScope);
+    if (!activeShift) {
+      throw new Error("Belum ada shift aktif.");
+    }
+
+    const normalizedAmount = Math.max(0, Math.round(Number(amount || 0)));
+    const normalizedNote = note.trim();
+
+    if (normalizedAmount <= 0) {
+      throw new Error("Nominal kas harus lebih dari 0.");
+    }
+
+    if (
+      normalizedAmount >= SHIFT_LARGE_CASH_MOVEMENT_REQUIRES_NOTE &&
+      normalizedNote.length < SHIFT_MOVEMENT_NOTE_MIN_LENGTH
+    ) {
+      throw new Error(
+        `Mutasi kas >= Rp ${SHIFT_LARGE_CASH_MOVEMENT_REQUIRES_NOTE.toLocaleString("id-ID")} wajib catatan minimal ${SHIFT_MOVEMENT_NOTE_MIN_LENGTH} karakter.`
+      );
+    }
+
+    if (type === "out") {
+      const availableCash = Math.max(0, Math.round(activeShiftCashSummary.expectedClosingCash));
+
+      if (availableCash <= 0) {
+        throw new Error("Saldo kas tidak cukup untuk kas keluar.");
+      }
+
+      if (normalizedAmount > availableCash) {
+        throw new Error(
+          `Kas keluar melebihi saldo tersedia. Maksimal Rp ${availableCash.toLocaleString("id-ID")}.`
+        );
+      }
+    }
+
+    const session = addCashMovement(type, normalizedAmount, normalizedNote, storageScope);
+    const expectedAfterMovement = Math.max(
+      0,
+      Math.round(
+        activeShiftCashSummary.expectedClosingCash +
+        (type === "in" ? normalizedAmount : -normalizedAmount)
+      )
+    );
+
     refreshShiftState();
     writeAudit(
       "cash_movement",
       "shift",
-      activeShift?.id,
-      `${type === "in" ? "Kas masuk" : "Kas keluar"} Rp ${amount.toLocaleString("id-ID")}${note ? ` • ${note}` : ""}`
+      session.id,
+      `${type === "in" ? "Kas masuk" : "Kas keluar"} Rp ${normalizedAmount.toLocaleString("id-ID")}${normalizedNote ? ` • ${normalizedNote}` : ""} • Saldo ekspektasi Rp ${expectedAfterMovement.toLocaleString("id-ID")}`
     );
   };
 

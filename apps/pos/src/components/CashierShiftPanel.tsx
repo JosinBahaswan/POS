@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CashMovementType, ShiftSession } from "../shift";
 
+const MOVEMENT_QUICK_AMOUNTS = [5000, 10000, 20000, 50000];
+
+function movementTypeLabel(type: CashMovementType) {
+  return type === "in" ? "Kas Masuk" : "Kas Keluar";
+}
+
 type CashierShiftPanelProps = {
   activeShift: ShiftSession | null;
   expectedClosingCash: number | null;
@@ -29,12 +35,13 @@ export function CashierShiftPanel({
   const [closingCash, setClosingCash] = useState<number>(0);
   const [closingNote, setClosingNote] = useState("");
   const [formError, setFormError] = useState("");
+  const activeShiftId = activeShift?.id;
 
   useEffect(() => {
-    if (!activeShift || expectedClosingCash === null) return;
+    if (!activeShiftId || expectedClosingCash === null) return;
     setClosingCash(Math.round(expectedClosingCash));
     setClosingNote("");
-  }, [activeShift?.id, expectedClosingCash]);
+  }, [activeShiftId, expectedClosingCash]);
 
   const summary = useMemo(() => {
     if (!activeShift) {
@@ -54,6 +61,23 @@ export function CashierShiftPanel({
       net: cashIn - cashOut
     };
   }, [activeShift]);
+
+  const availableCashForOut = useMemo(
+    () => Math.max(0, Math.round(expectedClosingCash ?? 0)),
+    [expectedClosingCash]
+  );
+
+  const recentMovements = useMemo(() => {
+    if (!activeShift) return [];
+    return activeShift.movements.slice(0, 6);
+  }, [activeShift]);
+
+  const isMovementAmountInvalid = useMemo(() => {
+    const normalizedAmount = Math.max(0, Number(movementAmount || 0));
+    if (normalizedAmount <= 0) return true;
+    if (movementType === "out" && normalizedAmount > availableCashForOut) return true;
+    return false;
+  }, [movementAmount, movementType, availableCashForOut]);
 
   const closingVariance = useMemo(() => {
     if (expectedClosingCash === null) return 0;
@@ -75,7 +99,7 @@ export function CashierShiftPanel({
   const submitMovement = () => {
     setFormError("");
     try {
-      onAddCashMovement(movementType, movementAmount, movementNote);
+      onAddCashMovement(movementType, movementAmount, movementNote.trim());
       setMovementAmount(0);
       setMovementNote("");
       setMovementType("out");
@@ -168,6 +192,23 @@ export function CashierShiftPanel({
 
           <article className="rounded-2xl bg-surface-container-lowest p-4">
             <p className="text-sm font-semibold text-on-surface">Kas Masuk/Keluar Kecil</p>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              {movementType === "out"
+                ? `Saldo tersedia untuk kas keluar: Rp ${availableCashForOut.toLocaleString("id-ID")}`
+                : "Tambahkan catatan jelas untuk menjaga jejak audit mutasi kas."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {MOVEMENT_QUICK_AMOUNTS.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  onClick={() => setMovementAmount(amount)}
+                  className="h-8 rounded-lg border border-outline-variant/40 bg-surface-container-low px-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-on-surface-variant"
+                >
+                  Rp {amount.toLocaleString("id-ID")}
+                </button>
+              ))}
+            </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto]">
               <select
                 value={movementType}
@@ -195,11 +236,66 @@ export function CashierShiftPanel({
               <button
                 type="button"
                 onClick={submitMovement}
-                className="h-11 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface"
+                disabled={isMovementAmountInvalid}
+                className={`h-11 rounded-xl px-4 text-sm font-semibold ${
+                  isMovementAmountInvalid
+                    ? "cursor-not-allowed bg-surface-container text-on-surface-variant/70"
+                    : "bg-surface-container-high text-on-surface"
+                }`}
               >
                 Simpan
               </button>
             </div>
+            {movementType === "out" && movementAmount > availableCashForOut && (
+              <p className="mt-2 text-xs font-semibold text-rose-700">
+                Nominal kas keluar melebihi saldo tersedia.
+              </p>
+            )}
+          </article>
+
+          <article className="rounded-2xl bg-surface-container-lowest p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-on-surface">Riwayat Mutasi Kas</p>
+              <span className="rounded-full bg-surface-container-low px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant">
+                {recentMovements.length} terbaru
+              </span>
+            </div>
+
+            {recentMovements.length === 0 ? (
+              <p className="mt-3 text-xs text-on-surface-variant">Belum ada mutasi kas pada shift ini.</p>
+            ) : (
+              <ul className="mt-3 grid gap-2">
+                {recentMovements.map((movement) => (
+                  <li
+                    key={movement.id}
+                    className="rounded-xl bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span
+                        className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                          movement.type === "in"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-rose-100 text-rose-700"
+                        }`}
+                      >
+                        {movementTypeLabel(movement.type)}
+                      </span>
+                      <p
+                        className={`text-sm font-bold ${
+                          movement.type === "in" ? "text-emerald-700" : "text-rose-700"
+                        }`}
+                      >
+                        {movement.type === "in" ? "+" : "-"}Rp {movement.amount.toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-[11px] text-on-surface-variant">
+                      {new Date(movement.createdAt).toLocaleString("id-ID")}
+                    </p>
+                    <p className="mt-1 text-xs text-on-surface">{movement.note || "Tanpa catatan"}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </article>
 
           <article className="rounded-2xl bg-surface-container-lowest p-4">

@@ -205,6 +205,14 @@ export function CashierPage({
     return lookup;
   }, [products]);
 
+  const productImageById = useMemo(() => {
+    const lookup: Record<string, string | undefined> = {};
+    for (const product of products) {
+      lookup[product.id] = product.imageUrl;
+    }
+    return lookup;
+  }, [products]);
+
   const isShiftOpen = Boolean(activeShift);
 
   const checkoutApprovalHint = useMemo(() => {
@@ -278,15 +286,35 @@ export function CashierPage({
         )}
 
         {mobileTab === "products" && (
-          <section className="grid h-[calc(100vh-14rem)] min-h-[36rem] gap-6 lg:col-span-2 lg:grid-cols-[minmax(0,1.8fr)_420px]">
-            <section className="min-h-0 overflow-hidden rounded-2xl bg-surface p-4">
-              <div className="h-full overflow-y-auto pr-1">
-                <ProductGrid products={products} onAdd={onAddItem} />
+          <section className="grid h-[calc(100vh-14rem)] min-h-[36rem] gap-6 lg:col-span-2">
+            <section className="min-h-0 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface">
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between gap-3 border-b border-outline-variant/20 bg-surface-container-low px-4 py-3">
+                  <div>
+                    <h3 className="font-headline text-lg font-extrabold text-on-surface">Katalog Produk</h3>
+                    <p className="text-xs text-on-surface-variant">Tab ini khusus pilih dan tambah produk ke keranjang.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileTab("cart")}
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-on-primary transition hover:brightness-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
+                    <span>Buka Cart ({itemCount})</span>
+                  </button>
+                </div>
+                <div className="h-full overflow-y-auto p-4 pr-3">
+                  <ProductGrid products={products} onAdd={onAddItem} />
+                </div>
               </div>
             </section>
+          </section>
+        )}
 
+        {mobileTab === "cart" && (
+          <section className="lg:col-span-2">
             <section className="min-h-0 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
-              <div className="h-full overflow-y-auto pr-1">
+              <div className="pr-1">
                 <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
                   selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
                   selectedCustomerMemberTier={selectedCustomerMemberTier}
@@ -300,6 +328,7 @@ export function CashierPage({
                   onRedeemedPointsChange={onRedeemedPointsChange}
                   cart={cart}
                   stockByProductId={stockByProductId}
+                  productImageById={productImageById}
                   pendingDraft={pendingCartDraftSummary}
                   subtotal={subtotal}
                   discountPercent={discountPercent}
@@ -341,65 +370,6 @@ export function CashierPage({
                 />
               </div>
             </section>
-          </section>
-        )}
-
-        {mobileTab === "cart" && (
-          <section className="lg:col-span-2">
-            <div className="mx-auto max-w-xl rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3">
-              <CartPanel customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer}
-                selectedCustomerLoyaltyPoints={selectedCustomerLoyaltyPoints}
-                selectedCustomerMemberTier={selectedCustomerMemberTier}
-                selectedCustomerLoyaltyMultiplier={selectedCustomerLoyaltyMultiplier}
-                estimatedEarnedPoints={estimatedEarnedPoints}
-                selectedCustomerOutstandingDebt={selectedCustomerOutstandingDebt}
-                loyaltyPointValue={loyaltyPointValue}
-                redeemedPoints={redeemedPoints}
-                loyaltyRedeemAmount={loyaltyRedeemAmount}
-                maxRedeemablePoints={maxRedeemablePoints}
-                onRedeemedPointsChange={onRedeemedPointsChange}
-                cart={cart}
-                stockByProductId={stockByProductId}
-                pendingDraft={pendingCartDraftSummary}
-                subtotal={subtotal}
-                discountPercent={discountPercent}
-                manualDiscountAmount={manualDiscountAmount}
-                autoPromotionDiscountAmount={autoPromotionDiscountAmount}
-                appliedAutoDiscountLabels={appliedAutoDiscountLabels}
-                discountAmount={discountAmount}
-                total={total}
-                estimatedCost={cartEstimatedCost}
-                grossProfit={cartGrossProfit}
-                grossMarginPercent={cartGrossMarginPercent}
-                hasNegativeMargin={cartHasNegativeMargin}
-                projectedLossAmount={cartProjectedLossAmount}
-                discountApprovalThreshold={discountApprovalThreshold}
-                minimumMarginThreshold={cartMinimumMarginThreshold}
-                isBelowMinimumMarginThreshold={cartBelowMinimumMarginThreshold}
-                isShiftOpen={isShiftOpen}
-                checkoutApprovalHint={checkoutApprovalHint}
-                paymentMethod={paymentMethod}
-                isSplitPayment={isSplitPayment}
-                splitPayment={splitPayment}
-                cashReceived={cashReceived}
-                changeAmount={changeAmount}
-                onDiscountChange={onDiscountChange}
-                onPaymentMethodChange={onPaymentMethodChange}
-                onSplitPaymentToggle={onSplitPaymentToggle}
-                onSplitPaymentAmountChange={onSplitPaymentAmountChange}
-                onApplySplitPaymentPreset={onApplySplitPaymentPreset}
-                onCashReceivedChange={onCashReceivedChange}
-                onIncreaseQty={onIncreaseQty}
-                onDecreaseQty={onDecreaseQty}
-                onRemoveItem={onRemoveItem}
-                onHoldOrder={onHoldOrder}
-                onRestoreDraft={onRestoreCartDraft}
-                onDiscardDraft={onDiscardCartDraft}
-                onClear={onClear}
-                onCheckout={onCheckout}
-                disableCheckout={isSyncing}
-              />
-            </div>
           </section>
         )}
       </div>
@@ -446,6 +416,7 @@ export function CashierPage({
               onRedeemedPointsChange={onRedeemedPointsChange}
               cart={cart}
               stockByProductId={stockByProductId}
+              productImageById={productImageById}
               pendingDraft={pendingCartDraftSummary}
               subtotal={subtotal}
               discountPercent={discountPercent}

@@ -3,6 +3,7 @@ import type { Customer, CartItem, PaymentBreakdown, PaymentMethod } from "../typ
 type CartPanelProps = {
   cart: CartItem[];
   stockByProductId?: Record<string, number>;
+  productImageById?: Record<string, string | undefined>;
   customers?: Customer[];
   selectedCustomerId?: string;
   selectedCustomerLoyaltyPoints: number;
@@ -63,6 +64,7 @@ type CartPanelProps = {
 export function CartPanel({
   cart,
   stockByProductId = {},
+  productImageById = {},
   customers = [],
   selectedCustomerId,
   selectedCustomerLoyaltyPoints,
@@ -146,6 +148,7 @@ export function CartPanel({
     ? appliedAutoDiscountLabels.slice(0, 2).join(" + ")
     : "Auto Promo";
   const hasDiscountBreakdown = manualDiscountAmount > 0 || autoPromotionDiscountAmount > 0;
+  const cartItemCount = cart.reduce((acc, item) => acc + item.qty, 0);
 
   const applySplitPreset = (next: PaymentBreakdown) => {
     onApplySplitPaymentPreset({
@@ -164,12 +167,13 @@ export function CartPanel({
     : "";
 
   return (
-    <aside className="max-w-full space-y-4 rounded-3xl bg-surface px-2 py-2 sm:px-3 sm:py-3">
-      <div className="rounded-2xl bg-surface-container-low px-4 py-4">
+    <aside className="max-w-full space-y-4 rounded-[1.75rem] border border-outline-variant/25 bg-surface p-3 shadow-[0_20px_45px_-32px_rgba(0,0,0,0.35)] sm:p-4">
+      <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="font-headline text-xl font-extrabold text-on-surface sm:text-2xl">Keranjang Aktif</h2>
             <p className="truncate text-xs text-on-surface-variant sm:text-sm">ID Pesanan: #POS-{new Date().getDate().toString().padStart(2, "0")}{new Date().getHours().toString().padStart(2, "0")}{new Date().getMinutes().toString().padStart(2, "0")}</p>
+            <p className="mt-1 text-xs text-on-surface-variant">{cartItemCount} item • Subtotal Rp {Math.round(subtotal).toLocaleString("id-ID")}</p>
           </div>
           <span className="rounded-full bg-secondary-container px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-on-secondary-container sm:text-xs">
             Sedang Aktif
@@ -203,9 +207,15 @@ export function CartPanel({
         </div>
       )}
 
-      <ul className="grid gap-3">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,0.95fr)] lg:items-start">
+      <section className="grid min-w-0 gap-2 overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low p-3">
+      <div className="flex items-center justify-between px-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Daftar Keranjang</p>
+        <span className="text-xs font-semibold text-on-surface-variant">{cartItemCount} item</span>
+      </div>
+      <ul className="grid gap-3 overflow-x-hidden pr-1">
         {cart.length === 0 && (
-          <li className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-2xl bg-surface-container-low/50">
+          <li className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-outline-variant/35 bg-surface-container-low/40 px-4 py-12 text-center">
             <div className="grid h-20 w-20 place-items-center rounded-full bg-surface-container-high/50 text-outline-variant mb-4">
               <span className="material-symbols-outlined text-[40px] opacity-50">shopping_basket</span>
             </div>
@@ -218,63 +228,100 @@ export function CartPanel({
         {cart.map((item) => {
           const availableStock = Math.max(0, stockByProductId[item.id] ?? 0);
           const canIncrease = availableStock > item.qty;
+          const itemSubtotal = item.qty * item.price;
+          const itemImageUrl = productImageById[item.id];
+          const stockBadgeClass =
+            availableStock <= 0
+              ? "bg-error-container text-on-error-container"
+              : availableStock <= 3
+                ? "bg-amber-100 text-amber-800"
+                : "bg-emerald-100 text-emerald-700";
 
           return (
-            <li key={item.id} className="rounded-2xl bg-surface-container-low px-4 py-3">
-            <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <span className="block truncate font-headline text-base font-semibold text-on-surface">{item.name}</span>
-              <span className="mt-0.5 block text-xs text-on-surface-variant">SKU: {item.id}</span>
-              <span className="mt-0.5 block text-xs text-on-surface-variant">Stok tersedia: {availableStock}</span>
-              <span className="mt-1 block font-headline text-lg font-bold text-primary">Rp {item.price.toLocaleString("id-ID")}</span>
-            </div>
+            <li key={item.id} className="rounded-2xl border border-outline-variant/20 bg-surface-container-low px-3 py-3 sm:px-4">
+              <div className="flex items-start gap-3">
+                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-container-high ring-1 ring-outline-variant/20">
+                  {itemImageUrl ? (
+                    <img src={itemImageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <span className="material-symbols-outlined text-[22px] text-on-surface-variant">inventory_2</span>
+                  )}
+                </div>
 
-              <button
-                type="button"
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-container-high text-on-surface-variant active:scale-95"
-                onClick={() => onRemoveItem(item.id)}
-                aria-label={`Hapus ${item.name}`}
-              >
-                <span className="material-symbols-outlined text-[20px]">delete</span>
-              </button>
-            </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="block truncate font-headline text-base font-bold text-on-surface">{item.name}</span>
+                      <span className="mt-0.5 block text-[11px] text-on-surface-variant">SKU: {item.id}</span>
+                    </div>
 
-            <div className="mt-3 flex items-center justify-end gap-3 rounded-xl bg-surface-container-lowest p-1">
-              <button
-                type="button"
-                onClick={() => onDecreaseQty(item.id)}
-                className="grid h-10 w-10 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95 transition-transform"
-                aria-label={`Kurangi ${item.name}`}
-              >
-                <span className="material-symbols-outlined text-[20px]">remove</span>
-              </button>
-              <span className="min-w-6 text-center text-sm font-bold text-on-surface">{item.qty}</span>
-              <button
-                type="button"
-                onClick={() => onIncreaseQty(item.id)}
-                disabled={!canIncrease}
-                className={
-                  canIncrease
-                    ? "grid h-10 w-10 place-items-center rounded-lg bg-surface-container-low text-primary active:scale-95 transition-transform"
-                    : "grid h-10 w-10 place-items-center rounded-lg bg-surface-container-high text-outline-variant"
-                }
-                aria-label={`Tambah ${item.name}`}
-              >
-                <span className="material-symbols-outlined text-[20px]">add</span>
-              </button>
-            </div>
+                    <button
+                      type="button"
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-surface-container-high text-on-surface-variant transition hover:brightness-95 active:scale-95"
+                      onClick={() => onRemoveItem(item.id)}
+                      aria-label={`Hapus ${item.name}`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </div>
 
-            {!canIncrease && (
-              <p className="mt-2 text-right text-[11px] font-semibold text-error">
-                Batas stok tercapai
-              </p>
-            )}
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${stockBadgeClass}`}>
+                      Stok {availableStock}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-surface-container-lowest px-2 py-1 text-[10px] font-semibold text-on-surface-variant ring-1 ring-outline-variant/20">
+                      Rp {item.price.toLocaleString("id-ID")} / item
+                    </span>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-on-surface-variant">Subtotal item</span>
+                    <span className="font-headline text-base font-extrabold text-primary">Rp {itemSubtotal.toLocaleString("id-ID")}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between rounded-xl bg-surface-container-lowest/80 px-2 py-1.5 ring-1 ring-outline-variant/20">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">Qty</span>
+                <div className="inline-flex items-center overflow-hidden rounded-xl bg-surface-container-low ring-1 ring-outline-variant/20">
+                  <button
+                    type="button"
+                    onClick={() => onDecreaseQty(item.id)}
+                    className="grid h-9 w-9 place-items-center text-primary transition hover:brightness-95 active:scale-95"
+                    aria-label={`Kurangi ${item.name}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+                  <span className="min-w-10 border-x border-outline-variant/20 px-2 text-center text-sm font-bold text-on-surface">{item.qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => onIncreaseQty(item.id)}
+                    disabled={!canIncrease}
+                    className={
+                      canIncrease
+                        ? "grid h-9 w-9 place-items-center text-primary transition hover:brightness-95 active:scale-95"
+                        : "grid h-9 w-9 place-items-center text-outline-variant"
+                    }
+                    aria-label={`Tambah ${item.name}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                </div>
+              </div>
+
+              {!canIncrease && (
+                <p className="mt-2 text-right text-[11px] font-semibold text-error">
+                  Batas stok tercapai
+                </p>
+              )}
             </li>
           );
         })}
       </ul>
+      </section>
 
-      <div className="grid gap-3 rounded-2xl bg-surface-container-low p-4">
+      <section className="grid min-w-0 gap-3">
+      <div className="grid gap-3 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4">
         <label htmlFor="customer" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Pelanggan (Loyalty)</label>
           <div className="relative">
             <select
@@ -527,8 +574,12 @@ export function CartPanel({
         </div>
       </div>
 
+      </section>
+
+      <section className="grid min-w-0 gap-3">
+
       {requiresCashInput && (
-        <div className="grid gap-1.5 rounded-2xl bg-surface-container-low p-4">
+        <div className="grid gap-1.5 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4">
           <label htmlFor="cash-received" className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Uang Diterima</label>
           <input
             id="cash-received"
@@ -565,7 +616,7 @@ export function CartPanel({
         </div>
       )}
 
-      <div className="grid gap-2 rounded-3xl bg-surface-container-low p-5 text-sm">
+      <div className="grid gap-2 rounded-3xl border border-primary/20 bg-gradient-to-br from-surface-container-low to-surface-container p-5 text-sm">
         <div className="flex items-center justify-between text-on-surface-variant">
           <span>Subtotal</span>
           <span className="font-headline text-base font-semibold sm:text-lg">Rp {subtotal.toLocaleString("id-ID")}</span>
@@ -611,7 +662,7 @@ export function CartPanel({
         )}
       </div>
 
-      <div className="grid gap-2 rounded-2xl bg-surface-container-low p-4 text-sm">
+      <div className="grid gap-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 text-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Analisis Profit Transaksi</p>
         <div className="flex items-center justify-between text-on-surface-variant">
           <span>Estimasi HPP</span>
@@ -643,7 +694,7 @@ export function CartPanel({
         )}
       </div>
 
-      <div className="sticky bottom-2 grid gap-2 rounded-2xl bg-surface-container-low px-3 py-3 backdrop-blur sm:static sm:bg-transparent sm:px-0 sm:py-0">
+      <div className="sticky bottom-2 grid gap-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low px-3 py-3 backdrop-blur sm:static sm:border-none sm:bg-transparent sm:px-0 sm:py-0">
         {!isShiftOpen && (
           <p className="rounded-xl bg-error-container px-3 py-2 text-xs font-semibold text-on-error-container">
             Shift belum dibuka. Buka shift di tab Home sebelum checkout.
@@ -656,19 +707,21 @@ export function CartPanel({
           </p>
         )}
 
-        <button
-          className="h-11 w-full rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant transition hover:brightness-95 active:scale-[0.98] disabled:opacity-60"
-          onClick={onHoldOrder}
-          disabled={cart.length === 0}
-        >
-          Tahan Order
-        </button>
-        <button
-          className="h-11 w-full rounded-xl bg-error-container text-sm font-semibold text-on-error-container transition hover:brightness-95 active:scale-[0.98]"
-          onClick={onClear}
-        >
-          Reset
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            className="h-11 w-full rounded-xl bg-surface-container-high text-sm font-semibold text-on-surface-variant transition hover:brightness-95 active:scale-[0.98] disabled:opacity-60"
+            onClick={onHoldOrder}
+            disabled={cart.length === 0}
+          >
+            Tahan Order
+          </button>
+          <button
+            className="h-11 w-full rounded-xl bg-error-container text-sm font-semibold text-on-error-container transition hover:brightness-95 active:scale-[0.98]"
+            onClick={onClear}
+          >
+            Reset
+          </button>
+        </div>
         <button
           className="h-14 w-full rounded-2xl bg-gradient-to-br from-primary to-primary-container text-base font-bold text-on-primary shadow-lg shadow-teal-900/10 transition hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           onClick={onCheckout}
@@ -676,6 +729,8 @@ export function CartPanel({
         >
           Konfirmasi Bayar
         </button>
+      </div>
+      </section>
       </div>
     </aside>
   );
